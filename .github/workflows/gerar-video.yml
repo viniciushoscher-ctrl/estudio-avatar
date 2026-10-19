@@ -1,5 +1,8 @@
 name: Gerar vídeo
 
+# Este repositório é público e só tem o motor. Seu vídeo de treino, seus roteiros e os
+# vídeos gerados ficam num repositório PRIVADO (dados_repo), acessado pelo segredo DADOS_TOKEN.
+
 on:
   workflow_dispatch:
     inputs:
@@ -9,10 +12,10 @@ on:
         options: [voz, video]
         default: voz
       video_treino:
-        description: "Seu vídeo de treino: tag/arquivo de uma Release deste repositório (ex.: treino/meu-video.mov) ou link https direto. 'sintetico' só confere a instalação."
+        description: "tag/arquivo de uma Release do repositório de dados (ex.: treino/meu-video.mov). 'sintetico' só confere a instalação."
         required: true
       roteiro:
-        description: "Arquivo do roteiro neste repositório"
+        description: "Arquivo do roteiro (procura primeiro no repositório de dados, depois neste)"
         default: roteiros/teste-15s.txt
       idioma:
         type: choice
@@ -28,6 +31,9 @@ on:
       inicio_video:
         description: "Segundo do treino com o rosto de frente e a boca fechada (usa 8 s)"
         default: "5"
+      dados_repo:
+        description: "Nome do repositório privado com os seus dados"
+        default: estudio-avatar-dados
 
 permissions:
   contents: read
@@ -39,8 +45,28 @@ jobs:
     env:
       WAV2LIP_COMMIT: bac9a81e63ecc153202353372e5724b83d9e6322
       HF_WAV2LIP: https://huggingface.co/camenduru/Wav2Lip/resolve/main
+      DADOS: ${{ github.repository_owner }}/${{ inputs.dados_repo }}
+      REAL: ${{ inputs.video_treino != 'sintetico' }}
     steps:
+      - name: Conferir o segredo de acesso aos seus dados
+        if: env.REAL == 'true'
+        env:
+          DADOS_TOKEN: ${{ secrets.DADOS_TOKEN }}
+        run: |
+          if [[ -z "$DADOS_TOKEN" ]]; then
+            echo "::error::Falta o segredo DADOS_TOKEN (Settings > Secrets and variables > Actions). Veja o README."
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
+
+      - name: Baixar os seus dados (repositório privado)
+        if: env.REAL == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.DADOS }}
+          token: ${{ secrets.DADOS_TOKEN }}
+          path: dados
 
       - uses: actions/setup-python@v5
         with:
@@ -87,7 +113,7 @@ jobs:
 
       - name: Baixar o vídeo de treino
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.DADOS_TOKEN }}
           ENTRADA: ${{ inputs.video_treino }}
         run: |
           mkdir -p treino
@@ -95,10 +121,8 @@ jobs:
             # Só para conferir a instalação: vídeo e tom falsos (a voz sai sem sentido, e tudo bem).
             ffmpeg -loglevel error -f lavfi -i testsrc=s=640x480:r=25:d=30 \
               -f lavfi -i "sine=frequency=180:duration=30" -c:v libx264 -c:a aac treino/treino.video
-          elif [[ "$ENTRADA" == http* ]]; then
-            curl -fL --retry 3 -o treino/treino.video "$ENTRADA"
           else
-            gh release download "${ENTRADA%%/*}" -p "${ENTRADA#*/}" --dir treino --repo "$GITHUB_REPOSITORY"
+            gh release download "${ENTRADA%%/*}" -p "${ENTRADA#*/}" --dir treino --repo "$DADOS"
             mv "treino/${ENTRADA#*/}" treino/treino.video
           fi
           ls -la treino
@@ -114,9 +138,12 @@ jobs:
         run: |
           EXTRA=()
           if [[ "$ETAPA" == "voz" ]]; then EXTRA+=(--so-voz); fi
+          # Seu roteiro privado tem prioridade; o de teste público vale como reserva.
+          ARQ="$ROTEIRO"
+          if [[ "$REAL" == "true" && -f "dados/$ROTEIRO" ]]; then ARQ="dados/$ROTEIRO"; fi
           python motor/gerar.py \
             --treino treino/treino.video \
-            --roteiro "$ROTEIRO" \
+            --roteiro "$ARQ" \
             --saida saida \
             --idioma "$IDIOMA" \
             --formato "$FORMATO" \
@@ -126,15 +153,23 @@ jobs:
             --pesos pesos/wav2lip_gan.pth \
             "${EXTRA[@]}"
 
-      - name: Guardar o resultado
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: resultado
-          path: |
-            saida/video_final.mp4
-            saida/voz.mp3
-            saida/trabalho/voz_referencia.wav
-            saida/trabalho/base.mp4
-          if-no-files-found: warn
-          retention-days: 7
+      # Nada é publicado neste repositório (público): o resultado vai para a Release
+      # "resultados" do seu repositório privado.
+      - name: Enviar o resultado para o seu repositório privado
+        if: env.REAL == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.DADOS_TOKEN }}
+          RUN: ${{ github.run_number }}
+        run: |
+          gh release view resultados --repo "$DADOS" >/dev/null 2>&1 \
+            || gh release create resultados --repo "$DADOS" --prerelease \
+                 --title "Resultados" --notes "Vídeos e áudios gerados."
+          if [[ -f saida/video_final.mp4 ]]; then
+            cp saida/video_final.mp4 "saida/video-$RUN.mp4"
+            gh release upload resultados "saida/video-$RUN.mp4" --repo "$DADOS" --clobber
+          fi
+          if [[ -f saida/voz.mp3 ]]; then
+            cp saida/voz.mp3 "saida/voz-$RUN.mp3"
+            gh release upload resultados "saida/voz-$RUN.mp3" --repo "$DADOS" --clobber
+          fi
+          echo "Enviado para a Release 'resultados' de $DADOS."

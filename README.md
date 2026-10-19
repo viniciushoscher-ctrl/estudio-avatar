@@ -3,6 +3,10 @@
 Gera um vídeo seu falando um roteiro, com a sua voz e a boca sincronizada, rodando no
 **GitHub Actions** (gratuito). Sem ElevenLabs, HeyGen, Modal ou Google.
 
+Este repositório é **público e só tem o motor**. O seu vídeo de treino, os seus roteiros e os
+vídeos gerados ficam num segundo repositório **privado**, para o seu rosto e a sua voz não
+ficarem expostos.
+
 ## Como funciona
 
 | Etapa | Modelo | Licença |
@@ -15,35 +19,50 @@ Gera um vídeo seu falando um roteiro, com a sua voz e a boca sincronizada, roda
 - Tudo roda na CPU. A boca fica menos nítida que a do HeyGen, e é mais lenta.
 - Wav2Lip **não pode ser usado comercialmente**. Serve para os seus posts; para vender o app
   depois, troque por um modelo com licença comercial (ex.: LatentSync, que precisa de GPU).
-- Os tempos de execução abaixo ainda não foram medidos.
+- Os tempos de execução ainda não foram medidos.
 
 ## Preparar (uma vez)
 
-1. Crie um repositório **privado** no GitHub (ex.: `estudio-avatar`) e envie estes arquivos.
-   Privado, porque o vídeo gerado mostra o seu rosto.
-2. Grave o vídeo de treino (1 a 3 min): olhando para a câmera, lugar silencioso, boa luz,
-   o mesmo microfone dos posts. **No final, fique 10 s com a boca fechada**, olhando para a
-   câmera: é esse trecho que vira a imagem base (a boca é redesenhada por cima).
-3. No repositório: *Releases > Draft a new release*, tag `treino`, anexe o vídeo e publique
-   (pode marcar como pré-lançamento). Vídeos até 2 GB cabem.
+1. **Repositório privado de dados:** crie um repositório **privado** chamado
+   `estudio-avatar-dados` (pode estar vazio).
+2. **Vídeo de treino:** grave 1 a 3 min olhando para a câmera, lugar silencioso, boa luz, o
+   mesmo microfone dos posts. **No final, fique 10 s com a boca fechada** olhando para a câmera:
+   é esse trecho que vira a imagem base (a boca é redesenhada por cima). No repositório de
+   dados: *Releases > Draft a new release*, tag `treino`, anexe o vídeo e publique.
+3. **Chave de acesso:** em *GitHub > Settings (da sua conta) > Developer settings > Personal
+   access tokens > Fine-grained tokens > Generate new token*:
+   - *Repository access:* **Only select repositories** > `estudio-avatar-dados`
+   - *Permissions > Repository permissions:* **Contents: Read and write**
+   - Copie o token gerado.
+4. **Guardar a chave:** neste repositório, *Settings > Secrets and variables > Actions >
+   New repository secret*. Nome: `DADOS_TOKEN`. Valor: o token copiado.
 
 ## Gerar
 
 *Actions > Gerar vídeo > Run workflow*:
 
-1. Primeiro rode com **etapa = voz**. Em minutos você baixa o `voz.mp3` e compara com a sua voz.
-   Se não ficar parecida, mude `inicio_voz` (segundo onde começa uma fala limpa) e rode de novo.
-2. Depois rode com **etapa = video**. O resultado sai em *Artifacts > resultado* (fica 7 dias).
+1. Primeiro rode com **etapa = voz** e `video_treino` = `treino/nome-do-arquivo.mov`. Em
+   minutos sai o `voz-N.mp3`. Compare com a sua voz. Se não ficar parecida, mude `inicio_voz`
+   (segundo onde começa uma fala limpa) e rode de novo.
+2. Depois rode com **etapa = video**. O resultado vai para *Releases > resultados* do seu
+   repositório **privado** (`video-N.mp4`).
 
-Campos: `video_treino` = `treino/nome-do-arquivo.mov`; `roteiro` = arquivo em `roteiros/`
-(edite pelo próprio GitHub); `inicio_video` = segundo onde começam os 10 s de boca fechada.
+Roteiros: coloque em `roteiros/` do repositório privado (ex.: `roteiros/post-1.txt`) e digite
+esse caminho no campo `roteiro`. Se o arquivo não existir lá, vale o de teste deste repositório.
+
+Para só conferir a instalação, rode com `video_treino = sintetico` (não usa seus dados).
+
+## Privacidade
+
+- Aqui só há código. O que é seu fica no repositório privado.
+- Os registros (logs) das execuções deste repositório são públicos: o motor não imprime seu
+  texto nem seus arquivos, só contagens e nomes de arquivos.
+- Nunca use o seu rosto nem a sua voz em `sintetico` ou em arquivos deste repositório.
 
 ## Custo
 
-Repositório privado no plano grátis tem uma cota mensal de minutos do Actions (confira o valor em
-*Settings > Billing*). Máquina de repositório privado: 2 CPUs e 8 GB; de repositório público:
-4 CPUs e 16 GB e minutos ilimitados, mas o resultado ficaria público. Se faltar memória na
-voz, a saída é tornar o repositório público e **não** usar o seu rosto real nele.
+Repositório público tem Actions gratuito e sem limite de minutos (máquina de 4 CPUs e 16 GB).
+Cada execução tem limite de 6 horas.
 
 ## Testar sem baixar modelos
 
@@ -58,4 +77,4 @@ python motor/gerar.py --treino meu.mp4 --roteiro roteiros/teste-15s.txt --saida 
 - `.github/workflows/gerar-video.yml`: o fluxo
 - `motor/gerar.py`: recorta, fala, sincroniza e junta
 - `motor/voz.py`: Chatterbox · `motor/patch_wav2lip.py`: ajustes do Wav2Lip às bibliotecas atuais
-- `roteiros/`: seus roteiros
+- `roteiros/teste-15s.txt`: roteiro de teste
