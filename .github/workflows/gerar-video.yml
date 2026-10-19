@@ -9,7 +9,7 @@ on:
         options: [voz, video]
         default: voz
       video_treino:
-        description: "Seu vídeo de treino: link https direto, ou tag/arquivo de uma Release deste repositório (ex.: treino/meu-video.mov)"
+        description: "Seu vídeo de treino: tag/arquivo de uma Release deste repositório (ex.: treino/meu-video.mov) ou link https direto. 'sintetico' só confere a instalação."
         required: true
       roteiro:
         description: "Arquivo do roteiro neste repositório"
@@ -91,7 +91,11 @@ jobs:
           ENTRADA: ${{ inputs.video_treino }}
         run: |
           mkdir -p treino
-          if [[ "$ENTRADA" == http* ]]; then
+          if [[ "$ENTRADA" == "sintetico" ]]; then
+            # Só para conferir a instalação: vídeo e tom falsos (a voz sai sem sentido, e tudo bem).
+            ffmpeg -loglevel error -f lavfi -i testsrc=s=640x480:r=25:d=30 \
+              -f lavfi -i "sine=frequency=180:duration=30" -c:v libx264 -c:a aac treino/treino.video
+          elif [[ "$ENTRADA" == http* ]]; then
             curl -fL --retry 3 -o treino/treino.video "$ENTRADA"
           else
             gh release download "${ENTRADA%%/*}" -p "${ENTRADA#*/}" --dir treino --repo "$GITHUB_REPOSITORY"
