@@ -1,0 +1,5 @@
+# torch e torchaudio 2.6.0 (versão CPU) são instalados antes, pelo fluxo do GitHub Actions.
+chatterbox-tts==0.1.7
+opencv-python-headless
+scipy
+tqdm

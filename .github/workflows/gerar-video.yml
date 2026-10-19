@@ -1,0 +1,136 @@
+name: Gerar vídeo
+
+on:
+  workflow_dispatch:
+    inputs:
+      etapa:
+        description: "voz = só o áudio, para você ouvir primeiro. video = voz e boca."
+        type: choice
+        options: [voz, video]
+        default: voz
+      video_treino:
+        description: "Seu vídeo de treino: link https direto, ou tag/arquivo de uma Release deste repositório (ex.: treino/meu-video.mov)"
+        required: true
+      roteiro:
+        description: "Arquivo do roteiro neste repositório"
+        default: roteiros/teste-15s.txt
+      idioma:
+        type: choice
+        options: [pt, en, es]
+        default: pt
+      formato:
+        type: choice
+        options: [vertical, quadrado, horizontal]
+        default: vertical
+      inicio_voz:
+        description: "Segundo do treino onde começa uma fala limpa (usa 12 s)"
+        default: "5"
+      inicio_video:
+        description: "Segundo do treino com o rosto de frente e a boca fechada (usa 8 s)"
+        default: "5"
+
+permissions:
+  contents: read
+
+jobs:
+  gerar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      WAV2LIP_COMMIT: bac9a81e63ecc153202353372e5724b83d9e6322
+      HF_WAV2LIP: https://huggingface.co/camenduru/Wav2Lip/resolve/main
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: motor/requirements.txt
+
+      - name: Instalar ffmpeg e bibliotecas
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r motor/requirements.txt
+
+      - name: Modelo de voz (cache)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: chatterbox-mtl-v1
+
+      - name: Wav2Lip e pesos (cache)
+        id: w2l
+        uses: actions/cache@v4
+        with:
+          path: |
+            Wav2Lip
+            pesos
+          key: wav2lip-${{ env.WAV2LIP_COMMIT }}-v1
+
+      - name: Baixar Wav2Lip e pesos
+        if: steps.w2l.outputs.cache-hit != 'true'
+        run: |
+          git clone -q https://github.com/Rudrabha/Wav2Lip.git Wav2Lip
+          git -C Wav2Lip checkout -q "$WAV2LIP_COMMIT"
+          mkdir -p pesos
+          curl -fL --retry 3 -o pesos/wav2lip_gan.pth "$HF_WAV2LIP/checkpoints/wav2lip_gan.pth"
+          curl -fL --retry 3 -o Wav2Lip/face_detection/detection/sfd/s3fd.pth \
+            "$HF_WAV2LIP/face_detection/detection/sfd/s3fd.pth"
+          # O nome oficial do arquivo (s3fd-619a316812.pth) traz o começo do SHA-256 dele.
+          sha256sum Wav2Lip/face_detection/detection/sfd/s3fd.pth | grep -q '^619a316812'
+
+      - name: Ajustar o Wav2Lip às bibliotecas atuais
+        run: python motor/patch_wav2lip.py Wav2Lip
+
+      - name: Baixar o vídeo de treino
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ENTRADA: ${{ inputs.video_treino }}
+        run: |
+          mkdir -p treino
+          if [[ "$ENTRADA" == http* ]]; then
+            curl -fL --retry 3 -o treino/treino.video "$ENTRADA"
+          else
+            gh release download "${ENTRADA%%/*}" -p "${ENTRADA#*/}" --dir treino --repo "$GITHUB_REPOSITORY"
+            mv "treino/${ENTRADA#*/}" treino/treino.video
+          fi
+          ls -la treino
+
+      - name: Gerar
+        env:
+          ETAPA: ${{ inputs.etapa }}
+          ROTEIRO: ${{ inputs.roteiro }}
+          IDIOMA: ${{ inputs.idioma }}
+          FORMATO: ${{ inputs.formato }}
+          INICIO_VOZ: ${{ inputs.inicio_voz }}
+          INICIO_VIDEO: ${{ inputs.inicio_video }}
+        run: |
+          EXTRA=()
+          if [[ "$ETAPA" == "voz" ]]; then EXTRA+=(--so-voz); fi
+          python motor/gerar.py \
+            --treino treino/treino.video \
+            --roteiro "$ROTEIRO" \
+            --saida saida \
+            --idioma "$IDIOMA" \
+            --formato "$FORMATO" \
+            --inicio-voz "$INICIO_VOZ" \
+            --inicio-video "$INICIO_VIDEO" \
+            --wav2lip Wav2Lip \
+            --pesos pesos/wav2lip_gan.pth \
+            "${EXTRA[@]}"
+
+      - name: Guardar o resultado
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultado
+          path: |
+            saida/video_final.mp4
+            saida/voz.mp3
+            saida/trabalho/voz_referencia.wav
+            saida/trabalho/base.mp4
+          if-no-files-found: warn
+          retention-days: 7
