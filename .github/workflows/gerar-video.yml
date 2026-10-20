@@ -121,9 +121,18 @@ jobs:
           if [[ "$ENTRADA" == "drive" ]]; then
             [[ "$VIDEO_URL" =~ ^https://drive\.google\.com/[A-Za-z0-9_./?=\&-]+$ ]] \
               || { echo "::error::video_url precisa ser um link https://drive.google.com/..."; exit 1; }
-            pip install -q gdown
-            gdown --fuzzy "$VIDEO_URL" -O treino/treino.video \
-              || { echo "::error::Não consegui baixar o link. Em Compartilhar, deixe 'Qualquer pessoa com o link'."; exit 1; }
+            # Arquivos grandes caem na página "verificação de vírus" do Drive; confirm=t pula essa página.
+            ID=$(sed -nE 's#.*/d/([A-Za-z0-9_-]+).*#\1#p; s#.*[?&]id=([A-Za-z0-9_-]+).*#\1#p' <<<"$VIDEO_URL" | head -n 1)
+            [[ -n "$ID" ]] || { echo "::error::Não achei o código do arquivo no link do Drive."; exit 1; }
+            curl -fsSL --retry 3 -o treino/treino.video \
+              "https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t" || true
+            if ! ffprobe -v error -select_streams v:0 -show_entries stream=codec_type -of csv=p=0 treino/treino.video 2>/dev/null | grep -q video; then
+              echo "download direto não trouxe um vídeo; tentando com gdown"
+              pip install -q gdown
+              gdown --fuzzy "$VIDEO_URL" -O treino/treino.video \
+                || { echo "::error::Não consegui baixar o link. Em Compartilhar, deixe 'Qualquer pessoa com o link'."; exit 1; }
+            fi
+            echo "treino: $(du -h treino/treino.video | cut -f1) baixados do Drive"
             # Guarda uma cópia na Release privada para as próximas execuções não dependerem do Drive.
             gh release view treino --repo "$DADOS" >/dev/null 2>&1 \
               || gh release create treino --repo "$DADOS" --title "Treino" --notes "Vídeo de treino."
