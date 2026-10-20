@@ -197,7 +197,7 @@ jobs:
             ROTEIRO=$(jq -r '.roteiro' "$P")
             FORMATO=$(jq -r '.formato // "vertical"' "$P")
             IDIOMA=$(jq -r '.idioma // "pt"' "$P")
-            EXTRA+=(--exagero "$(jq -r '.exagero // 0.5' "$P")" --cfg "$(jq -r '.cfg // 0.5' "$P")")
+            EXTRA+=(--exagero "$(jq -r '.exagero // 0.7' "$P")" --cfg "$(jq -r '.cfg // 0.3' "$P")")
             VOZ=$(jq -r '.voz_ref // empty' "$P")
             if [[ -n "$VOZ" ]]; then
               raw "$VOZ" > "dados/voz.${VOZ##*.}" || { echo "::error::Amostra de voz não encontrada."; exit 1; }
