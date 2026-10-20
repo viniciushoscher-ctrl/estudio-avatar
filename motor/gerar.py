@@ -15,7 +15,8 @@ from pathlib import Path
 AQUI = Path(__file__).resolve().parent
 
 # Menores que o 720p de sempre: na CPU, a detecção de rosto custa por pixel.
-FORMATOS = {"vertical": (540, 960), "quadrado": (720, 720), "horizontal": (960, 540)}
+FORMATOS = {"vertical": (540, 960), "feed": (576, 720), "quadrado": (720, 720),
+            "horizontal": (960, 540)}
 VOZ_REF_S = 12   # o Chatterbox usa ~10 s de referência
 BASE_S = 8       # trecho do rosto; vai e volta (ping-pong) para repetir sem pulo
 CHARS_TRECHO = 600
@@ -59,11 +60,15 @@ def pecas_voz(trecho: str, limite: int = 250) -> list[str]:
 
 # ---------- Etapas ----------
 
-def preparar(treino: Path, trab: Path, formato: str, inicio_voz: float, inicio_video: float):
+def preparar(treino: Path, trab: Path, formato: str, inicio_voz: float, inicio_video: float,
+             voz_ref: Path | None = None):
     d = duracao(treino)
-    iv = min(max(inicio_voz, 0), max(d - VOZ_REF_S, 0))
     ii = min(max(inicio_video, 0), max(d - BASE_S, 0))
-    ffmpeg("-ss", str(iv), "-t", str(VOZ_REF_S), "-i", str(treino), "-vn", "-ac", "1",
+    # A voz vem de uma gravação separada (clone feito no estúdio) ou de um trecho do próprio treino.
+    origem = voz_ref or treino
+    dv = duracao(origem) if voz_ref else d
+    iv = min(max(0.5 if voz_ref else inicio_voz, 0), max(dv - VOZ_REF_S, 0))
+    ffmpeg("-ss", str(iv), "-t", str(VOZ_REF_S), "-i", str(origem), "-vn", "-ac", "1",
            "-ar", "24000", str(trab / "voz_referencia.wav"))
     w, h = FORMATOS[formato]
     ida = trab / "base_ida.mp4"
@@ -73,11 +78,21 @@ def preparar(treino: Path, trab: Path, formato: str, inicio_voz: float, inicio_v
     ffmpeg("-i", str(ida), "-filter_complex",
            "[0:v]split[a][b];[b]reverse[r];[a][r]concat=n=2:v=1:a=0[v]", "-map", "[v]",
            "-c:v", "libx264", "-crf", "16", "-pix_fmt", "yuv420p", str(trab / "base.mp4"))
-    print(f"preparar: treino de {d:.0f} s, voz a partir de {iv:.0f} s, rosto a partir de {ii:.0f} s",
-          flush=True)
+    fonte = "gravação separada" if voz_ref else "treino"
+    print(f"preparar: treino de {d:.0f} s, voz ({fonte}) a partir de {iv:.0f} s, "
+          f"rosto a partir de {ii:.0f} s", flush=True)
 
 
-def falar(trab: Path, texto: str, idioma: str, simular: bool) -> Path:
+def preparar_voz(voz_ref: Path, trab: Path):
+    """Só a referência de voz, para gerar áudio sem vídeo de treino (texto para fala)."""
+    iv = min(0.5, max(duracao(voz_ref) - VOZ_REF_S, 0))
+    ffmpeg("-ss", str(iv), "-t", str(VOZ_REF_S), "-i", str(voz_ref), "-vn", "-ac", "1",
+           "-ar", "24000", str(trab / "voz_referencia.wav"))
+    print("preparar: só a voz (gravação separada)", flush=True)
+
+
+def falar(trab: Path, texto: str, idioma: str, simular: bool, exagero: float = 0.5,
+          cfg: float = 0.5) -> Path:
     trechos = [pecas_voz(t) for t in agrupar(frases(texto), CHARS_TRECHO)]
     (trab / "trechos.json").write_text(json.dumps(trechos, ensure_ascii=False))
     audios = trab / "audios"
@@ -89,7 +104,8 @@ def falar(trab: Path, texto: str, idioma: str, simular: bool) -> Path:
                    str(audios / f"trecho_{i:03d}.wav"))
     else:
         subprocess.run([sys.executable, str(AQUI / "voz.py"), str(trab / "voz_referencia.wav"),
-                        str(trab / "trechos.json"), str(audios), idioma], check=True)
+                        str(trab / "trechos.json"), str(audios), idioma, str(exagero), str(cfg)],
+                       check=True)
     lista = trab / "audios.txt"
     lista.write_text("".join(f"file '{p.resolve()}'\n" for p in sorted(audios.glob("trecho_*.wav"))))
     fala = trab / "fala.wav"
@@ -116,7 +132,7 @@ def sincronizar(trab: Path, fala: Path, wav2lip: Path, pesos: Path, simular: boo
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--treino", type=Path, required=True)
+    ap.add_argument("--treino", type=Path, help="vídeo de treino (dispensável em --so-voz com --voz-ref)")
     ap.add_argument("--roteiro", type=Path, required=True)
     ap.add_argument("--saida", type=Path, required=True)
     ap.add_argument("--idioma", default="pt")
@@ -125,20 +141,28 @@ def main():
     ap.add_argument("--inicio-video", type=float, default=5)
     ap.add_argument("--wav2lip", type=Path)
     ap.add_argument("--pesos", type=Path)
+    ap.add_argument("--voz-ref", type=Path, help="gravação só da voz (senão usa o áudio do treino)")
+    ap.add_argument("--exagero", type=float, default=0.5, help="expressividade da voz, de 0 a 1")
+    ap.add_argument("--cfg", type=float, default=0.5, help="ritmo e fidelidade da voz, de 0 a 1")
     ap.add_argument("--so-voz", action="store_true", help="para depois da voz, para você ouvir antes")
     ap.add_argument("--simular", action="store_true")
     a = ap.parse_args()
 
-    texto = a.roteiro.read_text().strip()
+    texto = a.roteiro.read_text(encoding="utf-8").strip()
     if not texto:
         sys.exit("O roteiro está vazio.")
-    if not a.simular and not (a.wav2lip and a.pesos):
+    if not a.treino and not (a.so_voz and a.voz_ref):
+        sys.exit("Falta --treino (só dá para dispensar em --so-voz com --voz-ref).")
+    if not a.so_voz and not a.simular and not (a.wav2lip and a.pesos):
         sys.exit("Faltam --wav2lip e --pesos.")
     trab = a.saida / "trabalho"
     trab.mkdir(parents=True, exist_ok=True)
 
-    preparar(a.treino, trab, a.formato, a.inicio_voz, a.inicio_video)
-    fala = falar(trab, texto, a.idioma, a.simular)
+    if a.treino:
+        preparar(a.treino, trab, a.formato, a.inicio_voz, a.inicio_video, a.voz_ref)
+    else:
+        preparar_voz(a.voz_ref, trab)
+    fala = falar(trab, texto, a.idioma, a.simular, min(max(a.exagero, 0), 1), min(max(a.cfg, 0), 1))
     if a.so_voz:
         ffmpeg("-i", str(fala), str(a.saida / "voz.mp3"))
         print(f"pronto: {a.saida / 'voz.mp3'}", flush=True)

@@ -55,6 +55,8 @@ input,textarea,select{font:inherit;color:inherit}
 /* ---- área principal ---- */
 main{flex:1;min-width:0;padding:22px 28px 60px;position:relative}
 .topbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:6px}
+.chip.on{color:var(--ok)}
+.status.err{color:#c0392b}
 .chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600;display:inline-flex;gap:6px;align-items:center;box-shadow:var(--shadow)}
 .view{display:none;max-width:980px;margin:0 auto}
 .view.on{display:block}
@@ -248,7 +250,7 @@ textarea.script{flex:1;min-height:110px;border:0;outline:0;resize:vertical;backg
   </nav>
 
   <main>
-    <div class="topbar"><span class="chip" id="creditChip">⏱ 0 vídeos este mês</span></div>
+    <div class="topbar"><button class="chip" id="motorChip">○ Ligar motor</button><span class="chip" id="creditChip">⏱ 0 vídeos este mês</span></div>
 
     <!-- INÍCIO -->
     <section class="view" id="v-inicio">
@@ -401,6 +403,12 @@ textarea.script{flex:1;min-height:110px;border:0;outline:0;resize:vertical;backg
 <div class="backdrop" id="mVoiceClone"><div class="modal">
   <div class="modal-head"><h2 style="font-size:17px" id="vcTitle">Adicionar voz</h2><button class="icon-btn" data-close>✕</button></div>
   <div id="voiceCloneBody"></div>
+</div></div>
+
+<!-- Modal: motor -->
+<div class="backdrop" id="mMotor"><div class="modal">
+  <div class="modal-head"><h2 style="font-size:17px">Motor de geração (GitHub)</h2><button class="icon-btn" data-close>✕</button></div>
+  <div id="motorBody"></div>
 </div></div>
 
 <!-- Modal: ver projeto -->
@@ -598,6 +606,7 @@ function runQueue() {
   runQueue._h = setInterval(() => {
     let changed = false;
     for (const p of state.projects) {
+      if (p.motor) continue;
       if (p.status === 'fila') { p.status = 'processando'; changed = true; break; }
       if (p.status === 'processando') { p.progress = Math.min(100, p.progress + 12 + Math.random() * 10); if (p.progress >= 100) p.status = 'pronto'; changed = true; break; }
     }
@@ -612,7 +621,7 @@ function updateCredits() {
 }
 
 /* ============ PROJETOS ============ */
-const statusHtml = p => p.status === 'pronto' ? '<span class="status ready">● Pronto</span>' : p.status === 'processando' ? `<span class="status proc">● Processando ${Math.round(p.progress)}%</span>` : '<span class="status">● Na fila</span>';
+const statusHtml = p => p.status === 'pronto' ? '<span class="status ready">● Pronto</span>' : p.status === 'erro' ? '<span class="status err">● Falhou</span>' : p.status === 'processando' ? `<span class="status proc">● ${esc(p.stepLabel || 'Processando')} ${Math.round(p.progress)}%</span>` : `<span class="status">● ${esc(p.stepLabel || 'Na fila')}</span>`;
 function projectCards(list) {
   if (!list.length) return `<div class="empty"><div style="font-size:28px">🎬</div><b>Nenhum projeto ainda</b>Os vídeos que você gerar aparecem aqui.</div>`;
   return `<div class="grid">${list.map(p => {
@@ -654,10 +663,16 @@ function openProject(p) {
       <div class="row"><button class="btn ghost sm" data-dl-srt="${p.id}">Legendas .srt</button><button class="btn ghost sm" data-dl-txt="${p.id}">Roteiro .txt</button><button class="btn accent sm" id="dlVideo" ${p.status !== 'pronto' ? 'disabled' : ''}>Baixar vídeo</button></div>
     </div>
     <div class="label" style="margin-top:14px">Roteiro</div><div class="read-box" style="font-size:14px">${esc(p.script)}</div>
-    <div class="note">Protótipo de interface: a renderização (clone de voz + lip sync) ainda não está conectada. O botão “Baixar vídeo” vai entregar o MP4 quando o motor estiver ligado; legendas e roteiro já funcionam.</div>`;
-  if (p.status === 'pronto' && av && !av.sample && !av.photoKey) blobUrl(av.videoKey).then(u => { if (u) $('#projPlayer').innerHTML = `<video src="${u}" controls playsinline></video>`; });
+    ${p.motor ? (p.status === 'erro' ? `<div class="note">${esc(p.stepLabel || 'Falhou.')} ${p.runUrl ? `<a href="${p.runUrl}" target="_blank" rel="noopener">Ver o registro no GitHub</a>` : ''}</div>` : p.runUrl ? `<div class="note">Gerado pelo seu motor no GitHub. <a href="${p.runUrl}" target="_blank" rel="noopener">Ver a execução</a></div>` : '') : '<div class="note">Gerado no modo simulação (motor desligado). Ligue o motor no botão do topo para gerar o vídeo de verdade.</div>'}`;
+  if (p.resultKey && p.status === 'pronto') blobUrl(p.resultKey).then(u => { if (u) $('#projPlayer').innerHTML = `<video src="${u}" controls playsinline></video>`; });
+  else if (p.motor && p.status === 'pronto' && p.resultUrl) $('#projPlayer').innerHTML = `<div style="text-align:center"><a class="btn accent sm" href="${p.resultUrl}" target="_blank" rel="noopener">Abrir o vídeo no GitHub</a></div>`;
+  else if (p.status === 'pronto' && av && !av.sample && !av.photoKey) blobUrl(av.videoKey).then(u => { if (u) $('#projPlayer').innerHTML = `<video src="${u}" controls playsinline></video>`; });
   else if (p.status === 'pronto') $('#projPlayer').innerHTML = `<div style="text-align:center"><div style="font-size:36px">▶</div>Prévia indisponível no protótipo</div>`;
-  $('#dlVideo').onclick = () => toast('O download do MP4 depende do motor de renderização (próxima etapa).');
+  $('#dlVideo').onclick = async () => {
+    if (p.resultKey) { const b = await db.get(p.resultKey); if (b) { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `${slug(p.title)}.mp4`; a.click(); return; } }
+    if (p.resultUrl) return window.open(p.resultUrl, '_blank', 'noopener');
+    toast('No modo simulação não há MP4. Ligue o motor no botão do topo.');
+  };
   openModal('#mProject');
 }
 const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'video';
@@ -1019,12 +1034,12 @@ function setVoiceButton(prefix, ref) {
 function renderTts() {
   const T = state.tts; $('#ttsText').value = T.text; $('#ttsModel').value = T.model; setVoiceButton('tts', T.voice); renderSliders(); ttsCount();
   const h = state.ttsHistory;
-  $('#ttsHistory').innerHTML = h.length ? h.map(x => `<div class="hist"><button class="icon-btn" data-hplay="${x.id}">▶</button><div class="tx"><div>${esc(x.text)}</div><small>${esc(voiceLabel(x.voice))} · ${x.model === 'rapido' ? 'Rápido' : 'Multilíngue'} · ${new Date(x.created).toLocaleString('pt-BR')}</small></div>
+  $('#ttsHistory').innerHTML = h.length ? h.map(x => `<div class="hist"><button class="icon-btn" data-hplay="${x.id}">▶</button><div class="tx"><div>${esc(x.text)}</div><small>${x.motor ? statusHtml(x) + ' · ' : ''}${esc(voiceLabel(x.voice))} · ${x.model === 'rapido' ? 'Rápido' : 'Multilíngue'} · ${new Date(x.created).toLocaleString('pt-BR')}</small></div>
       <button class="btn ghost sm" data-hreuse="${x.id}">Reusar</button><button class="btn ghost sm" data-hdl="${x.id}" title="Baixar áudio">⬇</button><button class="icon-btn" data-hdel="${x.id}">✕</button></div>`).join('')
     : `<div class="empty" style="padding:24px"><b>Nada gerado ainda</b>As falas que você gerar ficam aqui para ouvir e reaproveitar.</div>`;
-  $$('[data-hplay]').forEach(b => b.onclick = () => { const x = h.find(i => i.id === b.dataset.hplay); speak(x.text, x.voice, x.settings); });
+  $$('[data-hplay]').forEach(b => b.onclick = async () => { const x = h.find(i => i.id === b.dataset.hplay); const u = x.resultKey && await blobUrl(x.resultKey); if (u) return playAudio(u); speak(x.text, x.voice, x.settings); });
   $$('[data-hreuse]').forEach(b => b.onclick = () => { const x = h.find(i => i.id === b.dataset.hreuse); Object.assign(T, { text: x.text, voice: x.voice, model: x.model, settings: { ...x.settings } }); save(); renderTts(); });
-  $$('[data-hdl]').forEach(b => b.onclick = () => toast('O download do áudio (MP3) depende do motor de voz conectado.'));
+  $$('[data-hdl]').forEach(b => b.onclick = async () => { const x = h.find(i => i.id === b.dataset.hdl); const bl = x.resultKey && await db.get(x.resultKey); if (bl) { const a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = `fala-${slug(x.text)}.mp3`; a.click(); return; } if (x.resultUrl) return window.open(x.resultUrl, '_blank', 'noopener'); toast(x.motor ? 'Ainda gerando no motor.' : 'Prévia do navegador não gera arquivo. Ligue o motor e use uma voz clonada.'); });
   $$('[data-hdel]').forEach(b => b.onclick = () => { state.ttsHistory = h.filter(i => i.id !== b.dataset.hdel); save(); renderTts(); });
 }
 const ttsCount = () => { const n = $('#ttsText').value.length; $('#ttsCount').textContent = `${n} / 5000 caracteres · ~${fmtTime(estSeconds($('#ttsText').value))}`; };
@@ -1079,10 +1094,186 @@ $('#vcGen').onclick = async () => {
   save(); renderVc(); toast('Conversão registrada. Ela roda quando o motor de voz estiver conectado.');
 };
 
+/* ============ MOTOR NO GITHUB (Chatterbox + Wav2Lip no GitHub Actions) ============ */
+/* O estúdio envia os arquivos para o repositório PRIVADO de dados, dispara o workflow do repositório
+   do motor e acompanha a execução. A chave fica só neste navegador (localStorage), nunca no código. */
+const MOTOR_KEY = 'ea-motor';
+const motorCfg = (() => { try { return JSON.parse(localStorage.getItem(MOTOR_KEY)) || {} } catch { return {} } })();
+const saveMotor = () => { try { localStorage.setItem(MOTOR_KEY, JSON.stringify(motorCfg)) } catch {} };
+Object.assign(motorCfg, { owner: motorCfg.owner || 'viniciushoscher-ctrl', motor: motorCfg.motor || 'estudio-avatar', dados: motorCfg.dados || 'estudio-avatar-dados', branch: motorCfg.branch || 'main' });
+const motorOn = () => !!(motorCfg.token && motorCfg.ok);
+const FMT_MOTOR = { '9:16': 'vertical', '4:5': 'feed', '1:1': 'quadrado', '16:9': 'horizontal' };
+const WORKFLOW = 'gerar-video.yml';
+
+async function gh(path, opts = {}) {
+  const r = await fetch(path.startsWith('http') ? path : 'https://api.github.com' + path, {
+    ...opts, headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', Authorization: `Bearer ${motorCfg.token}`, ...(opts.headers || {}) }
+  });
+  if (!r.ok && !(opts.okStatus || []).includes(r.status)) {
+    let msg = ''; try { msg = (await r.json()).message } catch {}
+    const e = new Error(`GitHub ${r.status}${msg ? ': ' + msg : ''}`); e.status = r.status; throw e;
+  }
+  return r;
+}
+const repoPath = which => `/repos/${motorCfg.owner}/${which === 'motor' ? motorCfg.motor : motorCfg.dados}`;
+const toB64 = blob => new Promise((res, rej) => { const f = new FileReader(); f.onload = () => res(String(f.result).split(',')[1]); f.onerror = rej; f.readAsDataURL(blob); });
+async function putDados(path, content, message) {
+  const blob = content instanceof Blob ? content : new Blob([content], { type: 'text/plain;charset=utf-8' });
+  if (blob.size > 45 * 1024 * 1024) throw new Error('Arquivo maior que 45 MB; grave um vídeo mais curto.');
+  const cur = await gh(`${repoPath('dados')}/contents/${path}`, { okStatus: [404] });
+  const sha = cur.status === 404 ? undefined : (await cur.json()).sha;
+  await gh(`${repoPath('dados')}/contents/${path}`, { method: 'PUT', body: JSON.stringify({ message, content: await toB64(blob), sha }) });
+}
+const extOf = blob => /mp4/.test(blob.type) ? 'mp4' : /quicktime/.test(blob.type) ? 'mov' : /mpeg|mp3/.test(blob.type) ? 'mp3' : /wav/.test(blob.type) ? 'wav' : /m4a|aac/.test(blob.type) ? 'm4a' : 'webm';
+
+async function ensureAvatarUploaded(av) {
+  if (av.remote) return av.remote;
+  const blob = await db.get(av.videoKey); if (!blob) throw new Error('O vídeo deste avatar não está mais neste navegador.');
+  const path = `treino/${av.id}.${extOf(blob)}`;
+  await putDados(path, blob, 'Estúdio: vídeo de treino do avatar'); av.remote = path; save(); return path;
+}
+async function ensureVoiceUploaded(v) {
+  if (v.remote) return v.remote;
+  // A referência é de ~12 s: vale a amostra mais longa.
+  let best = null, bestSize = -1;
+  for (const k of v.sampleKeys || []) { const b = await db.get(k); if (b && b.size > bestSize) { best = b; bestSize = b.size; } }
+  if (!best) throw new Error('As amostras desta voz não estão mais neste navegador.');
+  const path = `vozes/${v.id}.${extOf(best)}`;
+  await putDados(path, best, 'Estúdio: amostra de voz'); v.remote = path; save(); return path;
+}
+const motorText = s => s.replace(/\[pausa ([\d,\.]+)s\]/g, (_, n) => parseFloat(n.replace(',', '.')) >= 1 ? '… … ' : '… ').replace(/[ \t]+/g, ' ').trim();
+const motorSettings = set => ({ exagero: +(0.3 + (set.style || 0) * 0.6).toFixed(2), cfg: +(0.3 + (set.stability ?? 0.5) * 0.4).toFixed(2) });
+
+/* Envia arquivos, dispara o workflow e devolve { id, html_url } da execução. */
+async function motorSubmit(job, report) {
+  const { pid, etapa, avatar, voiceRef, text, fmt, settings } = job;
+  report('Enviando arquivos para o repositório privado…');
+  const treino = avatar ? await ensureAvatarUploaded(avatar) : 'nenhum';
+  const mv = myVoice(voiceRef); const vozRemote = mv && mv.kind === 'clone' ? await ensureVoiceUploaded(mv) : null;
+  await putDados(`roteiros/${pid}.txt`, motorText(text), 'Estúdio: roteiro');
+  const pedido = { roteiro: `roteiros/${pid}.txt`, formato: FMT_MOTOR[fmt] || 'vertical', idioma: 'pt', ...motorSettings(settings || DEFAULT_SET), ...(vozRemote ? { voz_ref: vozRemote } : {}) };
+  await putDados(`pedidos/${pid}.json`, JSON.stringify(pedido, null, 1), 'Estúdio: pedido');
+  report('Disparando o motor…');
+  const since = Date.now() - 60000;
+  await gh(`${repoPath('motor')}/actions/workflows/${WORKFLOW}/dispatches`, { method: 'POST', body: JSON.stringify({ ref: motorCfg.branch, inputs: { etapa, video_treino: treino, pedido: `pedidos/${pid}.json`, dados_repo: motorCfg.dados } }) });
+  for (let i = 0; i < 20; i++) {
+    await new Promise(r => setTimeout(r, 3000));
+    const runs = await (await gh(`${repoPath('motor')}/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=15`)).json();
+    const run = (runs.workflow_runs || []).find(r => (r.display_title || '').includes(pid) && new Date(r.created_at).getTime() >= since);
+    if (run) return { id: run.id, html_url: run.html_url };
+  }
+  throw new Error('O workflow foi disparado, mas não achei a execução. Confira a aba Actions.');
+}
+/* Lê o andamento: etapa atual do job e a fração de etapas concluídas. */
+async function motorStatus(runId) {
+  const run = await (await gh(`${repoPath('motor')}/actions/runs/${runId}`)).json();
+  let step = '', frac = run.status === 'completed' ? 1 : 0.02;
+  try {
+    const jobs = await (await gh(`${repoPath('motor')}/actions/runs/${runId}/jobs`)).json(); const steps = (jobs.jobs && jobs.jobs[0] && jobs.jobs[0].steps) || [];
+    if (steps.length) { const done = steps.filter(s => s.status === 'completed').length; frac = Math.max(frac, done / steps.length); step = (steps.find(s => s.status === 'in_progress') || {}).name || ''; }
+  } catch {}
+  return { status: run.status, conclusion: run.conclusion, step, frac, html_url: run.html_url };
+}
+async function motorFetchResult(name) {
+  const rel = await (await gh(`${repoPath('dados')}/releases/tags/resultados`)).json();
+  const asset = (rel.assets || []).find(a => a.name === name); if (!asset) throw new Error(`Arquivo ${name} não apareceu nos resultados.`);
+  try { const r = await gh(asset.url, { headers: { Accept: 'application/octet-stream' } }); return { blob: await r.blob(), url: asset.browser_download_url }; }
+  catch { return { blob: null, url: asset.browser_download_url }; }
+}
+const STEP_PT = { 'Instalar ffmpeg e bibliotecas': 'Preparando a máquina', 'Baixar Wav2Lip e pesos': 'Baixando modelos', 'Baixar o vídeo de treino': 'Lendo seu avatar', 'Gerar': 'Gerando voz e boca', 'Enviar o resultado para o seu repositório privado': 'Salvando o resultado' };
+
+/* Acompanha um item (projeto de vídeo ou fala do texto para fala) até terminar. */
+const pollers = {};
+function motorTrack(item, kind) {
+  if (pollers[item.id] || !item.runId) return;
+  const tick = async () => {
+    try {
+      const st = await motorStatus(item.runId); item.runUrl = st.html_url;
+      if (st.status !== 'completed') { item.status = 'processando'; item.progress = Math.round(st.frac * 95); item.stepLabel = STEP_PT[st.step] || st.step || 'Na fila do GitHub'; save(); kind === 'tts' ? renderTts() : refreshProjectViews(); return; }
+      clearInterval(pollers[item.id]); delete pollers[item.id];
+      if (st.conclusion !== 'success') { item.status = 'erro'; item.stepLabel = 'Falhou no GitHub'; save(); kind === 'tts' ? renderTts() : refreshProjectViews(); toast('A geração falhou. Abra o projeto para ver o registro no GitHub.'); return; }
+      item.stepLabel = 'Baixando o resultado';
+      const res = await motorFetchResult(`${kind === 'tts' ? 'voz' : 'video'}-${item.id}.${kind === 'tts' ? 'mp3' : 'mp4'}`);
+      item.resultUrl = res.url;
+      if (res.blob) { item.resultKey = 'res-' + item.id; await db.put(item.resultKey, res.blob); }
+      item.status = 'pronto'; item.progress = 100; item.stepLabel = ''; save();
+      kind === 'tts' ? renderTts() : refreshProjectViews(); toast(kind === 'tts' ? 'Fala pronta!' : 'Vídeo pronto!');
+    } catch (e) { item.stepLabel = 'Sem conexão com o GitHub, tentando de novo…'; save(); }
+  };
+  tick(); pollers[item.id] = setInterval(tick, 15000);
+}
+
+/* ---- Gerar vídeo: usa o motor quando ele está ligado ---- */
+const simulateGen = $('#genBtn').onclick;
+$('#genBtn').onclick = async () => {
+  if (!motorOn()) return simulateGen();
+  const av = getAvatar(D.avatarId), s = D.script.trim();
+  if (!av) { toast('Escolha um avatar antes de gerar.'); return openAvatarPicker(); }
+  if (av.sample || av.photoKey) return toast('O motor precisa de um avatar gravado em vídeo (o de exemplo e o de foto não servem).');
+  if (!s) { $('#script').focus(); return toast('Escreva o roteiro do vídeo.'); }
+  if (!D.voice) { toast('Escolha a voz do vídeo.'); return openVoicePicker(); }
+  const mv = myVoice(D.voice);
+  if (!mv || mv.kind !== 'clone') toast('Essa voz não é um clone seu: o motor vai usar a voz do próprio vídeo do avatar.');
+  const p = { id: uid(), title: s.replace(/\[pausa [\d,\.]+s\]/g, '').trim().slice(0, 48) || 'Sem título', script: D.script, avatarId: D.avatarId, voice: D.voice,
+    fmt: D.fmt, res: D.res, mode: D.mode, motion: D.motion, secs: estSeconds(D.script), created: Date.now(), status: 'fila', progress: 0, motor: true, stepLabel: 'Enviando…' };
+  state.projects.unshift(p); save(); renderRecent(); updateCredits();
+  $('#genBtn').disabled = true;
+  try {
+    const run = await motorSubmit({ pid: p.id, etapa: 'video', avatar: av, voiceRef: D.voice, text: D.script, fmt: D.fmt, settings: (mv && mv.settings) || D.settings }, msg => { p.stepLabel = msg; save(); renderRecent(); });
+    Object.assign(p, { runId: run.id, runUrl: run.html_url, status: 'processando', stepLabel: 'Na fila do GitHub' }); save(); motorTrack(p, 'video');
+    toast('Enviado para o motor. Pode fechar a aba: o andamento continua no GitHub.');
+  } catch (e) { p.status = 'erro'; p.stepLabel = e.message; save(); toast('Não consegui enviar: ' + e.message); }
+  finally { $('#genBtn').disabled = false; refreshProjectViews(); }
+};
+
+/* ---- Gerar fala (texto para fala) com a voz clonada ---- */
+const previewTts = $('#ttsGen').onclick;
+$('#ttsGen').onclick = async () => {
+  const T = state.tts, mv = myVoice(T.voice);
+  if (!motorOn() || !mv || mv.kind !== 'clone') return previewTts();
+  if (!T.text.trim()) return toast('Escreva o texto primeiro.');
+  const item = { id: uid(), text: T.text, voice: T.voice, model: T.model, settings: { ...T.settings }, created: Date.now(), motor: true, status: 'processando', progress: 0, stepLabel: 'Enviando…' };
+  state.ttsHistory.unshift(item); save(); renderTts();
+  try {
+    const run = await motorSubmit({ pid: item.id, etapa: 'voz', avatar: null, voiceRef: T.voice, text: T.text, fmt: '9:16', settings: T.settings }, msg => { item.stepLabel = msg; save(); renderTts(); });
+    Object.assign(item, { runId: run.id, runUrl: run.html_url, stepLabel: 'Na fila do GitHub' }); save(); motorTrack(item, 'tts');
+  } catch (e) { item.status = 'erro'; item.stepLabel = e.message; save(); renderTts(); toast('Não consegui enviar: ' + e.message); }
+};
+
+/* ---- Configuração do motor ---- */
+function renderMotorChip() { $('#motorChip').innerHTML = motorOn() ? '● Motor GitHub ligado' : '○ Ligar motor'; $('#motorChip').classList.toggle('on', motorOn()); }
+$('#motorChip').onclick = () => {
+  const c = motorCfg;
+  $('#motorBody').innerHTML = `<p class="muted" style="margin-top:0">O estúdio usa o seu motor grátis no GitHub Actions (voz Chatterbox + boca Wav2Lip). Seus arquivos vão para o repositório <b>privado</b> de dados; o motor público só recebe o código do pedido.</p>
+    <div class="labels"><div class="field"><label>Usuário do GitHub</label><input id="mOwner" value="${esc(c.owner)}"></div><div class="field"><label>Repositório do motor</label><input id="mMotorRepo" value="${esc(c.motor)}"></div><div class="field"><label>Repositório de dados (privado)</label><input id="mDados" value="${esc(c.dados)}"></div></div>
+    <div class="field"><label>Chave (fine-grained token)</label><input id="mToken" type="password" autocomplete="off" placeholder="${c.token ? 'chave salva neste navegador — deixe em branco para manter' : 'cole a chave aqui'}"></div>
+    <div class="note">Como criar a chave: GitHub → Settings → Developer settings → Fine-grained tokens → Generate new token. Em <i>Repository access</i>, escolha os dois repositórios (motor e dados). Permissões: <b>Actions: Read and write</b> e <b>Contents: Read and write</b>. A chave fica só neste navegador e nunca vai para o código.</div>
+    <div class="row" style="justify-content:space-between;margin-top:14px"><span class="muted" id="mStatus" style="font-size:12.5px">${motorOn() ? 'Conectado ✓' : 'Desligado: o Gerar só simula.'}</span>
+      <span class="row">${c.token ? '<button class="btn ghost sm" id="mOff">Desligar e apagar a chave</button>' : ''}<button class="btn accent sm" id="mTest">Testar e salvar</button></span></div>`;
+  $('#mTest').onclick = async () => {
+    Object.assign(c, { owner: $('#mOwner').value.trim(), motor: $('#mMotorRepo').value.trim(), dados: $('#mDados').value.trim() });
+    const tk = $('#mToken').value.trim(); if (tk) c.token = tk;
+    if (!c.token) return toast('Cole a chave do GitHub.');
+    $('#mStatus').textContent = 'Testando…'; c.ok = false;
+    try {
+      const d = await (await gh(repoPath('dados'))).json();
+      if (!d.private) throw new Error(`o repositório ${c.dados} precisa ser privado (ele guarda seu rosto e sua voz)`);
+      if (!(d.permissions && d.permissions.push)) throw new Error(`a chave não tem permissão de escrita em ${c.dados}`);
+      const m = await (await gh(repoPath('motor'))).json(); c.branch = m.default_branch || 'main';
+      await gh(`${repoPath('motor')}/actions/workflows/${WORKFLOW}`);
+      c.ok = true; saveMotor(); $('#mStatus').textContent = 'Conectado ✓'; renderMotorChip(); toast('Motor ligado: o Gerar agora produz o vídeo de verdade.');
+    } catch (e) { saveMotor(); $('#mStatus').textContent = 'Falhou: ' + (e.status === 401 ? 'chave inválida' : e.status === 404 ? 'repositório ou workflow não encontrado (confira os nomes e o acesso da chave)' : e.message); renderMotorChip(); }
+  };
+  const off = $('#mOff'); if (off) off.onclick = () => { delete c.token; c.ok = false; saveMotor(); renderMotorChip(); closeModal($('#mMotor')); toast('Chave apagada deste navegador.'); };
+  openModal('#mMotor');
+};
+renderMotorChip();
+
 /* ============ início ============ */
 window.openClone = openClone; window.openVoiceClone = openVoiceClone;
 renderNav(); go(state.page || 'cena'); syncComposer(); updateCredits();
-if (state.projects.some(p => p.status !== 'pronto')) runQueue();
+if (state.projects.some(p => !p.motor && p.status !== 'pronto')) runQueue();
+[...state.projects.map(p => [p, 'video']), ...state.ttsHistory.map(x => [x, 'tts'])].forEach(([it, k]) => { if (it.motor && it.runId && it.status === 'processando' && motorOn()) motorTrack(it, k); });
 </script>
 </body>
 </html>

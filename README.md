@@ -85,6 +85,28 @@ python motor/gerar.py --treino meu.mp4 --roteiro roteiros/teste-15s.txt --saida 
 Para abrir, dê dois cliques no arquivo (Chrome ou Edge) ou rode `npx http-server estudio -p 8765`.
 Gravações e projetos ficam só no seu navegador. Os mapas de referência das telas estão em `docs/`.
 
+### Ligar o estúdio ao motor
+
+Sem o motor, o botão Gerar só simula. Para gerar de verdade:
+
+1. Faça a preparação acima (repositório privado `estudio-avatar-dados` e segredo `DADOS_TOKEN`).
+2. Crie uma **segunda** chave (fine-grained token) para o estúdio:
+   - *Repository access:* **Only select repositories** > `estudio-avatar` e `estudio-avatar-dados`
+   - *Permissions:* **Actions: Read and write** e **Contents: Read and write**
+3. No estúdio, clique em **○ Ligar motor** (no topo), cole a chave e clique em *Testar e salvar*.
+   A chave fica só nesse navegador.
+
+Depois disso, ao clicar em **Gerar**:
+- o vídeo do avatar vai para `treino/`, a amostra da voz clonada para `vozes/`, o roteiro para
+  `roteiros/` e um pedido (`pedidos/ID.json`, com formato e ajustes de voz) para o repositório
+  **privado**;
+- o estúdio dispara o workflow só com o código do pedido e acompanha as etapas;
+- quando termina, baixa o `video-ID.mp4` da Release *resultados* e mostra no projeto.
+
+O **Texto para fala** com uma voz clonada roda só a etapa de voz (`voz-ID.mp3`), sem vídeo.
+Formatos aceitos: vertical (9:16), feed (4:5), quadrado (1:1) e horizontal (16:9). Dos ajustes de voz,
+o "exagero de estilo" e a "estabilidade" vão para o Chatterbox; velocidade e semelhança ainda não.
+
 ## Arquivos
 
 - `.github/workflows/gerar-video.yml`: o fluxo

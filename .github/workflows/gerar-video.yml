@@ -1,4 +1,6 @@
 name: Gerar vídeo
+# O estúdio (estudio/index.html) encontra a própria execução pelo código do pedido no título.
+run-name: Gerar ${{ inputs.etapa }} ${{ inputs.pedido }}
 
 # Este repositório é público e só tem o motor. Seu vídeo de treino, seus roteiros e os
 # vídeos gerados ficam num repositório PRIVADO (dados_repo), acessado pelo segredo DADOS_TOKEN.
@@ -26,7 +28,7 @@ on:
         default: pt
       formato:
         type: choice
-        options: [vertical, quadrado, horizontal]
+        options: [vertical, feed, quadrado, horizontal]
         default: vertical
       inicio_voz:
         description: "Segundo do treino onde começa uma fala limpa (usa 12 s)"
@@ -37,6 +39,9 @@ on:
       dados_repo:
         description: "Nome do repositório privado com os seus dados"
         default: estudio-avatar-dados
+      pedido:
+        description: "Usado pelo estúdio: pedidos/ID.json no repositório de dados (roteiro, voz, formato e ajustes). Deixe vazio ao rodar à mão."
+        default: ""
 
 permissions:
   contents: read
@@ -125,6 +130,13 @@ jobs:
             cp treino/treino.video treino/video-treino.mp4
             gh release upload treino treino/video-treino.mp4 --repo "$DADOS" --clobber
             rm treino/video-treino.mp4
+          elif [[ "$ENTRADA" == "nenhum" ]]; then
+            # Texto para fala do estúdio: só a voz, sem vídeo de treino.
+            echo "sem vídeo de treino"; exit 0
+          elif [[ "$REAL" == "true" && "$ENTRADA" == */* ]] && gh api -H "Accept: application/vnd.github.raw" \
+               "repos/$DADOS/contents/$ENTRADA" > treino/treino.video 2>/dev/null; then
+            # Vídeo enviado pelo estúdio como arquivo do repositório de dados.
+            echo "treino lido dos arquivos do repositório de dados"
           elif [[ "$ENTRADA" == "sintetico" ]]; then
             # Só para conferir a instalação: vídeo e tom falsos (a voz sai sem sentido, e tudo bem).
             ffmpeg -loglevel error -f lavfi -i testsrc=s=640x480:r=25:d=30 \
@@ -162,9 +174,22 @@ jobs:
           FORMATO: ${{ inputs.formato }}
           INICIO_VOZ: ${{ inputs.inicio_voz }}
           INICIO_VIDEO: ${{ inputs.inicio_video }}
+          PEDIDO: ${{ inputs.pedido }}
         run: |
           EXTRA=()
           if [[ "$ETAPA" == "voz" ]]; then EXTRA+=(--so-voz); fi
+          if [[ -f treino/treino.video ]]; then EXTRA+=(--treino treino/treino.video); fi
+          # Pedido do estúdio (repositório de dados): substitui roteiro e formato e traz voz e ajustes.
+          if [[ -n "$PEDIDO" ]]; then
+            P="dados/$PEDIDO"
+            [[ -f "$P" ]] || { echo "::error::Pedido não encontrado no repositório de dados."; exit 1; }
+            ROTEIRO=$(jq -r '.roteiro' "$P")
+            FORMATO=$(jq -r '.formato // "vertical"' "$P")
+            IDIOMA=$(jq -r '.idioma // "pt"' "$P")
+            EXTRA+=(--exagero "$(jq -r '.exagero // 0.5' "$P")" --cfg "$(jq -r '.cfg // 0.5' "$P")")
+            VOZ=$(jq -r '.voz_ref // empty' "$P")
+            if [[ -n "$VOZ" ]]; then EXTRA+=(--voz-ref "dados/$VOZ"); fi
+          fi
           # Seu roteiro privado tem prioridade; o de teste público vale como reserva.
           ARQ="$ROTEIRO"
           if [[ "$REAL" == "true" ]]; then
@@ -174,7 +199,6 @@ jobs:
             fi
           fi
           python motor/gerar.py \
-            --treino treino/treino.video \
             --roteiro "$ARQ" \
             --saida saida \
             --idioma "$IDIOMA" \
@@ -192,7 +216,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.DADOS_TOKEN }}
           RUN: ${{ github.run_number }}
+          PEDIDO: ${{ inputs.pedido }}
         run: |
+          # Pedidos do estúdio saem com o código do pedido no nome, para ele achar o arquivo.
+          if [[ -n "$PEDIDO" ]]; then RUN=$(basename "$PEDIDO" .json); fi
           gh release view resultados --repo "$DADOS" >/dev/null 2>&1 \
             || gh release create resultados --repo "$DADOS" --prerelease \
                  --title "Resultados" --notes "Vídeos e áudios gerados."
