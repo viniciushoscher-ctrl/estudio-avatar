@@ -15,8 +15,8 @@ from pathlib import Path
 AQUI = Path(__file__).resolve().parent
 
 # Menores que o 720p de sempre: na CPU, a detecção de rosto custa por pixel.
-FORMATOS = {"vertical": (540, 960), "feed": (576, 720), "quadrado": (720, 720),
-            "horizontal": (960, 540)}
+FORMATOS = {"vertical": (720, 1280), "feed": (576, 720), "quadrado": (720, 720),
+            "horizontal": (1280, 720)}
 VOZ_REF_S = 12   # o Chatterbox usa ~10 s de referência
 BASE_S = 8       # trecho do rosto; vai e volta (ping-pong) para repetir sem pulo
 CHARS_TRECHO = 600
@@ -156,6 +156,7 @@ def main():
     # Padrões mais expressivos que os do Chatterbox (0.5/0.5), que soavam robóticos.
     ap.add_argument("--exagero", type=float, default=0.7, help="expressividade da voz, de 0 a 1")
     ap.add_argument("--cfg", type=float, default=0.3, help="menor = ritmo mais solto e natural (0 a 1)")
+    ap.add_argument("--realce", type=Path, help="pesos do GFPGAN: restaura o rosto depois do Wav2Lip")
     ap.add_argument("--so-voz", action="store_true", help="para depois da voz, para você ouvir antes")
     ap.add_argument("--simular", action="store_true")
     a = ap.parse_args()
@@ -181,6 +182,19 @@ def main():
         return
     bruto = sincronizar(trab, fala, a.wav2lip.resolve() if a.wav2lip else None,
                         a.pesos.resolve() if a.pesos else None, a.simular)
+
+    if a.realce and not a.simular:
+        mudo = trab / "boca_realce.mp4"
+        r = subprocess.run([sys.executable, str(AQUI / "realce.py"), str(bruto), str(mudo),
+                            str(a.realce.resolve())], stderr=subprocess.PIPE, text=True)
+        if r.returncode or not mudo.exists():
+            fim = " | ".join(r.stderr.strip().splitlines()[-3:])[:300]
+            print(f"::warning::Realce do rosto falhou, sigo sem ele: {fim}", flush=True)
+        else:
+            com_audio = trab / "boca_realce_audio.mp4"
+            ffmpeg("-i", str(mudo), "-i", str(fala), "-map", "0:v", "-map", "1:a", "-c:v", "libx264",
+                   "-crf", "16", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(com_audio))
+            bruto = com_audio
 
     final = a.saida / "video_final.mp4"
     ffmpeg("-i", str(bruto), "-c:v", "libx264", "-crf", "20", "-pix_fmt", "yuv420p", "-c:a", "aac",

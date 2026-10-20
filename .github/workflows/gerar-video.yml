@@ -34,8 +34,8 @@ on:
         description: "Segundo do treino onde começa uma fala limpa (usa 12 s)"
         default: "5"
       inicio_video:
-        description: "Segundo do treino com o rosto de frente e a boca fechada (usa 8 s)"
-        default: "5"
+        description: "Segundo do treino com o rosto de frente, parado e sem gestos (usa 8 s)"
+        default: "44"
       dados_repo:
         description: "Nome do repositório privado com os seus dados"
         default: estudio-avatar-dados
@@ -78,7 +78,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
-          pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install torch==2.6.0 torchaudio==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
           pip install -r motor/requirements.txt
 
       - name: Modelo de voz (cache)
@@ -107,6 +107,23 @@ jobs:
             "$HF_WAV2LIP/face_detection/detection/sfd/s3fd.pth"
           # O nome oficial do arquivo (s3fd-619a316812.pth) traz o começo do SHA-256 dele.
           sha256sum Wav2Lip/face_detection/detection/sfd/s3fd.pth | grep -q '^619a316812'
+
+      - name: Pesos da restauração do rosto (cache)
+        if: inputs.etapa == 'video'
+        id: realce
+        uses: actions/cache@v4
+        with:
+          path: |
+            pesos-realce
+            gfpgan/weights
+          key: gfpgan-v1.4-v1
+
+      - name: Baixar pesos da restauração do rosto
+        if: inputs.etapa == 'video' && steps.realce.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p pesos-realce
+          curl -fL --retry 3 -o pesos-realce/GFPGANv1.4.pth \
+            https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.4.pth
 
       - name: Ajustar o Wav2Lip às bibliotecas atuais
         run: python motor/patch_wav2lip.py Wav2Lip
@@ -186,7 +203,7 @@ jobs:
           PEDIDO: ${{ inputs.pedido }}
         run: |
           EXTRA=()
-          if [[ "$ETAPA" == "voz" ]]; then EXTRA+=(--so-voz); fi
+          if [[ "$ETAPA" == "voz" ]]; then EXTRA+=(--so-voz); else EXTRA+=(--realce pesos-realce/GFPGANv1.4.pth); fi
           if [[ -f treino/treino.video ]]; then EXTRA+=(--treino treino/treino.video); fi
           # Pedido do estúdio (repositório de dados): substitui roteiro e formato e traz voz e ajustes.
           mkdir -p dados
