@@ -7,6 +7,7 @@ Roda em CPU (GitHub Actions). --simular troca voz e boca por versões falsas, s�
 """
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -118,7 +119,8 @@ def falar(trab: Path, texto: str, idioma: str, simular: bool, exagero: float = 0
     return fala
 
 
-def sincronizar(trab: Path, fala: Path, wav2lip: Path, pesos: Path, simular: bool) -> Path:
+def sincronizar(trab: Path, fala: Path, wav2lip: Path, pesos: Path, simular: bool,
+                atraso_boca_ms: float = 0) -> Path:
     bruto = trab / "boca.mp4"
     if simular:
         ffmpeg("-stream_loop", "-1", "-i", str(trab / "base.mp4"), "-i", str(fala), "-map", "0:v",
@@ -131,7 +133,8 @@ def sincronizar(trab: Path, fala: Path, wav2lip: Path, pesos: Path, simular: boo
          "--face", str((trab / "base.mp4").resolve()), "--audio", str(fala.resolve()),
          "--outfile", str(bruto.resolve()),
          "--face_det_batch_size", "4", "--wav2lip_batch_size", "32", "--pads", "0", "10", "0", "0"],
-        cwd=wav2lip, stderr=subprocess.PIPE, text=True)
+        cwd=wav2lip, stderr=subprocess.PIPE, text=True,
+        env={**os.environ, "ATRASO_BOCA_MS": str(atraso_boca_ms)})  # lido pelo patch_wav2lip.py
     sys.stderr.write(r.stderr)
     if r.returncode:
         # Só as últimas linhas do erro da biblioteca (não contêm o seu texto nem arquivos).
@@ -157,6 +160,8 @@ def main():
     ap.add_argument("--exagero", type=float, default=0.7, help="expressividade da voz, de 0 a 1")
     ap.add_argument("--cfg", type=float, default=0.3, help="menor = ritmo mais solto e natural (0 a 1)")
     ap.add_argument("--realce", type=Path, help="pesos do GFPGAN: restaura o rosto depois do Wav2Lip")
+    ap.add_argument("--atraso-boca-ms", type=float, default=0,
+                    help="ajuste fino da sincronia: positivo = boca mais tarde que a voz")
     ap.add_argument("--so-voz", action="store_true", help="para depois da voz, para você ouvir antes")
     ap.add_argument("--simular", action="store_true")
     a = ap.parse_args()
@@ -181,7 +186,7 @@ def main():
         print(f"pronto: {a.saida / 'voz.mp3'}", flush=True)
         return
     bruto = sincronizar(trab, fala, a.wav2lip.resolve() if a.wav2lip else None,
-                        a.pesos.resolve() if a.pesos else None, a.simular)
+                        a.pesos.resolve() if a.pesos else None, a.simular, a.atraso_boca_ms)
 
     if a.realce and not a.simular:
         mudo = trab / "boca_realce.mp4"

@@ -201,6 +201,9 @@ jobs:
           INICIO_VOZ: ${{ inputs.inicio_voz }}
           INICIO_VIDEO: ${{ inputs.inicio_video }}
           PEDIDO: ${{ inputs.pedido }}
+          # Ajuste fino da sincronia boca/voz, em ms (positivo = boca mais tarde). Mude em
+          # Settings > Secrets and variables > Actions > Variables, sem mexer no código.
+          ATRASO_BOCA_MS: ${{ vars.ATRASO_BOCA_MS || '0' }}
         run: |
           EXTRA=()
           if [[ "$ETAPA" == "voz" ]]; then EXTRA+=(--so-voz); else EXTRA+=(--realce pesos-realce/GFPGANv1.4.pth); fi
@@ -215,6 +218,7 @@ jobs:
             FORMATO=$(jq -r '.formato // "vertical"' "$P")
             IDIOMA=$(jq -r '.idioma // "pt"' "$P")
             EXTRA+=(--exagero "$(jq -r '.exagero // 0.7' "$P")" --cfg "$(jq -r '.cfg // 0.3' "$P")")
+            ATRASO_BOCA_MS=$(jq -r --arg d "$ATRASO_BOCA_MS" '.atraso_boca_ms // $d' "$P")
             VOZ=$(jq -r '.voz_ref // empty' "$P")
             if [[ -n "$VOZ" ]]; then
               raw "$VOZ" > "dados/voz.${VOZ##*.}" || { echo "::error::Amostra de voz não encontrada."; exit 1; }
@@ -237,6 +241,7 @@ jobs:
             --inicio-video "$INICIO_VIDEO" \
             --wav2lip Wav2Lip \
             --pesos pesos/wav2lip_gan.pth \
+            --atraso-boca-ms "$ATRASO_BOCA_MS" \
             "${EXTRA[@]}"
 
       # Nada é publicado neste repositório (público): o resultado vai para a Release

@@ -15,6 +15,12 @@ TROCAS = [
     ("inference.py", "import json, subprocess, random, string\n",
      "import json, subprocess, random, string\nfrom boca import colar_boca\n"),
     ("inference.py", "\t\t\tf[y1:y2, x1:x2] = p\n", "\t\t\tf[y1:y2, x1:x2] = colar_boca(f[y1:y2, x1:x2], p)\n"),
+    # Sincronia: o original usa, para o quadro i, o áudio de i até i+0,2 s, então a boca se mexe
+    # ~0,1 s ANTES da voz. Centraliza a janela no instante do quadro (meia janela = 8 passos de
+    # 12,5 ms) e aceita um atraso extra em ATRASO_BOCA_MS (positivo = boca mais tarde).
+    ("inference.py", "\t\tstart_idx = int(i * mel_idx_multiplier)\n",
+     "\t\tstart_idx = max(0, int(i * mel_idx_multiplier) - mel_step_size // 2\n"
+     "\t\t\t- int(round(float(os.environ.get('ATRASO_BOCA_MS', '0')) / 12.5)))\n"),
 ]
 
 
