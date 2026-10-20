@@ -142,8 +142,13 @@ jobs:
               gh api -H "Accept: application/vnd.github.raw" "repos/$DADOS/contents/$CAMINHO" > treino/treino.video
             fi
           else
-            gh release download "${ENTRADA%%/*}" -p "${ENTRADA#*/}" --dir treino --repo "$DADOS"
-            mv "treino/${ENTRADA#*/}" treino/treino.video
+            if gh release download "${ENTRADA%%/*}" -p "${ENTRADA#*/}" --dir treino --repo "$DADOS" 2>/dev/null; then
+              mv "treino/${ENTRADA#*/}" treino/treino.video
+            else
+              # Não é Release: trata como caminho de um arquivo do repositório de dados (ex.: treino/ID.webm).
+              gh api -H "Accept: application/vnd.github.raw" "repos/$DADOS/contents/$ENTRADA" > treino/treino.video \
+                || { echo "::error::Não achei '$ENTRADA' na Release nem nos arquivos do repositório de dados."; exit 1; }
+            fi
           fi
           ls -la treino
 
