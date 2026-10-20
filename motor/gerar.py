@@ -21,8 +21,8 @@ FORMATOS = {"vertical": (720, 1280), "feed": (576, 720), "quadrado": (720, 720),
 VOZ_REF_S = 12   # o Chatterbox usa ~10 s de referência
 BASE_S = 8       # trecho do rosto; vai e volta (ping-pong) para repetir sem pulo
 CHARS_TRECHO = 600
-# Se a medida automática (alinhar.py) não for confiável, usa o que medimos no teste: ~2 quadros.
-ATRASO_IMAGEM_PADRAO_S = 0.08
+# Sem medida confiável, não mexe: a janela de áudio já está centrada no quadro (patch do Wav2Lip).
+ATRASO_IMAGEM_PADRAO_S = 0.0
 
 
 def ffmpeg(*args):
