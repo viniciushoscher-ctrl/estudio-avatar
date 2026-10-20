@@ -120,7 +120,7 @@ jobs:
           if [[ "$ENTRADA" == "sintetico" ]]; then
             # Só para conferir a instalação: vídeo e tom falsos (a voz sai sem sentido, e tudo bem).
             ffmpeg -loglevel error -f lavfi -i testsrc=s=640x480:r=25:d=30 \
-              -f lavfi -i "sine=frequency=180:duration=30" -c:v libx264 -c:a aac treino/treino.video
+              -f lavfi -i "sine=frequency=180:duration=30" -c:v libx264 -c:a aac -f mp4 treino/treino.video
           else
             gh release download "${ENTRADA%%/*}" -p "${ENTRADA#*/}" --dir treino --repo "$DADOS"
             mv "treino/${ENTRADA#*/}" treino/treino.video
