@@ -115,8 +115,16 @@ jobs:
               -f lavfi -i "sine=frequency=180:duration=30" -c:v libx264 -c:a aac -f mp4 treino/treino.video
           elif [[ "$ENTRADA" != */* ]]; then
             # Só a tag (ex.: treino): usa o primeiro arquivo anexado a essa Release.
-            gh release download "$ENTRADA" -p '*' --dir treino --repo "$DADOS"
-            mv "$(ls treino/* | head -n 1)" treino/treino.video
+            if gh release download "$ENTRADA" -p '*' --dir treino --repo "$DADOS" 2>/dev/null; then
+              mv "$(ls treino/* | head -n 1)" treino/treino.video
+            else
+              # Sem Release: procura um vídeo nos arquivos do próprio repositório de dados.
+              CAMINHO=$(gh api "repos/$DADOS/git/trees/HEAD?recursive=1" --jq \
+                '[.tree[] | select(.type=="blob") | select(.path|test("\\.(mp4|mov|m4v|webm|mkv)$";"i")) | .path][0] // empty')
+              if [[ -z "$CAMINHO" ]]; then echo "::error::Não achei vídeo na Release '$ENTRADA' nem no repositório de dados."; exit 1; fi
+              echo "Vídeo encontrado no repositório: $CAMINHO"
+              gh api -H "Accept: application/vnd.github.raw" "repos/$DADOS/contents/$CAMINHO" > treino/treino.video
+            fi
           else
             gh release download "${ENTRADA%%/*}" -p "${ENTRADA#*/}" --dir treino --repo "$DADOS"
             mv "treino/${ENTRADA#*/}" treino/treino.video
