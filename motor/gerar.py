@@ -50,12 +50,16 @@ def agrupar(pecas: list[str], limite: int) -> list[str]:
     return grupos + ([atual] if atual else [])
 
 
-def pecas_voz(trecho: str, limite: int = 250) -> list[str]:
-    """Frases curtas para a voz: o Chatterbox gera no máximo ~40 s por chamada."""
-    out = []
+def pecas_voz(trecho: str, limite: int = 250, junta: int = 180) -> list[str]:
+    """Pedaços para a voz: o Chatterbox gera no máximo ~40 s por chamada.
+
+    Frases curtas vizinhas vão juntas (até `junta` caracteres): gerar frase por frase faz a
+    entonação recomeçar do zero a cada uma, e é isso que soa robótico.
+    """
+    pecas = []
     for f in frases(trecho):
-        out += [f] if len(f) <= limite else agrupar(re.split(r"(?<=[,;:])\s+", f), limite)
-    return out
+        pecas += [f] if len(f) <= limite else agrupar(re.split(r"(?<=[,;:])\s+", f), limite)
+    return agrupar(pecas, junta)
 
 
 # ---------- Etapas ----------
@@ -91,8 +95,8 @@ def preparar_voz(voz_ref: Path, trab: Path):
     print("preparar: só a voz (gravação separada)", flush=True)
 
 
-def falar(trab: Path, texto: str, idioma: str, simular: bool, exagero: float = 0.5,
-          cfg: float = 0.5) -> Path:
+def falar(trab: Path, texto: str, idioma: str, simular: bool, exagero: float = 0.7,
+          cfg: float = 0.3) -> Path:
     trechos = [pecas_voz(t) for t in agrupar(frases(texto), CHARS_TRECHO)]
     (trab / "trechos.json").write_text(json.dumps(trechos, ensure_ascii=False))
     audios = trab / "audios"
@@ -142,8 +146,9 @@ def main():
     ap.add_argument("--wav2lip", type=Path)
     ap.add_argument("--pesos", type=Path)
     ap.add_argument("--voz-ref", type=Path, help="gravação só da voz (senão usa o áudio do treino)")
+    # Padrões mais expressivos que os do Chatterbox (0.5/0.5), que soavam robóticos.
     ap.add_argument("--exagero", type=float, default=0.7, help="expressividade da voz, de 0 a 1")
-    ap.add_argument("--cfg", type=float, default=0.3, help="ritmo e fidelidade da voz, de 0 a 1")
+    ap.add_argument("--cfg", type=float, default=0.3, help="menor = ritmo mais solto e natural (0 a 1)")
     ap.add_argument("--so-voz", action="store_true", help="para depois da voz, para você ouvir antes")
     ap.add_argument("--simular", action="store_true")
     a = ap.parse_args()
