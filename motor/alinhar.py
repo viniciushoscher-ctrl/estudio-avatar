@@ -18,22 +18,31 @@ def _z(v):
     return (v - v.mean()) / (v.std() + 1e-9)
 
 
-def medir_atraso(video: str) -> tuple[float, float]:
+def medir_atraso(video: str, abertura: list[float] | None = None) -> tuple[float, float]:
+    """`abertura`: quanto a boca gerada está aberta em cada quadro, medido pelo boca.py dentro da
+    caixa do rosto que o Wav2Lip detectou. Funciona com qualquer enquadramento. Sem ela, usa uma
+    região fixa no meio do quadro (só serve quando o rosto está centralizado)."""
     audio = np.frombuffer(subprocess.run(
         ["ffmpeg", "-v", "error", "-i", video, "-f", "s16le", "-ac", "1", "-ar", "16000", "-"],
         capture_output=True, check=True).stdout, np.int16).astype(float)
     n = len(audio) // (16000 // FPS)
     env = np.sqrt((audio[:n * 640].reshape(n, 640) ** 2).mean(1))
-    cap = cv2.VideoCapture(video)
-    mov = []
-    while True:
-        ok, q = cap.read()
-        if not ok:
-            break
-        h, w = q.shape[:2]
-        reg = cv2.cvtColor(q[int(h * .38):int(h * .62), int(w * .25):int(w * .75)], cv2.COLOR_BGR2GRAY)
-        mov.append(float(reg.astype(np.float32).std()))
-    mov = np.abs(np.diff(np.array(mov), prepend=mov[0]))
+    if abertura:
+        # Nível de abertura contra nível do volume. (Comparar a VARIAÇÃO da boca com o NÍVEL do
+        # som, como na região fixa abaixo, desloca a medida em ~1 quadro.)
+        mov = np.array(abertura, float)
+    else:
+        cap = cv2.VideoCapture(video)
+        mov = []
+        while True:
+            ok, q = cap.read()
+            if not ok:
+                break
+            h, w = q.shape[:2]
+            reg = cv2.cvtColor(q[int(h * .38):int(h * .62), int(w * .25):int(w * .75)], cv2.COLOR_BGR2GRAY)
+            mov.append(float(reg.astype(np.float32).std()))
+        mov = np.array(mov)
+        mov = np.abs(np.diff(mov, prepend=mov[0]))
     m = min(len(mov), len(env))
     if m < 50:
         return 0.0, 0.0

@@ -136,7 +136,9 @@ def sincronizar(trab: Path, fala: Path, wav2lip: Path, pesos: Path, simular: boo
          "--outfile", str(bruto.resolve()),
          "--face_det_batch_size", "4", "--wav2lip_batch_size", "32", "--pads", "0", "10", "0", "0"],
         cwd=wav2lip, stderr=subprocess.PIPE, text=True,
-        env={**os.environ, "ATRASO_BOCA_MS": str(atraso_boca_ms)})  # lido pelo patch_wav2lip.py
+        # Lidos pelo patch_wav2lip.py e pelo boca.py (curva de abertura da boca para o alinhar.py).
+        env={**os.environ, "ATRASO_BOCA_MS": str(atraso_boca_ms),
+             "BOCA_ABERTURA_JSON": str((trab / "abertura.json").resolve())})
     sys.stderr.write(r.stderr)
     if r.returncode:
         # Só as últimas linhas do erro da biblioteca (não contêm o seu texto nem arquivos).
@@ -208,7 +210,8 @@ def main():
     if not a.simular:
         try:
             from alinhar import medir_atraso
-            atraso, corr = medir_atraso(str(bruto))
+            arq = trab / "abertura.json"
+            atraso, corr = medir_atraso(str(bruto), json.loads(arq.read_text()) if arq.exists() else None)
             print(f"alinhamento: boca {'adiantada' if atraso > 0 else 'atrasada' if atraso < 0 else 'ok'}"
                   f" {abs(atraso) * 1000:.0f} ms (correlação {corr:.2f})", flush=True)
         except Exception as e:  # noqa: BLE001

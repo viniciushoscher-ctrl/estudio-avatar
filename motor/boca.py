@@ -6,8 +6,38 @@ entra, com máscara oval de borda suave, cor igualada à pele original e um pouc
 
 Copiado para dentro do Wav2Lip pelo patch_wav2lip.py e usado no lugar de `f[y1:y2, x1:x2] = p`.
 """
+import atexit
+import json
+import os
+
 import cv2
 import numpy as np
+
+# Quanto a boca gerada está aberta em cada quadro (0 a 1), medido dentro da caixa do rosto.
+# O alinhar.py usa essa curva para medir o atraso boca/voz em qualquer enquadramento.
+ABERTURA: list[float] = []
+
+
+@atexit.register
+def _salvar_abertura():
+    destino = os.environ.get("BOCA_ABERTURA_JSON")
+    if destino and ABERTURA:
+        with open(destino, "w") as f:
+            json.dump(ABERTURA, f)
+
+
+def _abertura(gerado: np.ndarray) -> float:
+    """Boca aberta = interior da boca mais escuro que a pele em volta (dentes/língua/sombra)."""
+    h, w = gerado.shape[:2]
+    cinza = cv2.cvtColor(gerado, cv2.COLOR_BGR2GRAY)
+    interno = np.zeros((h, w), np.uint8)
+    cv2.ellipse(interno, (int(w * CENTRO_X), int(h * CENTRO_Y)), (int(w * 0.16), int(h * 0.09)),
+                0, 0, 360, 1, -1)
+    pele = _anel(h, w)
+    if not interno.any() or not pele.any():
+        return 0.0
+    return float(max(0.0, cinza[pele].mean() - cinza[interno == 1].mean()) / 255.0)
+
 
 # Região da boca dentro da caixa do rosto (frações da largura/altura da caixa).
 CENTRO_X, CENTRO_Y = 0.50, 0.74
@@ -73,6 +103,7 @@ def colar_boca(original: np.ndarray, gerado: np.ndarray) -> np.ndarray:
     """original e gerado: recortes BGR uint8 do mesmo tamanho (caixa do rosto)."""
     h, w = original.shape[:2]
     m = _mascara(h, w)
+    ABERTURA.append(_abertura(gerado))  # antes da suavização: é o tempo real da boca
     ant = _anterior["g"]
     suave = gerado
     if ant is not None and ant.shape == gerado.shape:
