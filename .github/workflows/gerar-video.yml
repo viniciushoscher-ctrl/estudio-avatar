@@ -60,14 +60,6 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: Baixar os seus dados (repositório privado)
-        if: env.REAL == 'true'
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.DADOS }}
-          token: ${{ secrets.DADOS_TOKEN }}
-          path: dados
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -133,6 +125,7 @@ jobs:
 
       - name: Gerar
         env:
+          GH_TOKEN: ${{ secrets.DADOS_TOKEN }}
           ETAPA: ${{ inputs.etapa }}
           ROTEIRO: ${{ inputs.roteiro }}
           IDIOMA: ${{ inputs.idioma }}
@@ -144,7 +137,12 @@ jobs:
           if [[ "$ETAPA" == "voz" ]]; then EXTRA+=(--so-voz); fi
           # Seu roteiro privado tem prioridade; o de teste público vale como reserva.
           ARQ="$ROTEIRO"
-          if [[ "$REAL" == "true" && -f "dados/$ROTEIRO" ]]; then ARQ="dados/$ROTEIRO"; fi
+          if [[ "$REAL" == "true" ]]; then
+            mkdir -p dados
+            if gh api -H "Accept: application/vnd.github.raw" "repos/$DADOS/contents/$ROTEIRO" > "dados/roteiro.txt" 2>/dev/null; then
+              ARQ="dados/roteiro.txt"
+            fi
+          fi
           python motor/gerar.py \
             --treino treino/treino.video \
             --roteiro "$ARQ" \
