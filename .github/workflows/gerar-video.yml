@@ -180,20 +180,24 @@ jobs:
           if [[ "$ETAPA" == "voz" ]]; then EXTRA+=(--so-voz); fi
           if [[ -f treino/treino.video ]]; then EXTRA+=(--treino treino/treino.video); fi
           # Pedido do estúdio (repositório de dados): substitui roteiro e formato e traz voz e ajustes.
+          mkdir -p dados
+          raw() { gh api -H "Accept: application/vnd.github.raw" "repos/$DADOS/contents/$1"; }
           if [[ -n "$PEDIDO" ]]; then
-            P="dados/$PEDIDO"
-            [[ -f "$P" ]] || { echo "::error::Pedido não encontrado no repositório de dados."; exit 1; }
+            P=dados/pedido.json
+            raw "$PEDIDO" > "$P" 2>/dev/null || { echo "::error::Pedido não encontrado no repositório de dados."; exit 1; }
             ROTEIRO=$(jq -r '.roteiro' "$P")
             FORMATO=$(jq -r '.formato // "vertical"' "$P")
             IDIOMA=$(jq -r '.idioma // "pt"' "$P")
             EXTRA+=(--exagero "$(jq -r '.exagero // 0.5' "$P")" --cfg "$(jq -r '.cfg // 0.5' "$P")")
             VOZ=$(jq -r '.voz_ref // empty' "$P")
-            if [[ -n "$VOZ" ]]; then EXTRA+=(--voz-ref "dados/$VOZ"); fi
+            if [[ -n "$VOZ" ]]; then
+              raw "$VOZ" > "dados/voz.${VOZ##*.}" || { echo "::error::Amostra de voz não encontrada."; exit 1; }
+              EXTRA+=(--voz-ref "dados/voz.${VOZ##*.}")
+            fi
           fi
           # Seu roteiro privado tem prioridade; o de teste público vale como reserva.
           ARQ="$ROTEIRO"
           if [[ "$REAL" == "true" ]]; then
-            mkdir -p dados
             if gh api -H "Accept: application/vnd.github.raw" "repos/$DADOS/contents/$ROTEIRO" > "dados/roteiro.txt" 2>/dev/null; then
               ARQ="dados/roteiro.txt"
             fi
