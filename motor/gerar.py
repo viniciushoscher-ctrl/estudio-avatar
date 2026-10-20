@@ -126,11 +126,18 @@ def sincronizar(trab: Path, fala: Path, wav2lip: Path, pesos: Path, simular: boo
                str(bruto))
         return bruto
     # O Wav2Lip usa caminhos relativos (temp/) e quebra em caminhos com ponto: roda de dentro dele.
-    subprocess.run(
-        [sys.executable, "inference.py", "--checkpoint_path", str(pesos),
-         "--face", str(trab / "base.mp4"), "--audio", str(fala), "--outfile", str(bruto),
+    r = subprocess.run(
+        [sys.executable, "inference.py", "--checkpoint_path", str(pesos.resolve()),
+         "--face", str((trab / "base.mp4").resolve()), "--audio", str(fala.resolve()),
+         "--outfile", str(bruto.resolve()),
          "--face_det_batch_size", "4", "--wav2lip_batch_size", "32", "--pads", "0", "10", "0", "0"],
-        cwd=wav2lip, check=True)
+        cwd=wav2lip, stderr=subprocess.PIPE, text=True)
+    sys.stderr.write(r.stderr)
+    if r.returncode:
+        # Só as últimas linhas do erro da biblioteca (não contêm o seu texto nem arquivos).
+        fim = " | ".join(r.stderr.strip().splitlines()[-4:])[:400]
+        print(f"::error::Wav2Lip falhou: {fim}", flush=True)
+        raise SystemExit(r.returncode)
     return bruto
 
 
