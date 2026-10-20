@@ -14,6 +14,9 @@ on:
       video_treino:
         description: "tag/arquivo de uma Release do repositório de dados (ex.: treino/meu-video.mov). 'sintetico' só confere a instalação."
         required: true
+      video_url:
+        description: "Só com video_treino=drive: link compartilhado do vídeo (baixado uma vez e guardado na Release treino do repositório privado)"
+        default: ""
       roteiro:
         description: "Arquivo do roteiro (procura primeiro no repositório de dados, depois neste)"
         default: roteiros/teste-15s.txt
@@ -107,9 +110,22 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.DADOS_TOKEN }}
           ENTRADA: ${{ inputs.video_treino }}
+          VIDEO_URL: ${{ inputs.video_url }}
         run: |
           mkdir -p treino
-          if [[ "$ENTRADA" == "sintetico" ]]; then
+          if [[ "$ENTRADA" == "drive" ]]; then
+            [[ "$VIDEO_URL" =~ ^https://drive\.google\.com/[A-Za-z0-9_./?=\&-]+$ ]] \
+              || { echo "::error::video_url precisa ser um link https://drive.google.com/..."; exit 1; }
+            pip install -q gdown
+            gdown --fuzzy "$VIDEO_URL" -O treino/treino.video \
+              || { echo "::error::Não consegui baixar o link. Em Compartilhar, deixe 'Qualquer pessoa com o link'."; exit 1; }
+            # Guarda uma cópia na Release privada para as próximas execuções não dependerem do Drive.
+            gh release view treino --repo "$DADOS" >/dev/null 2>&1 \
+              || gh release create treino --repo "$DADOS" --title "Treino" --notes "Vídeo de treino."
+            cp treino/treino.video treino/video-treino.mp4
+            gh release upload treino treino/video-treino.mp4 --repo "$DADOS" --clobber
+            rm treino/video-treino.mp4
+          elif [[ "$ENTRADA" == "sintetico" ]]; then
             # Só para conferir a instalação: vídeo e tom falsos (a voz sai sem sentido, e tudo bem).
             ffmpeg -loglevel error -f lavfi -i testsrc=s=640x480:r=25:d=30 \
               -f lavfi -i "sine=frequency=180:duration=30" -c:v libx264 -c:a aac -f mp4 treino/treino.video
