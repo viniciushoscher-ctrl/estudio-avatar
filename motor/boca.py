@@ -1,0 +1,72 @@
+"""Cola a boca gerada pelo Wav2Lip no rosto original sem o "quadrado" por cima.
+
+O Wav2Lip gera o rosto inteiro em 96x96 e, por padrão, cola esse quadrado ampliado sobre o
+quadro: fica borrado, com borda visível e cor diferente. Aqui só a região da boca e do queixo
+entra, com máscara oval de borda suave, cor igualada à pele original e um pouco de nitidez.
+
+Copiado para dentro do Wav2Lip pelo patch_wav2lip.py e usado no lugar de `f[y1:y2, x1:x2] = p`.
+"""
+import cv2
+import numpy as np
+
+# Região da boca dentro da caixa do rosto (frações da largura/altura da caixa).
+CENTRO_X, CENTRO_Y = 0.50, 0.74
+RAIO_X, RAIO_Y = 0.34, 0.24
+SUAVE = 0.18  # borda da máscara, em fração da largura da caixa
+
+_mascaras = {}
+
+
+def _mascara(h: int, w: int) -> np.ndarray:
+    chave = (h, w)
+    if chave not in _mascaras:
+        m = np.zeros((h, w), np.float32)
+        cv2.ellipse(m, (int(w * CENTRO_X), int(h * CENTRO_Y)), (int(w * RAIO_X), int(h * RAIO_Y)),
+                    0, 0, 360, 1.0, -1)
+        k = max(3, int(w * SUAVE) | 1)
+        _mascaras[chave] = cv2.GaussianBlur(m, (k, k), 0)[..., None]
+    return _mascaras[chave]
+
+
+_aneis = {}
+
+
+def _anel(h: int, w: int) -> np.ndarray:
+    """Pele em volta da boca (dentro da máscara, fora da boca): onde a cor é comparada.
+    A boca em si fica de fora, senão a boca aberta (escura) clareia tudo em volta."""
+    chave = (h, w)
+    if chave not in _aneis:
+        dentro = np.zeros((h, w), np.uint8)
+        cv2.ellipse(dentro, (int(w * CENTRO_X), int(h * CENTRO_Y)), (int(w * RAIO_X), int(h * RAIO_Y)),
+                    0, 0, 360, 1, -1)
+        boca = np.zeros((h, w), np.uint8)
+        cv2.ellipse(boca, (int(w * CENTRO_X), int(h * CENTRO_Y)), (int(w * 0.20), int(h * 0.12)),
+                    0, 0, 360, 1, -1)
+        _aneis[chave] = (dentro == 1) & (boca == 0)
+    return _aneis[chave]
+
+
+def _igualar_cor(gerado: np.ndarray, original: np.ndarray) -> np.ndarray:
+    """Desloca a cor (LAB) da boca gerada para a pele original bater no anel em volta da boca."""
+    h, w = original.shape[:2]
+    anel = _anel(h, w)
+    if anel.sum() < 20:
+        return gerado
+    g = cv2.cvtColor(gerado, cv2.COLOR_BGR2LAB).astype(np.float32)
+    o = cv2.cvtColor(original, cv2.COLOR_BGR2LAB).astype(np.float32)
+    g += (o[anel].mean(axis=0) - g[anel].mean(axis=0))  # só desloca: preserva o contraste da boca
+    return cv2.cvtColor(np.clip(g, 0, 255).astype(np.uint8), cv2.COLOR_LAB2BGR)
+
+
+def _nitidez(img: np.ndarray, forca: float = 0.6) -> np.ndarray:
+    borrado = cv2.GaussianBlur(img, (0, 0), 1.2)
+    return cv2.addWeighted(img, 1 + forca, borrado, -forca, 0)
+
+
+def colar_boca(original: np.ndarray, gerado: np.ndarray) -> np.ndarray:
+    """original e gerado: recortes BGR uint8 do mesmo tamanho (caixa do rosto)."""
+    h, w = original.shape[:2]
+    m = _mascara(h, w)
+    g = _nitidez(_igualar_cor(gerado, original))
+    out = original.astype(np.float32) * (1 - m) + g.astype(np.float32) * m
+    return np.clip(out, 0, 255).astype(np.uint8)
