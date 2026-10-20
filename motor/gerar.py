@@ -21,6 +21,8 @@ FORMATOS = {"vertical": (720, 1280), "feed": (576, 720), "quadrado": (720, 720),
 VOZ_REF_S = 12   # o Chatterbox usa ~10 s de referência
 BASE_S = 8       # trecho do rosto; vai e volta (ping-pong) para repetir sem pulo
 CHARS_TRECHO = 600
+# Se a medida automática (alinhar.py) não for confiável, usa o que medimos no teste: ~2 quadros.
+ATRASO_IMAGEM_PADRAO_S = 0.08
 
 
 def ffmpeg(*args):
@@ -202,8 +204,21 @@ def main():
             bruto = com_audio
 
     final = a.saida / "video_final.mp4"
-    ffmpeg("-i", str(bruto), "-c:v", "libx264", "-crf", "20", "-pix_fmt", "yuv420p", "-c:a", "aac",
-           "-b:a", "160k", "-movflags", "+faststart", str(final))
+    atraso, corr = ATRASO_IMAGEM_PADRAO_S, 0.0
+    if not a.simular:
+        try:
+            from alinhar import medir_atraso
+            atraso, corr = medir_atraso(str(bruto))
+            print(f"alinhamento: boca {'adiantada' if atraso > 0 else 'atrasada' if atraso < 0 else 'ok'}"
+                  f" {abs(atraso) * 1000:.0f} ms (correlação {corr:.2f})", flush=True)
+        except Exception as e:  # noqa: BLE001
+            print(f"::warning::Medida de sincronia falhou ({type(e).__name__}); uso o padrão.", flush=True)
+            atraso = ATRASO_IMAGEM_PADRAO_S
+    # atraso > 0: atrasa a imagem; < 0: atrasa o som.
+    off_v, off_a = (atraso, 0.0) if atraso >= 0 else (0.0, -atraso)
+    ffmpeg("-itsoffset", f"{off_v:.3f}", "-i", str(bruto), "-itsoffset", f"{off_a:.3f}", "-i", str(bruto),
+           "-map", "0:v", "-map", "1:a", "-c:v", "libx264", "-crf", "20", "-pix_fmt", "yuv420p",
+           "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", str(final))
     print(f"pronto: {final} ({duracao(final):.1f} s)", flush=True)
 
 

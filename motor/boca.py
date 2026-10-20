@@ -63,10 +63,21 @@ def _nitidez(img: np.ndarray, forca: float = 0.6) -> np.ndarray:
     return cv2.addWeighted(img, 1 + forca, borrado, -forca, 0)
 
 
+# Suavização no tempo: o Wav2Lip decide a boca quadro a quadro e tremula (a boca "bate" rápido
+# demais). Misturar um pouco do quadro anterior calma o movimento sem atrasar a fala.
+PESO_ANTERIOR = 0.35
+_anterior = {"g": None}
+
+
 def colar_boca(original: np.ndarray, gerado: np.ndarray) -> np.ndarray:
     """original e gerado: recortes BGR uint8 do mesmo tamanho (caixa do rosto)."""
     h, w = original.shape[:2]
     m = _mascara(h, w)
-    g = _nitidez(_igualar_cor(gerado, original))
+    ant = _anterior["g"]
+    suave = gerado
+    if ant is not None and ant.shape == gerado.shape:
+        suave = cv2.addWeighted(gerado, 1 - PESO_ANTERIOR, ant, PESO_ANTERIOR, 0)
+    _anterior["g"] = gerado
+    g = _nitidez(_igualar_cor(suave, original))
     out = original.astype(np.float32) * (1 - m) + g.astype(np.float32) * m
     return np.clip(out, 0, 255).astype(np.uint8)
