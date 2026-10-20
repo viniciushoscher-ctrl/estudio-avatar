@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estúdio Avatar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --ink:#1c1b19; --muted:#6f6b63; --line:#e7e3dc;
+  --accent:#e8572f; --accent-ink:#ffffff; --accent-soft:#fde9e2; --ok:#1f8a5b; --warn:#b7791f;
+  --rail:#ffffff; --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.06); --r:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141311; --panel:#1d1c1a; --ink:#f2efe9; --muted:#a39e94; --line:#2f2d29;
+    --accent:#ff7a52; --accent-ink:#1a0d08; --accent-soft:#3a2219; --rail:#1a1917; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141311; --panel:#1d1c1a; --ink:#f2efe9; --muted:#a39e94; --line:#2f2d29;
+  --accent:#ff7a52; --accent-ink:#1a0d08; --accent-soft:#3a2219; --rail:#1a1917; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 "Plus Jakarta Sans",system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.5}
+input,textarea,select{font:inherit;color:inherit}
+.app{display:flex;min-height:100vh}
+
+/* ---- navegação: trilho de ícones + submenu ---- */
+.nav{display:flex;position:sticky;top:0;height:100vh;padding:10px;gap:0}
+.nav-card{display:flex;background:var(--rail);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.rail{width:64px;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:6px;border-right:1px solid var(--line)}
+.logo{width:36px;height:36px;border-radius:11px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:800;margin-bottom:8px}
+.rail-btn{width:52px;border:0;background:none;border-radius:12px;padding:7px 0 5px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--muted)}
+.rail-btn svg{width:20px;height:20px}
+.rail-btn.on{color:var(--accent)}
+.rail-btn.on .ico{background:var(--accent-soft)}
+.rail-btn .ico{width:34px;height:30px;border-radius:9px;display:grid;place-items:center}
+.rail-sep{width:30px;height:1px;background:var(--line);margin:4px 0}
+.rail-foot{margin-top:auto}
+.sub{width:190px;padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+.sub.hide{display:none}
+.sub-title{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px;padding:2px 8px 10px}
+.sub-btn{border:0;background:none;text-align:left;padding:7px 10px;border-radius:10px;display:flex;gap:9px;align-items:center;font-size:13px;font-weight:500}
+.sub-btn svg{width:16px;height:16px;color:var(--muted)}
+.sub-btn.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.sub-btn.on svg{color:var(--accent)}
+.icon-btn{border:0;background:none;padding:4px;border-radius:8px;color:var(--muted);display:grid;place-items:center}
+.icon-btn svg{width:16px;height:16px}
+
+/* ---- área principal ---- */
+main{flex:1;min-width:0;padding:22px 28px 60px;position:relative}
+.topbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:6px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600;display:inline-flex;gap:6px;align-items:center;box-shadow:var(--shadow)}
+.view{display:none;max-width:980px;margin:0 auto}
+.view.on{display:block}
+h1.hero{font-size:34px;font-weight:800;letter-spacing:-.02em;text-align:center;margin:18px 0 14px}
+h2{font-size:15px;font-weight:700;margin:0}
+.muted{color:var(--muted)}
+.seg{display:flex;justify-content:center;margin-bottom:16px}
+.seg-in{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg-in button{border:0;background:none;border-radius:999px;padding:5px 14px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.seg-in button.on{background:var(--bg);color:var(--ink);box-shadow:var(--shadow)}
+.tag{font-size:10.5px;font-weight:700;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:1px 6px;margin-left:4px}
+
+/* ---- compositor (tela principal de criação) ---- */
+.composer{background:var(--panel);border:1.5px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:14px;transition:border-color .2s}
+.composer:focus-within{border-color:var(--accent)}
+.comp-top{display:flex;gap:14px}
+.thumb{width:96px;flex:none;aspect-ratio:9/16;max-height:170px;border-radius:12px;border:1.5px dashed var(--line);background:var(--bg);display:grid;place-items:center;color:var(--muted);overflow:hidden;position:relative}
+.thumb.land{aspect-ratio:16/9;width:150px;align-self:flex-start}
+.thumb:hover{border-color:var(--accent);color:var(--accent)}
+.thumb video,.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb svg{width:26px;height:26px}
+.script-wrap{flex:1;display:flex;flex-direction:column;min-width:0}
+.label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+textarea.script{flex:1;min-height:110px;border:0;outline:0;resize:vertical;background:none;padding:6px 0;font-size:15px}
+.script-meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);gap:8px;flex-wrap:wrap}
+.linkish{border:0;background:none;padding:0;color:var(--muted);text-decoration:underline;font-size:12px}
+.motion{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;display:none}
+.motion.on{display:block}
+.motion textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:8px 10px;min-height:60px;resize:vertical;outline:0}
+.switch{display:inline-flex;gap:8px;align-items:center;font-size:12.5px;margin-top:6px}
+.switch input{accent-color:var(--accent)}
+.controls{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600;display:inline-flex;gap:6px;align-items:center;position:relative}
+.pill svg{width:14px;height:14px}
+.pill.on{border-color:var(--accent);color:var(--accent)}
+.pill-play{border-radius:0 999px 999px 0;margin-left:-9px;padding:6px 10px;background:var(--bg)}
+.spacer{flex:1}
+.btn{border:0;border-radius:999px;padding:8px 18px;font-weight:700;background:var(--ink);color:var(--bg)}
+.btn.accent{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--ink)}
+.btn.sm{padding:6px 12px;font-size:12.5px}
+.menu{position:absolute;bottom:calc(100% + 6px);right:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:5px;min-width:150px;z-index:20;display:none}
+.menu.on{display:block}
+.menu button{display:flex;width:100%;border:0;background:none;padding:7px 10px;border-radius:8px;gap:8px;align-items:center;font-size:13px;justify-content:space-between}
+.menu button:hover,.menu button.sel{background:var(--bg)}
+.estimate{font-size:12px;color:var(--muted);margin-top:8px;text-align:right}
+
+/* ---- listas e cartões ---- */
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:34px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.empty{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:44px 20px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);margin:8px 0 2px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);position:relative}
+.card .media{aspect-ratio:16/10;background:var(--bg);display:grid;place-items:center;color:var(--muted);overflow:hidden}
+.card .media video,.card .media img{width:100%;height:100%;object-fit:cover}
+.card .body{padding:10px 12px}
+.card .title{font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .sub2{font-size:12px;color:var(--muted)}
+.card .more{position:absolute;top:8px;right:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:2px 7px}
+.card .menu{top:36px;bottom:auto}
+.status{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--bg)}
+.status.ready{color:var(--ok)}
+.status.proc{color:var(--warn)}
+.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+/* ---- início: checklist ---- */
+.check-wrap{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:var(--shadow)}
+.check-head{font-size:13px;font-weight:600;margin:0 0 10px 4px;display:flex;gap:8px;align-items:center}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.step{border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px;min-height:150px;background:var(--bg)}
+.step.cur{border-color:var(--accent);background:var(--panel)}
+.step.done{opacity:.75}
+.step .k{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.05em;display:flex;justify-content:space-between}
+.step .t{font-weight:700}
+.step .d{font-size:12px;color:var(--muted);flex:1}
+.step .lock{font-size:11.5px;color:var(--muted)}
+.ideas{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.idea{border-radius:var(--r);padding:16px;min-height:130px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;border:0;text-align:left}
+.idea b{font-size:19px;line-height:1.15;font-weight:800}
+.idea span{align-self:flex-start;background:rgba(255,255,255,.22);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600}
+
+/* ---- modais ---- */
+.backdrop{position:fixed;inset:0;background:rgba(10,10,10,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.backdrop.on{display:flex}
+.modal{background:var(--panel);border-radius:20px;width:min(720px,100%);max-height:90vh;overflow:auto;padding:18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.tabs{display:flex;gap:16px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.tabs button{border:0;background:none;padding:8px 2px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent}
+.tabs button.on{color:var(--ink);border-color:var(--accent)}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.choice button{border:1px solid var(--line);background:var(--bg);border-radius:16px;padding:16px;text-align:left}
+.choice button:hover{border-color:var(--accent)}
+.choice .art{height:110px;border-radius:12px;margin-bottom:10px;display:grid;place-items:center;font-size:40px}
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.pick{border:1.5px solid var(--line);border-radius:14px;background:var(--bg);padding:0;overflow:hidden;text-align:left}
+.pick.sel{border-color:var(--accent)}
+.pick .ph{aspect-ratio:3/4;display:grid;place-items:center;font-size:28px;font-weight:800;color:#fff;overflow:hidden}
+.pick .ph video{width:100%;height:100%;object-fit:cover}
+.pick .nm{padding:6px 8px;font-size:12.5px;font-weight:600}
+.voice-row{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:8px;background:var(--bg)}
+.voice-row.sel{border-color:var(--accent)}
+.voice-row .nm{flex:1}
+.voice-row .nm small{display:block;color:var(--muted)}
+.rec-stage{background:#000;border-radius:14px;aspect-ratio:16/9;overflow:hidden;position:relative;display:grid;place-items:center;color:#fff}
+.rec-stage video{width:100%;height:100%;object-fit:cover}
+.rec-dot{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.55);border-radius:999px;padding:3px 10px;font-size:12px;display:none}
+.rec-dot.on{display:block}
+.rec-dot::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff3b30;margin-right:6px}
+.tips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.tips div{background:var(--bg);border-radius:10px;padding:8px 10px;font-size:12px}
+.field{display:flex;flex-direction:column;gap:4px;margin:10px 0}
+.field input,.field select{border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:8px 10px;outline:0}
+.read-box{background:var(--bg);border-radius:12px;padding:12px;font-size:15px;line-height:1.6}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:80;max-width:90vw}
+.toast.on{opacity:1}
+.player{width:100%;border-radius:14px;background:#000;aspect-ratio:16/9;display:grid;place-items:center;color:#fff;overflow:hidden}
+.player video{width:100%;height:100%;object-fit:contain}
+.note{font-size:12px;color:var(--muted);background:var(--bg);border-radius:10px;padding:8px 10px;margin-top:10px}
+
+/* ---- voz (texto para fala / vozes / trocador) ---- */
+.tts{display:grid;grid-template-columns:1fr 290px;gap:14px}
+.tts-main{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-height:340px}
+.tts-main textarea{flex:1;border:0;outline:0;resize:none;background:none;padding:18px;font-size:16px;line-height:1.6}
+.tts-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
+.tts-side{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:var(--shadow)}
+.voice-sel{width:100%;display:flex;gap:10px;align-items:center;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:8px 10px;margin-top:6px;text-align:left}
+.voice-sel span:nth-child(2){flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vs-av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:12px;background:var(--muted);flex:none}
+.sel,.search{border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:8px 10px;outline:0;width:100%;margin-top:6px}
+.search{flex:1;margin:0;min-width:180px}
+.sliders{margin:12px 0 4px}
+.sl{margin-bottom:12px}
+.sl-top{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600}
+.sl input{width:100%;accent-color:var(--accent)}
+.sl-ends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:-2px}
+.hist{display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.hist .tx{flex:1;min-width:0}
+.hist .tx div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist .tx small{color:var(--muted)}
+.drop{border:1.5px dashed var(--line);border-radius:16px;padding:28px;text-align:center;display:flex;flex-direction:column;gap:4px;align-items:center;cursor:pointer;background:var(--bg)}
+.drop:hover,.drop.over{border-color:var(--accent)}
+.samples .hist{background:var(--bg)}
+.meter{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0 2px}
+.meter i{display:block;height:100%;background:var(--ok)}
+.labels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.labels .field{margin:4px 0}
+.design-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.design-opts button{border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:12px;text-align:left}
+.design-opts button.sel{border-color:var(--accent)}
+.vtag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:6px;padding:1px 6px;background:var(--bg);color:var(--muted);margin-right:4px;border:1px solid var(--line)}
+@media (max-width:820px){
+  .tts{grid-template-columns:1fr}
+  .labels,.design-opts{grid-template-columns:1fr}
+  .sub{display:none}
+  main{padding:16px}
+  .steps{grid-template-columns:1fr 1fr}
+  .ideas{grid-template-columns:1fr 1fr}
+  .tips{grid-template-columns:1fr}
+  h1.hero{font-size:26px}
+}
+@media (max-width:560px){
+  .app{flex-direction:column}
+  .nav{position:fixed;bottom:0;top:auto;left:0;right:0;height:auto;padding:8px 16px;z-index:40}
+  .nav-card{width:100%}
+  .rail{flex-direction:row;width:100%;justify-content:space-around;padding:4px;border:0}
+  .logo,.rail-sep,.rail-foot{display:none}
+  main{padding:12px 16px 100px}
+  .comp-top{flex-direction:column}
+  .thumb{width:80px}
+  .steps,.ideas,.choice{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="nav">
+    <div class="nav-card">
+      <div class="rail" id="rail">
+        <div class="logo">EA</div>
+        <button class="rail-btn on" data-sec="criar"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></span>Criar</button>
+        <button class="rail-btn" data-sec="avatar"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="9" r="3.5"/><path d="M5 20c1.2-3.5 4-5 7-5s5.8 1.5 7 5"/></svg></span>Avatar</button>
+        <button class="rail-btn" data-sec="voz"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>Voz</button>
+        <div class="rail-sep"></div>
+        <button class="rail-btn" data-sec="projetos"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>Projetos</button>
+        <div class="rail-foot"><button class="rail-btn" id="themeBtn" title="Tema"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></span>Tema</button></div>
+      </div>
+      <div class="sub" id="sub"></div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="topbar"><span class="chip" id="creditChip">⏱ 0 vídeos este mês</span></div>
+
+    <!-- INÍCIO -->
+    <section class="view" id="v-inicio">
+      <h1 class="hero">Olá! Vamos gravar seu próximo post?</h1>
+      <div class="check-wrap">
+        <div class="check-head">✓ Configure seu estúdio — <span id="stepCount">0/4</span></div>
+        <div class="steps" id="steps"></div>
+      </div>
+      <div class="section-head"><h2>Ideias de post</h2><span class="muted" style="font-size:12px">Clique para começar com um roteiro-base</span></div>
+      <div class="ideas" id="ideas"></div>
+    </section>
+
+    <!-- CENA ÚNICA (criação) -->
+    <section class="view on" id="v-cena">
+      <h1 class="hero">O que você quer falar hoje?</h1>
+      <div class="seg"><div class="seg-in"><button class="on" data-mode="falante">Falante <span class="tag">lip sync</span></button><button data-mode="expressivo">Expressivo</button></div></div>
+
+      <div class="composer">
+        <div class="comp-top">
+          <button class="thumb" id="thumb" title="Escolher avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 19c1-3.2 3.6-4.6 6.5-4.6 1.4 0 2.7.3 3.8 1M18 14v6M15 17h6"/></svg></button>
+          <div class="script-wrap">
+            <div class="label">Roteiro do vídeo</div>
+            <textarea class="script" id="script" maxlength="2500" placeholder="Escreva aqui o que o seu avatar vai falar…"></textarea>
+            <div class="script-meta">
+              <span><button class="linkish" id="pauseBtn" title="Inserir pausa no cursor">+ pausa 0,5 s</button> · <button class="linkish" id="loadTxt">carregar .txt</button><input type="file" id="txtFile" accept=".txt" hidden></span>
+              <span id="counter">0 / 2500 · ~0 s</span>
+            </div>
+          </div>
+        </div>
+        <div class="motion" id="motionBox">
+          <div class="label">Direção de movimento <span class="tag">beta</span></div>
+          <textarea id="motionText" placeholder="ex.: sorrir no começo, olhar para a câmera, acenar no final…"></textarea>
+          <label class="switch"><input type="checkbox" id="expressive" checked> Mais expressivo</label>
+        </div>
+        <div class="controls">
+          <button class="pill" id="avatarPill">🙂 <span id="avatarName">Escolher avatar</span></button>
+          <button class="pill" id="motionPill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><path d="M12 7v6l-3 7M12 13l3 7M7 10h10"/></svg>Movimento</button>
+          <button class="pill" id="voicePill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg><span id="voiceName">Voz</span></button>
+          <button class="pill pill-play" id="playBtn" title="Ouvir roteiro">▶</button>
+          <span class="spacer"></span>
+          <span style="position:relative"><button class="pill" id="fmtPill"><span id="fmtLabel">▯ 9:16</span> ▾</button>
+            <div class="menu" id="fmtMenu">
+              <button data-fmt="9:16">▯ Vertical <small class="muted">9:16</small></button>
+              <button data-fmt="4:5">▭ Feed <small class="muted">4:5</small></button>
+              <button data-fmt="1:1">◻ Quadrado <small class="muted">1:1</small></button>
+              <button data-fmt="16:9">▭ Horizontal <small class="muted">16:9</small></button>
+            </div></span>
+          <span style="position:relative"><button class="pill" id="resPill"><span id="resLabel">720p</span> ▾</button>
+            <div class="menu" id="resMenu"><button data-res="720p">720p</button><button data-res="1080p">1080p</button></div></span>
+          <button class="btn" id="genBtn">Gerar</button>
+        </div>
+        <div class="estimate" id="estimate"></div>
+      </div>
+
+      <div class="section-head"><h2>Criações recentes</h2><button class="linkish" data-go="projetos">Todos os projetos ›</button></div>
+      <div id="recent"></div>
+    </section>
+
+    <!-- AVATARES -->
+    <section class="view" id="v-avatares">
+      <div class="section-head" style="margin-top:8px"><h2 style="font-size:22px">Meus avatares</h2><div class="row"><button class="btn ghost sm" data-go="vozes">Vozes ›</button><button class="btn accent sm" id="newAvatarBtn">+ Novo avatar</button></div></div>
+      <div id="avatarList"></div>
+    </section>
+
+    <!-- VOZ: TEXTO PARA FALA -->
+    <section class="view" id="v-tts">
+      <div class="section-head" style="margin-top:8px"><h2 style="font-size:22px">Texto para fala</h2><span class="muted" style="font-size:12px" id="ttsCredits"></span></div>
+      <div class="tts">
+        <div class="tts-main">
+          <textarea id="ttsText" maxlength="5000" placeholder="Digite ou cole o texto que você quer transformar em fala…"></textarea>
+          <div class="tts-foot">
+            <span class="muted" style="font-size:12px" id="ttsCount">0 / 5000 caracteres</span>
+            <span class="row"><button class="linkish" id="ttsPause">+ pausa</button><button class="btn ghost sm" id="ttsToStudio" title="Levar o texto para o roteiro do vídeo">Usar no vídeo</button><button class="btn accent sm" id="ttsGen">Gerar fala</button></span>
+          </div>
+        </div>
+        <aside class="tts-side">
+          <div class="label">Voz</div>
+          <button class="voice-sel" id="ttsVoiceBtn"><span class="vs-av" id="ttsVoiceAv">?</span><span id="ttsVoiceName">Escolher voz</span><span class="muted">▾</span></button>
+          <div class="label" style="margin-top:14px">Modelo</div>
+          <select id="ttsModel" class="sel"><option value="padrao">Multilíngue — mais natural</option><option value="rapido">Rápido — baixa latência</option></select>
+          <div class="sliders" id="ttsSliders"></div>
+          <label class="switch"><input type="checkbox" id="setBoost" checked> Reforço de semelhança</label>
+          <div class="row" style="margin-top:12px"><button class="linkish" id="ttsReset">Restaurar padrão</button><button class="linkish" id="ttsSaveDefault">Salvar como padrão da voz</button></div>
+          <div class="note">A prévia no navegador aplica velocidade e tom. Estabilidade, semelhança e estilo vão para o motor de voz quando ele for conectado.</div>
+        </aside>
+      </div>
+      <div class="section-head"><h2>Histórico</h2><button class="linkish" id="ttsClear">Limpar histórico</button></div>
+      <div id="ttsHistory"></div>
+    </section>
+
+    <!-- VOZ: MINHAS VOZES -->
+    <section class="view" id="v-vozes">
+      <div class="section-head" style="margin-top:8px"><h2 style="font-size:22px">Vozes</h2><button class="btn accent sm" id="newVoiceBtn">+ Adicionar voz</button></div>
+      <div class="tabs"><button class="on" data-vltab="minhas">Minhas vozes</button><button data-vltab="explorar">Explorar (navegador)</button></div>
+      <div class="row" style="margin-bottom:12px"><input class="search" id="voiceSearch" placeholder="Buscar por nome ou rótulo…"><select class="sel" id="voiceFilter" style="width:auto"><option value="">Todos os tipos</option><option value="clone">Clones</option><option value="design">Criadas por descrição</option></select></div>
+      <div id="voiceList"></div>
+    </section>
+
+    <!-- VOZ: TROCADOR DE VOZ -->
+    <section class="view" id="v-trocador">
+      <div class="section-head" style="margin-top:8px"><h2 style="font-size:22px">Trocador de voz</h2></div>
+      <p class="muted" style="margin-top:-6px">Grave ou envie um áudio falando do seu jeito; a fala é convertida para a voz escolhida mantendo o ritmo e a emoção.</p>
+      <div class="tts">
+        <div class="tts-main" style="padding:16px">
+          <div class="drop" id="vcDrop"><div style="font-size:26px">🎙️</div><b>Clique para enviar um áudio</b><span class="muted" style="font-size:12px">ou arraste aqui · até 5 min</span><input type="file" id="vcFile" accept="audio/*" hidden></div>
+          <div class="row" style="justify-content:center;margin:10px 0"><span class="muted">ou</span><button class="btn ghost sm" id="vcRec">● Gravar agora</button><span class="muted" id="vcInfo" style="font-size:12px"></span></div>
+          <div id="vcPrev"></div>
+          <div class="tts-foot"><label class="switch" style="margin:0"><input type="checkbox" id="vcNoise" checked> Remover ruído de fundo</label><button class="btn accent sm" id="vcGen" disabled>Converter</button></div>
+        </div>
+        <aside class="tts-side">
+          <div class="label">Voz de destino</div>
+          <button class="voice-sel" id="vcVoiceBtn"><span class="vs-av" id="vcVoiceAv">?</span><span id="vcVoiceName">Escolher voz</span><span class="muted">▾</span></button>
+          <div class="note">O áudio original não é alterado. A conversão acontece no motor de voz (próxima etapa).</div>
+        </aside>
+      </div>
+      <div class="section-head"><h2>Conversões</h2></div>
+      <div id="vcHistory"></div>
+    </section>
+
+    <!-- PROJETOS -->
+    <section class="view" id="v-projetos">
+      <div class="section-head" style="margin-top:8px"><h2 style="font-size:22px">Projetos</h2><button class="btn sm" data-go="cena">+ Criar vídeo</button></div>
+      <div id="projectList"></div>
+    </section>
+  </main>
+</div>
+
+<!-- Modal: escolher avatar -->
+<div class="backdrop" id="mAvatar"><div class="modal">
+  <div class="modal-head"><h2 style="font-size:17px">Escolher avatar</h2><button class="icon-btn" data-close>✕</button></div>
+  <div class="tabs"><button class="on" data-atab="meus">Meus avatares</button><button data-atab="modelo">Modelos de exemplo</button></div>
+  <div id="avatarPickBody"></div>
+</div></div>
+
+<!-- Modal: criar avatar (gêmeo digital) -->
+<div class="backdrop" id="mClone"><div class="modal">
+  <div class="modal-head"><h2 style="font-size:17px" id="cloneTitle">Criar seu avatar</h2><button class="icon-btn" data-close>✕</button></div>
+  <div id="cloneBody"></div>
+</div></div>
+
+<!-- Modal: escolher voz -->
+<div class="backdrop" id="mVoice"><div class="modal">
+  <div class="modal-head"><h2 style="font-size:17px">Escolher voz</h2><button class="icon-btn" data-close>✕</button></div>
+  <div class="tabs"><button class="on" data-vtab="minhas">Minhas vozes</button><button data-vtab="sistema">Vozes do navegador (pt-BR)</button></div>
+  <div id="voicePickBody"></div>
+  <div class="row" style="margin-top:10px"><label class="field" style="margin:0;flex:1">Velocidade <input type="range" id="rate" min="0.7" max="1.3" step="0.05" value="1"></label><button class="btn accent sm" id="voiceCloneFromPicker">+ Clonar minha voz</button></div>
+</div></div>
+
+<!-- Modal: adicionar voz -->
+<div class="backdrop" id="mVoiceClone"><div class="modal">
+  <div class="modal-head"><h2 style="font-size:17px" id="vcTitle">Adicionar voz</h2><button class="icon-btn" data-close>✕</button></div>
+  <div id="voiceCloneBody"></div>
+</div></div>
+
+<!-- Modal: ver projeto -->
+<div class="backdrop" id="mProject"><div class="modal">
+  <div class="modal-head"><h2 style="font-size:17px" id="projTitle">Projeto</h2><button class="icon-btn" data-close>✕</button></div>
+  <div id="projBody"></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ armazenamento local (metadados em localStorage, mídia em IndexedDB) ============ */
+const LS_KEY = 'estudio-avatar-v1';
+const load = () => { try { return JSON.parse(localStorage.getItem(LS_KEY)) || null } catch { return null } };
+const state = Object.assign({
+  avatars: [], voices: [], projects: [],
+  draft: { script: '', avatarId: null, voice: null, fmt: '9:16', res: '720p', mode: 'falante', motion: '', expressive: true, rate: 1 },
+  section: 'criar', page: 'cena'
+}, load() || {});
+const save = () => { try { localStorage.setItem(LS_KEY, JSON.stringify(state)) } catch {} };
+
+const db = (() => {
+  let p;
+  const open = () => p ||= new Promise((res, rej) => {
+    const r = indexedDB.open('estudio-avatar-media', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('blobs');
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+  const tx = async (mode, fn) => { const d = await open(); return new Promise((res, rej) => { const t = d.transaction('blobs', mode); const q = fn(t.objectStore('blobs')); t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); }); };
+  return { put: (k, v) => tx('readwrite', s => s.put(v, k)).catch(() => null), get: k => tx('readonly', s => s.get(k)).catch(() => null), del: k => tx('readwrite', s => s.delete(k)).catch(() => null) };
+})();
+const urlCache = {};
+async function blobUrl(key) { if (!key) return null; if (urlCache[key]) return urlCache[key]; const b = await db.get(key); return b ? (urlCache[key] = URL.createObjectURL(b)) : null; }
+
+/* ============ utilidades ============ */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const uid = () => Math.random().toString(36).slice(2, 10);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2600); }
+const words = s => (s.replace(/\[pausa [\d,\.]+s\]/g, ' ').trim().match(/\S+/g) || []).length;
+const pauses = s => [...s.matchAll(/\[pausa ([\d,\.]+)s\]/g)].reduce((a, m) => a + parseFloat(m[1].replace(',', '.')), 0);
+const estSeconds = s => Math.round(words(s) / 2.5 + pauses(s)); // ~150 palavras/min em pt-BR
+const fmtTime = s => s < 60 ? `${s} s` : `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, '0')} s`;
+const gradients = ['linear-gradient(135deg,#e8572f,#f2a65a)', 'linear-gradient(135deg,#2f6fe8,#5ac8f2)', 'linear-gradient(135deg,#7b3fe4,#e45fb0)', 'linear-gradient(135deg,#1f8a5b,#8fd18b)', 'linear-gradient(135deg,#3a3a3a,#8a8a8a)', 'linear-gradient(135deg,#b7791f,#f6d365)'];
+const openModal = id => $(id).classList.add('on');
+const closeModal = el => { el.classList.remove('on'); stopStreams(); };
+$$('.backdrop').forEach(b => b.addEventListener('click', e => { if (e.target === b || e.target.closest('[data-close]')) closeModal(b); }));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { $$('.backdrop.on').forEach(closeModal); $$('.menu.on').forEach(m => m.classList.remove('on')); } });
+
+/* ============ tema ============ */
+(() => { try { const t = localStorage.getItem('ea-theme'); if (t) document.documentElement.dataset.theme = t } catch {} })();
+$('#themeBtn').onclick = () => {
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+  const cur = document.documentElement.dataset.theme || (dark ? 'dark' : 'light');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next; try { localStorage.setItem('ea-theme', next) } catch {}
+};
+
+/* ============ navegação ============ */
+const SECTIONS = {
+  criar: { title: 'Criar', items: [['inicio', 'Início', '⌂'], ['cena', 'Cena única', '▣']] },
+  avatar: { title: 'Gerenciar avatar', items: [['avatares', 'Avatares', '☺']] },
+  voz: { title: 'Voz', items: [['tts', 'Texto para fala', '✎'], ['vozes', 'Minhas vozes', '♫'], ['trocador', 'Trocador de voz', '⇄']] },
+  projetos: { title: 'Projetos', items: [['projetos', 'Todos os projetos', '▤']] }
+};
+function go(page) {
+  const sec = Object.keys(SECTIONS).find(k => SECTIONS[k].items.some(i => i[0] === page)) || 'criar';
+  state.section = sec; state.page = page; save(); renderNav();
+  $$('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + page));
+  if (page === 'avatares') renderAvatarList();
+  if (page === 'vozes') renderVoiceList();
+  if (page === 'projetos') renderProjects();
+  if (page === 'tts') renderTts();
+  if (page === 'trocador') renderVc();
+  if (page === 'inicio') renderHome();
+  if (page === 'cena') renderRecent();
+  window.scrollTo(0, 0);
+}
+function renderNav() {
+  $$('#rail .rail-btn[data-sec]').forEach(b => b.classList.toggle('on', b.dataset.sec === state.section));
+  const s = SECTIONS[state.section];
+  $('#sub').innerHTML = `<div class="sub-title">${s.title}</div>` + s.items.map(([id, label, ic]) =>
+    `<button class="sub-btn ${state.page === id ? 'on' : ''}" data-go="${id}"><span style="width:16px;text-align:center">${ic}</span>${label}</button>`).join('');
+}
+$('#rail').addEventListener('click', e => { const b = e.target.closest('[data-sec]'); if (b) go(b.dataset.sec === 'criar' ? 'cena' : SECTIONS[b.dataset.sec].items[0][0]); });
+document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) go(g.dataset.go); });
+
+/* ============ INÍCIO ============ */
+const IDEAS = [
+  ['Bastidores do dia', 'Hoje eu quero te mostrar um pouco dos bastidores do meu trabalho. [pausa 0,5s] Começa assim: '],
+  ['Dica rápida', 'Uma dica rápida que pouca gente usa: [pausa 0,5s] '],
+  ['Novidade / lançamento', 'Tenho uma novidade para te contar, e eu estou muito animado com isso. [pausa 0,5s] '],
+  ['Responder comentário', 'Recebi essa pergunta nos comentários e achei que valia um vídeo. [pausa 0,5s] '],
+  ['Mito ou verdade', 'Mito ou verdade? [pausa 1s] Vamos esclarecer isso de uma vez: '],
+  ['Chamada para ação', 'Se esse conteúdo te ajudou, salva esse post e manda para alguém que precisa ver. ']
+];
+function renderHome() {
+  const hasAvatar = state.avatars.length > 0, hasVoice = state.voices.length > 0;
+  const hasVideo = state.projects.some(p => state.avatars.some(a => a.id === p.avatarId));
+  const steps = [
+    ['Criar seu avatar', 'Grave 15 segundos olhando para a câmera. É isso que o lip sync usa para animar você.', hasAvatar, true, 'Gravar agora', () => openClone()],
+    ['Clonar sua voz', 'Leia em voz alta por cerca de 1 minuto. Sua voz clonada vai narrar os roteiros.', hasVoice, true, 'Gravar voz', () => openVoiceClone(null, 'ivc')],
+    ['Revisar o roteiro', 'Use “ouvir roteiro” para conferir ritmo e pausas antes de gerar.', hasVideo, hasAvatar && hasVoice, 'Abrir estúdio', () => go('cena')],
+    ['Gerar seu primeiro post', 'Escolha o formato (9:16, 4:5, 1:1) e gere o vídeo.', hasVideo, hasAvatar && hasVoice, 'Criar vídeo', () => go('cena')]
+  ];
+  const done = steps.filter(s => s[2]).length; $('#stepCount').textContent = `${done}/4`;
+  const cur = steps.findIndex(s => !s[2]);
+  $('#steps').innerHTML = steps.map((s, i) => `<div class="step ${s[2] ? 'done' : ''} ${i === cur ? 'cur' : ''}">
+    <div class="k"><span>${s[2] ? '✓' : '○'}</span><span>ETAPA ${i + 1}</span></div>
+    <div class="t">${s[0]}</div><div class="d">${s[1]}</div>
+    ${s[2] ? '<div class="lock">Concluída</div>' : s[3] ? `<button class="btn ghost sm" data-step="${i}">${s[4]}</button>` : `<div class="lock">Libera após as etapas 1 e 2</div>`}
+  </div>`).join('');
+  $$('[data-step]').forEach(b => b.onclick = () => steps[+b.dataset.step][5]());
+  $('#ideas').innerHTML = IDEAS.map((x, i) => `<button class="idea" data-idea="${i}" style="background:${gradients[i % gradients.length]}"><b>${x[0]}</b><span>Começar ›</span></button>`).join('');
+  $$('[data-idea]').forEach(b => b.onclick = () => { state.draft.script = IDEAS[+b.dataset.idea][1]; save(); go('cena'); syncComposer(); const t = $('#script'); t.focus(); t.setSelectionRange(t.value.length, t.value.length); });
+}
+
+/* ============ COMPOSITOR ============ */
+const D = state.draft;
+const getAvatar = id => state.avatars.find(a => a.id === id) || SAMPLE_AVATARS.find(a => a.id === id);
+const SAMPLE_AVATARS = [
+  { id: 's-ana', name: 'Ana (exemplo)', sample: true, g: 0 },
+  { id: 's-leo', name: 'Léo (exemplo)', sample: true, g: 1 },
+  { id: 's-bia', name: 'Bia (exemplo)', sample: true, g: 2 }
+];
+async function syncComposer() {
+  $('#script').value = D.script;
+  updateCounter();
+  const av = getAvatar(D.avatarId);
+  $('#avatarName').textContent = av ? av.name : 'Escolher avatar';
+  $('#avatarPill').classList.toggle('on', !!av);
+  const th = $('#thumb'); th.classList.toggle('land', D.fmt === '16:9');
+  if (av && !av.sample) { const u = await blobUrl(av.videoKey); th.innerHTML = !u ? '☺' : av.photoKey ? `<img src="${u}">` : `<video src="${u}" muted loop autoplay playsinline></video>`; }
+  else if (av) th.innerHTML = `<div style="width:100%;height:100%;display:grid;place-items:center;background:${gradients[av.g]};color:#fff;font-size:28px;font-weight:800">${av.name[0]}</div>`;
+  else th.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 19c1-3.2 3.6-4.6 6.5-4.6 1.4 0 2.7.3 3.8 1M18 14v6M15 17h6"/></svg>`;
+  $('#voiceName').textContent = D.voice ? voiceLabel(D.voice) : 'Voz';
+  $('#voicePill').classList.toggle('on', !!D.voice);
+  $('#fmtLabel').textContent = ({ '9:16': '▯ 9:16', '4:5': '▭ 4:5', '1:1': '◻ 1:1', '16:9': '▭ 16:9' })[D.fmt];
+  $('#resLabel').textContent = D.res;
+  $$('#fmtMenu button').forEach(b => b.classList.toggle('sel', b.dataset.fmt === D.fmt));
+  $$('#resMenu button').forEach(b => b.classList.toggle('sel', b.dataset.res === D.res));
+  $$('.seg-in button').forEach(b => b.classList.toggle('on', b.dataset.mode === D.mode));
+  $('#motionText').value = D.motion; $('#expressive').checked = D.expressive;
+  $('#motionBox').classList.toggle('on', D.mode === 'expressivo' || !!D.motion);
+  $('#motionPill').classList.toggle('on', $('#motionBox').classList.contains('on'));
+}
+function updateCounter() {
+  const s = $('#script').value, secs = estSeconds(s);
+  $('#counter').textContent = `${s.length} / 2500 · ~${fmtTime(secs)}`;
+  $('#estimate').textContent = s.trim() ? `Duração estimada ${fmtTime(secs)} · ${D.fmt} · ${D.res}` : '';
+}
+$('#script').addEventListener('input', e => { D.script = e.target.value; updateCounter(); save(); });
+$('#pauseBtn').onclick = () => {
+  const t = $('#script'), a = t.selectionStart, b = t.selectionEnd, ins = ' [pausa 0,5s] ';
+  t.value = t.value.slice(0, a) + ins + t.value.slice(b); t.focus(); t.setSelectionRange(a + ins.length, a + ins.length);
+  D.script = t.value; updateCounter(); save();
+};
+$('#loadTxt').onclick = () => $('#txtFile').click();
+$('#txtFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; D.script = (await f.text()).slice(0, 2500); save(); syncComposer(); e.target.value = ''; };
+$$('.seg-in button').forEach(b => b.onclick = () => { D.mode = b.dataset.mode; save(); syncComposer(); });
+$('#motionPill').onclick = () => { $('#motionBox').classList.toggle('on'); $('#motionPill').classList.toggle('on'); };
+$('#motionText').oninput = e => { D.motion = e.target.value; save(); };
+$('#expressive').onchange = e => { D.expressive = e.target.checked; save(); };
+function toggleMenu(m) { $$('.menu.on').forEach(x => x !== m && x.classList.remove('on')); m.classList.toggle('on'); }
+$('#fmtPill').onclick = e => { e.stopPropagation(); toggleMenu($('#fmtMenu')); };
+$('#resPill').onclick = e => { e.stopPropagation(); toggleMenu($('#resMenu')); };
+$('#fmtMenu').onclick = e => { const b = e.target.closest('[data-fmt]'); if (b) { D.fmt = b.dataset.fmt; save(); syncComposer(); } };
+$('#resMenu').onclick = e => { const b = e.target.closest('[data-res]'); if (b) { D.res = b.dataset.res; save(); syncComposer(); } };
+document.addEventListener('click', e => { if (!e.target.closest('.menu') && !e.target.closest('.pill')) $$('.menu.on').forEach(m => m.classList.remove('on')); });
+$('#thumb').onclick = $('#avatarPill').onclick = () => openAvatarPicker();
+$('#voicePill').onclick = () => openVoicePicker();
+
+/* ---- ouvir roteiro ---- */
+const cleanForSpeech = s => s.replace(/\[pausa [\d,\.]+s\]/g, ', ');
+let speaking = false;
+let audioEl; function playAudio(u, done) { stopAudio(); audioEl = new Audio(u); audioEl.onended = done; audioEl.play(); }
+function stopAudio() { if (audioEl) { audioEl.pause(); audioEl = null; } }
+
+/* ---- gerar ---- */
+$('#genBtn').onclick = () => {
+  const s = D.script.trim();
+  if (!getAvatar(D.avatarId)) { toast('Escolha um avatar antes de gerar.'); return openAvatarPicker(); }
+  if (!s) { $('#script').focus(); return toast('Escreva o roteiro do vídeo.'); }
+  if (!D.voice) { toast('Escolha a voz do vídeo.'); return openVoicePicker(); }
+  const p = { id: uid(), title: s.replace(/\[pausa [\d,\.]+s\]/g, '').trim().slice(0, 48) || 'Sem título', script: D.script, avatarId: D.avatarId, voice: D.voice,
+    fmt: D.fmt, res: D.res, mode: D.mode, motion: D.motion, secs: estSeconds(D.script), created: Date.now(), status: 'fila', progress: 0 };
+  state.projects.unshift(p); save(); renderRecent(); updateCredits();
+  toast('Vídeo enviado para a fila.'); runQueue();
+};
+
+/* Fila simulada: sem um motor de lip sync conectado, o status avança sozinho para mostrar o fluxo da interface. */
+function runQueue() {
+  clearInterval(runQueue._h);
+  runQueue._h = setInterval(() => {
+    let changed = false;
+    for (const p of state.projects) {
+      if (p.status === 'fila') { p.status = 'processando'; changed = true; break; }
+      if (p.status === 'processando') { p.progress = Math.min(100, p.progress + 12 + Math.random() * 10); if (p.progress >= 100) p.status = 'pronto'; changed = true; break; }
+    }
+    if (!changed) clearInterval(runQueue._h);
+    save(); refreshProjectViews();
+  }, 900);
+}
+function refreshProjectViews() { if (state.page === 'cena') renderRecent(); if (state.page === 'projetos') renderProjects(); if (state.page === 'inicio') renderHome(); }
+function updateCredits() {
+  const m = new Date(); const n = state.projects.filter(p => { const d = new Date(p.created); return d.getMonth() === m.getMonth() && d.getFullYear() === m.getFullYear(); }).length;
+  $('#creditChip').textContent = `⏱ ${n} ${n === 1 ? 'vídeo' : 'vídeos'} este mês`;
+}
+
+/* ============ PROJETOS ============ */
+const statusHtml = p => p.status === 'pronto' ? '<span class="status ready">● Pronto</span>' : p.status === 'processando' ? `<span class="status proc">● Processando ${Math.round(p.progress)}%</span>` : '<span class="status">● Na fila</span>';
+function projectCards(list) {
+  if (!list.length) return `<div class="empty"><div style="font-size:28px">🎬</div><b>Nenhum projeto ainda</b>Os vídeos que você gerar aparecem aqui.</div>`;
+  return `<div class="grid">${list.map(p => {
+    const av = getAvatar(p.avatarId);
+    return `<div class="card" data-proj="${p.id}">
+      <div class="media" style="background:${av && av.sample ? gradients[av.g] : 'var(--bg)'}">${av && !av.sample ? mediaTag(av) : `<span style="color:#fff;font-weight:800;font-size:22px">${esc(p.fmt)}</span>`}</div>
+      <button class="more" data-more="${p.id}">⋯</button>
+      <div class="menu" id="pm-${p.id}"><button data-open="${p.id}">Abrir</button><button data-dl-srt="${p.id}">Baixar legendas (.srt)</button><button data-dl-txt="${p.id}">Baixar roteiro (.txt)</button><button data-dup="${p.id}">Duplicar no estúdio</button><button data-del="${p.id}" style="color:#c0392b">Excluir</button></div>
+      <div class="body"><div class="title">${esc(p.title)}</div>
+        <div class="row" style="justify-content:space-between;margin-top:4px">${statusHtml(p)}<span class="sub2">${fmtTime(p.secs)} · ${p.res}</span></div>
+        ${p.status === 'processando' ? `<div class="bar"><i style="width:${p.progress}%"></i></div>` : ''}
+      </div></div>`;
+  }).join('')}</div>`;
+}
+const mediaTag = (a, extra = '') => a.photoKey ? `<img data-ikey="${a.photoKey}">` : `<video data-vkey="${a.videoKey}" muted playsinline ${extra}></video>`;
+async function hydrateVideos(root) { for (const v of root.querySelectorAll('video[data-vkey],img[data-ikey]')) { const u = await blobUrl(v.dataset.vkey || v.dataset.ikey); if (u) v.src = u; } }
+function renderRecent() { const el = $('#recent'); el.innerHTML = projectCards(state.projects.slice(0, 6)); hydrateVideos(el); }
+function renderProjects() { const el = $('#projectList'); el.innerHTML = projectCards(state.projects); hydrateVideos(el); }
+document.addEventListener('click', e => {
+  const t = e.target;
+  const more = t.closest('[data-more]'); if (more) { e.stopPropagation(); return toggleMenu($('#pm-' + more.dataset.more)); }
+  const id = (t.closest('[data-open],[data-dl-srt],[data-dl-txt],[data-dup],[data-del]') || {}).dataset;
+  if (id) {
+    const pid = id.open || id.dlSrt || id.dlTxt || id.dup || id.del; const p = state.projects.find(x => x.id === pid); if (!p) return;
+    if (id.open) openProject(p);
+    if (id.dlSrt) download(`${slug(p.title)}.srt`, toSrt(p.script), 'text/plain');
+    if (id.dlTxt) download(`${slug(p.title)}.txt`, p.script, 'text/plain');
+    if (id.dup) { Object.assign(D, { script: p.script, avatarId: p.avatarId, voice: p.voice, fmt: p.fmt, res: p.res, mode: p.mode, motion: p.motion || '' }); save(); go('cena'); syncComposer(); }
+    if (id.del && confirm('Excluir este projeto?')) { state.projects = state.projects.filter(x => x.id !== pid); save(); refreshProjectViews(); updateCredits(); }
+    return;
+  }
+  const card = t.closest('.card[data-proj]'); if (card && !t.closest('.menu')) { const p = state.projects.find(x => x.id === card.dataset.proj); if (p) openProject(p); }
+});
+function openProject(p) {
+  $('#projTitle').textContent = p.title; const av = getAvatar(p.avatarId);
+  $('#projBody').innerHTML = `<div class="player" id="projPlayer">${p.status === 'pronto' ? '' : statusHtml(p)}</div>
+    <div class="row" style="justify-content:space-between;margin-top:12px">
+      <div class="muted" style="font-size:12.5px">${esc(av ? av.name : '—')} · ${esc(voiceLabel(p.voice))} · ${p.fmt} · ${p.res} · ${fmtTime(p.secs)}</div>
+      <div class="row"><button class="btn ghost sm" data-dl-srt="${p.id}">Legendas .srt</button><button class="btn ghost sm" data-dl-txt="${p.id}">Roteiro .txt</button><button class="btn accent sm" id="dlVideo" ${p.status !== 'pronto' ? 'disabled' : ''}>Baixar vídeo</button></div>
+    </div>
+    <div class="label" style="margin-top:14px">Roteiro</div><div class="read-box" style="font-size:14px">${esc(p.script)}</div>
+    <div class="note">Protótipo de interface: a renderização (clone de voz + lip sync) ainda não está conectada. O botão “Baixar vídeo” vai entregar o MP4 quando o motor estiver ligado; legendas e roteiro já funcionam.</div>`;
+  if (p.status === 'pronto' && av && !av.sample && !av.photoKey) blobUrl(av.videoKey).then(u => { if (u) $('#projPlayer').innerHTML = `<video src="${u}" controls playsinline></video>`; });
+  else if (p.status === 'pronto') $('#projPlayer').innerHTML = `<div style="text-align:center"><div style="font-size:36px">▶</div>Prévia indisponível no protótipo</div>`;
+  $('#dlVideo').onclick = () => toast('O download do MP4 depende do motor de renderização (próxima etapa).');
+  openModal('#mProject');
+}
+const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'video';
+function download(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+function toSrt(script) {
+  // divide em blocos de ~7 palavras com tempo estimado pela mesma taxa da contagem
+  const tokens = script.split(/(\[pausa [\d,\.]+s\])/g); let t = 0, out = [], n = 1, buf = [];
+  const ts = x => { const ms = Math.round(x * 1000), h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, s = Math.floor(ms / 1000) % 60; return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(ms % 1000).padStart(3, '0')}`; };
+  const flush = () => { if (!buf.length) return; const d = buf.length / 2.5; out.push(`${n++}\n${ts(t)} --> ${ts(t + d)}\n${buf.join(' ')}\n`); t += d; buf = []; };
+  for (const tk of tokens) {
+    const m = tk.match(/^\[pausa ([\d,\.]+)s\]$/); if (m) { flush(); t += parseFloat(m[1].replace(',', '.')); continue; }
+    for (const w of tk.match(/\S+/g) || []) { buf.push(w); if (buf.length >= 7 || /[.!?]$/.test(w)) flush(); }
+  }
+  flush(); return out.join('\n');
+}
+
+/* ============ AVATARES ============ */
+let aTab = 'meus';
+function openAvatarPicker() { aTab = state.avatars.length ? 'meus' : 'meus'; renderAvatarPicker(); openModal('#mAvatar'); }
+$$('[data-atab]').forEach(b => b.onclick = () => { aTab = b.dataset.atab; renderAvatarPicker(); });
+async function renderAvatarPicker() {
+  $$('[data-atab]').forEach(b => b.classList.toggle('on', b.dataset.atab === aTab));
+  const body = $('#avatarPickBody');
+  if (aTab === 'meus' && !state.avatars.length) {
+    body.innerHTML = `<div style="text-align:center;margin:6px 0 16px"><h2 style="font-size:22px">Crie seu primeiro avatar</h2><p class="muted">Um avatar mantém seu rosto, jeito de falar e voz em todos os posts.</p></div>
+      <div class="choice"><button id="chReal"><div class="art" style="background:${gradients[0]}">🎥</div><b>Clonar você mesmo</b><div class="muted" style="font-size:12.5px">Grave 15 s pela webcam ou envie um vídeo seu falando.</div></button>
+      <button id="chPhoto"><div class="art" style="background:${gradients[2]}">🖼️</div><b>A partir de uma foto</b><div class="muted" style="font-size:12.5px">Envie uma foto sua de frente; o lip sync anima a boca.</div></button></div>
+      <div style="text-align:center;margin-top:14px"><button class="linkish" id="chSample">Testar com um modelo de exemplo →</button></div>`;
+    $('#chReal').onclick = () => { closeModal($('#mAvatar')); openClone('video'); };
+    $('#chPhoto').onclick = () => { closeModal($('#mAvatar')); openClone('foto'); };
+    $('#chSample').onclick = () => { aTab = 'modelo'; renderAvatarPicker(); };
+    return;
+  }
+  const list = aTab === 'meus' ? state.avatars : SAMPLE_AVATARS;
+  body.innerHTML = `<div class="pick-grid">${list.map(a => `<button class="pick ${D.avatarId === a.id ? 'sel' : ''}" data-pick="${a.id}"><div class="ph" style="background:${a.sample ? gradients[a.g] : '#222'}">${a.sample ? a.name[0] : mediaTag(a, 'loop autoplay')}</div><div class="nm">${esc(a.name)}</div></button>`).join('')}
+    ${aTab === 'meus' ? `<button class="pick" id="pickNew"><div class="ph" style="background:var(--bg);color:var(--muted)">＋</div><div class="nm">Novo avatar</div></button>` : ''}</div>
+    ${aTab === 'modelo' ? '<div class="note">Modelos de exemplo servem só para testar a tela. Para seus posts, crie o avatar com o seu rosto.</div>' : ''}`;
+  hydrateVideos(body);
+  $$('[data-pick]').forEach(b => b.onclick = () => {
+    D.avatarId = b.dataset.pick; const av = getAvatar(D.avatarId);
+    if (av && av.voiceId && !D.voice) D.voice = { type: 'clone', id: av.voiceId };
+    save(); syncComposer(); closeModal($('#mAvatar'));
+  });
+  const n = $('#pickNew'); if (n) n.onclick = () => { closeModal($('#mAvatar')); openClone('video'); };
+}
+async function renderAvatarList() {
+  const el = $('#avatarList');
+  if (!state.avatars.length) { el.innerHTML = `<div class="empty"><div style="font-size:28px">🙂</div><b>Você ainda não tem avatar</b>Grave 15 segundos para criar o seu.<div style="margin-top:12px"><button class="btn accent sm" onclick="openClone('video')">Criar avatar</button></div></div>`; return; }
+  el.innerHTML = `<div class="grid">${state.avatars.map(a => `<div class="card"><div class="media" style="aspect-ratio:3/4">${mediaTag(a, 'loop autoplay')}</div>
+    <button class="more" data-amore="${a.id}">⋯</button><div class="menu" id="am-${a.id}"><button data-ause="${a.id}">Usar no estúdio</button><button data-avoice="${a.id}">Definir voz principal</button><button data-adel="${a.id}" style="color:#c0392b">Excluir avatar</button></div>
+    <div class="body"><div class="title">${esc(a.name)}</div><div class="sub2">Voz principal: ${a.voiceId ? esc((state.voices.find(v => v.id === a.voiceId) || {}).name || '—') : 'nenhuma'}</div></div></div>`).join('')}</div>`;
+  hydrateVideos(el);
+  for (const img of el.querySelectorAll('img[data-ikey]')) { const u = await blobUrl(img.dataset.ikey); if (u) img.src = u; }
+}
+document.addEventListener('click', e => {
+  const t = e.target, m = t.closest('[data-amore]'); if (m) { e.stopPropagation(); return toggleMenu($('#am-' + m.dataset.amore)); }
+  const u = t.closest('[data-ause]'); if (u) { D.avatarId = u.dataset.ause; const a = getAvatar(D.avatarId); if (a.voiceId) D.voice = { type: 'clone', id: a.voiceId }; save(); go('cena'); syncComposer(); }
+  const v = t.closest('[data-avoice]'); if (v) { primaryFor = v.dataset.avoice; openVoicePicker(); }
+  const d = t.closest('[data-adel]'); if (d && confirm('Excluir este avatar? Os projetos antigos perdem a prévia.')) { const a = getAvatar(d.dataset.adel); db.del(a.videoKey); if (a.photoKey) db.del(a.photoKey); state.avatars = state.avatars.filter(x => x.id !== a.id); if (D.avatarId === a.id) D.avatarId = null; save(); renderAvatarList(); syncComposer(); }
+});
+$('#newAvatarBtn').onclick = () => openClone('video');
+
+/* ---- criação do avatar: gravar 15 s ou enviar arquivo ---- */
+let streams = [], recorder;
+function stopStreams() { streams.forEach(s => s.getTracks().forEach(t => t.stop())); streams = []; if (recorder && recorder.state === 'recording') recorder.stop(); clearInterval(window._recTimer); }
+function openClone(kind = 'video') {
+  $('#cloneTitle').textContent = kind === 'foto' ? 'Avatar a partir de foto' : 'Criar seu avatar';
+  const body = $('#cloneBody');
+  if (kind === 'foto') {
+    body.innerHTML = `<p class="muted">Envie uma foto nítida, de frente, com o rosto bem iluminado e a boca visível.</p>
+      <div class="field"><input type="file" id="photoFile" accept="image/*"></div><div id="photoPrev"></div>${consentAndName()}`;
+    let file;
+    $('#photoFile').onchange = e => { file = e.target.files[0]; if (file) $('#photoPrev').innerHTML = `<img src="${URL.createObjectURL(file)}" style="max-height:220px;border-radius:12px">`; };
+    $('#saveAvatar').onclick = async () => { if (!file) return toast('Escolha uma foto.'); if (!validConsent()) return; await saveAvatar(file, file); };
+  } else {
+    body.innerHTML = `<div class="tabs" style="margin-top:-4px"><button class="on" data-ck="rec">Gravar agora</button><button data-ck="up">Enviar vídeo</button></div><div id="ckBody"></div>`;
+    const tab = k => { $$('[data-ck]').forEach(b => b.classList.toggle('on', b.dataset.ck === k)); stopStreams(); k === 'rec' ? recUI() : upUI(); };
+    $$('[data-ck]').forEach(b => b.onclick = () => tab(b.dataset.ck)); tab('rec');
+  }
+  openModal('#mClone');
+}
+const consentAndName = () => `<div class="field"><label>Nome do avatar</label><input id="avName" placeholder="ex.: Eu — escritório" maxlength="40"></div>
+  <label class="switch" style="align-items:flex-start"><input type="checkbox" id="consent"> <span>Confirmo que sou a pessoa deste vídeo/foto (ou tenho autorização expressa dela) e que vou usar o avatar apenas para meus próprios conteúdos.</span></label>
+  <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn accent" id="saveAvatar">Salvar avatar</button></div>`;
+function validConsent() { if (!$('#consent').checked) { toast('Marque a confirmação de consentimento.'); return false; } return true; }
+function recUI() {
+  $('#ckBody').innerHTML = `<div class="rec-stage" id="stage"><span class="rec-dot" id="recDot">Gravando 0 s</span><div id="stageMsg" style="text-align:center;padding:20px">Clique em “Ligar câmera” para começar.</div></div>
+    <div class="tips"><div>💡 Luz de frente, sem sombra forte</div><div>👀 Olhe para a lente e fale naturalmente</div><div>🔇 Ambiente silencioso, sem cortes</div></div>
+    <div class="row"><button class="btn ghost sm" id="camOn">Ligar câmera</button><button class="btn accent sm" id="recBtn" disabled>● Gravar 15 s</button><span class="muted" style="font-size:12px" id="recInfo"></span></div>
+    <div id="afterRec" style="display:none">${consentAndName()}</div>`;
+  let blob;
+  $('#camOn').onclick = async () => {
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true }); streams.push(s);
+      $('#stage').innerHTML = `<span class="rec-dot" id="recDot">Gravando 0 s</span><video id="live" autoplay muted playsinline></video>`; $('#live').srcObject = s; $('#recBtn').disabled = false;
+    } catch (err) { $('#stageMsg').textContent = 'Não consegui acessar câmera/microfone. Verifique a permissão do navegador.'; }
+  };
+  $('#recBtn').onclick = () => {
+    const s = streams[0]; if (!s) return; const chunks = []; recorder = new MediaRecorder(s); let sec = 0;
+    recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+    recorder.onstop = () => { blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' }); $('#recDot').classList.remove('on'); streams.forEach(x => x.getTracks().forEach(t => t.stop())); streams = [];
+      $('#stage').innerHTML = `<video src="${URL.createObjectURL(blob)}" controls playsinline></video>`; $('#recInfo').textContent = `Gravado: ${sec} s`; $('#recBtn').textContent = '↺ Regravar'; $('#recBtn').disabled = true; $('#camOn').textContent = 'Ligar câmera de novo'; $('#afterRec').style.display = 'block';
+      $('#saveAvatar').onclick = async () => { if (!validConsent()) return; await saveAvatar(blob); }; };
+    recorder.start(); $('#recDot').classList.add('on'); $('#recBtn').disabled = true;
+    window._recTimer = setInterval(() => { sec++; $('#recDot').textContent = `Gravando ${sec} s`; if (sec >= 15) { clearInterval(window._recTimer); recorder.stop(); } }, 1000);
+  };
+}
+function upUI() {
+  $('#ckBody').innerHTML = `<p class="muted">Envie um vídeo seu falando de frente, de 15 s a 2 min, sem cortes. MP4, MOV ou WEBM.</p>
+    <div class="field"><input type="file" id="vidFile" accept="video/*"></div><div id="vidPrev"></div>${consentAndName()}`;
+  let file;
+  $('#vidFile').onchange = e => { file = e.target.files[0]; if (file) $('#vidPrev').innerHTML = `<video src="${URL.createObjectURL(file)}" controls style="width:100%;max-height:260px;border-radius:12px;background:#000"></video>`; };
+  $('#saveAvatar').onclick = async () => { if (!file) return toast('Escolha um vídeo.'); if (!validConsent()) return; await saveAvatar(file); };
+}
+async function saveAvatar(media, photo) {
+  const id = uid(), name = ($('#avName').value || '').trim() || `Meu avatar ${state.avatars.length + 1}`;
+  const a = { id, name, videoKey: 'av-' + id, created: Date.now(), consent: true };
+  await db.put(a.videoKey, media); if (photo) { a.photoKey = a.videoKey; }
+  state.avatars.push(a); D.avatarId = id; save(); stopStreams(); closeModal($('#mClone'));
+  toast('Avatar salvo! Agora clone sua voz para ele.'); syncComposer(); if (state.page === 'avatares') renderAvatarList(); if (state.page === 'inicio') renderHome();
+  if (!state.voices.length) setTimeout(() => openVoiceClone(id, 'ivc'), 500);
+}
+
+/* ============ VOZES (clonagem, criação por descrição, texto para fala, trocador) ============ */
+/* Motor: ponto único para ligar os serviços reais. Hoje só a prévia do navegador funciona. */
+const engine = {
+  connected: false,
+  async cloneVoice(/* amostras, rótulos */) { return null; },
+  async tts(/* texto, voz, modelo, ajustes */) { return null; },       // deve devolver um Blob de áudio
+  async changeVoice(/* áudio, voz, ajustes */) { return null; },
+  async lipSync(/* avatar, áudio, formato, resolução */) { return null; } // deve devolver um Blob de vídeo
+};
+const DEFAULT_SET = { speed: 1, stability: 0.5, similarity: 0.75, style: 0, boost: true };
+state.ttsHistory ||= []; state.vcHistory ||= [];
+D.settings ||= { ...DEFAULT_SET };
+let vTab = 'minhas', primaryFor = null, voiceTarget = 'composer';
+const shortVoice = n => n.replace(/^(Microsoft|Google)\s+/i, '').replace(/\s*[-–(].*$/, '').trim() || n;
+const myVoice = ref => ref && ref.type === 'clone' ? state.voices.find(x => x.id === ref.id) : null;
+const voiceLabel = v => !v ? '—' : v.type === 'clone' ? ((myVoice(v) || {}).name || 'Minha voz') : (v.name || 'Voz do sistema');
+const voiceColor = name => gradients[[...String(name)].reduce((a, c) => a + c.charCodeAt(0), 0) % gradients.length];
+function sysVoices() { return 'speechSynthesis' in window ? speechSynthesis.getVoices().filter(v => /^pt/i.test(v.lang)) : []; }
+if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => { if ($('#mVoice').classList.contains('on')) renderVoicePicker(); if (state.page === 'vozes') renderVoiceList(); };
+
+/* fala de prévia: voz do navegador (sistema ou voz criada por descrição) ou amostra gravada (clone) */
+function speak(text, ref, set = DEFAULT_SET, onend = () => {}) {
+  speechSynthesis.cancel(); stopAudio();
+  const mine = myVoice(ref);
+  if (mine && mine.kind === 'clone') { blobUrl(mine.sampleKeys[0]).then(u => u ? playAudio(u, onend) : onend()); return 'sample'; }
+  const u = new SpeechSynthesisUtterance(cleanForSpeech(text)); u.lang = 'pt-BR'; u.rate = set.speed || 1;
+  const uri = mine ? mine.sysVoice : ref && ref.id; const sv = speechSynthesis.getVoices().find(v => v.voiceURI === uri); if (sv) u.voice = sv;
+  if (mine && mine.pitch) u.pitch = mine.pitch;
+  u.onend = onend; u.onerror = onend; speechSynthesis.speak(u); return 'synth';
+}
+function stopSpeak() { if ('speechSynthesis' in window) speechSynthesis.cancel(); stopAudio(); }
+
+/* ---- botão ▶ do compositor ---- */
+$('#playBtn').onclick = () => {
+  const s = $('#script').value.trim();
+  if (speaking) { stopSpeak(); speaking = false; $('#playBtn').textContent = '▶'; return; }
+  if (!s) return toast('Escreva o roteiro primeiro.');
+  if (!D.voice) return toast('Escolha uma voz para ouvir o roteiro.');
+  const how = speak(s, D.voice, (myVoice(D.voice) || {}).settings || D.settings, () => { speaking = false; $('#playBtn').textContent = '▶'; });
+  if (how === 'sample') toast('A leitura com voz clonada depende do motor de voz; tocando a amostra gravada.');
+  speaking = true; $('#playBtn').textContent = '■';
+};
+
+/* ---- seletor de voz (modal usado pelo compositor, pelo texto para fala e pelo trocador) ---- */
+function openVoicePicker(target = 'composer') { voiceTarget = target; vTab = state.voices.length ? 'minhas' : 'sistema'; $('#rate').value = currentRef().set.speed || 1; renderVoicePicker(); openModal('#mVoice'); }
+function currentRef() { return voiceTarget === 'tts' ? { ref: state.tts.voice, set: state.tts.settings } : voiceTarget === 'vc' ? { ref: state.vc.voice, set: DEFAULT_SET } : { ref: D.voice, set: D.settings }; }
+$$('[data-vtab]').forEach(b => b.onclick = () => { vTab = b.dataset.vtab; renderVoicePicker(); });
+$('#rate').oninput = e => { currentRef().set.speed = +e.target.value; save(); if (voiceTarget === 'tts') renderSliders(); };
+$('#voiceCloneFromPicker').onclick = () => { closeModal($('#mVoice')); openVoiceClone(); };
+const voiceRowHtml = (v, sel, attrPlay, attrUse) => `<div class="voice-row ${sel ? 'sel' : ''}"><button class="icon-btn" ${attrPlay}>▶</button><span class="vs-av" style="background:${voiceColor(v.name)}">${esc(v.name[0])}</span><div class="nm">${esc(v.name)}<small>${v.kind === 'design' ? 'Criada por descrição' : v.kind === 'clone' ? 'Clone instantâneo' : esc(v.lang) + ' · voz do navegador'}${v.labels && v.labels.desc ? ' · ' + esc(v.labels.desc) : ''}</small></div><button class="btn sm" ${attrUse}>Usar</button></div>`;
+function renderVoicePicker() {
+  $$('[data-vtab]').forEach(b => b.classList.toggle('on', b.dataset.vtab === vTab));
+  const body = $('#voicePickBody'); const cur = primaryFor ? null : currentRef().ref;
+  if (vTab === 'minhas') {
+    body.innerHTML = state.voices.length ? state.voices.map(v => voiceRowHtml(v, cur && cur.type === 'clone' && cur.id === v.id, `data-vplay="${v.id}"`, `data-vsel-clone="${v.id}"`)).join('')
+      : `<div class="empty" style="padding:24px"><b>Nenhuma voz sua ainda</b>Clone sua voz em 1 minuto ou crie uma por descrição.</div>`;
+  } else {
+    const list = sysVoices();
+    body.innerHTML = list.length ? list.map(v => voiceRowHtml({ name: shortVoice(v.name), lang: v.lang }, cur && cur.type === 'sys' && cur.id === v.voiceURI, `data-splay="${esc(v.voiceURI)}"`, `data-vsel-sys="${esc(v.voiceURI)}"`)).join('')
+      : `<div class="empty" style="padding:24px"><b>Nenhuma voz pt-BR no navegador</b>Use o Chrome ou o Edge para ouvir prévias.</div>`;
+  }
+  body.querySelectorAll('[data-vplay]').forEach(b => b.onclick = () => speak('Olá! Esta é uma prévia da minha voz para os seus posts.', { type: 'clone', id: b.dataset.vplay }, currentRef().set));
+  body.querySelectorAll('[data-splay]').forEach(b => b.onclick = () => speak('Olá! Esta é uma prévia da minha voz para os seus posts.', { type: 'sys', id: b.dataset.splay }, currentRef().set));
+  body.querySelectorAll('[data-vsel-clone]').forEach(b => b.onclick = () => pickVoice({ type: 'clone', id: b.dataset.vselClone }));
+  body.querySelectorAll('[data-vsel-sys]').forEach(b => b.onclick = () => { const sv = speechSynthesis.getVoices().find(x => x.voiceURI === b.dataset.vselSys); pickVoice({ type: 'sys', id: b.dataset.vselSys, name: sv ? shortVoice(sv.name) : 'Voz do sistema' }); });
+}
+function pickVoice(v) {
+  if (primaryFor) { const a = getAvatar(primaryFor); if (v.type === 'clone') a.voiceId = v.id; else toast('A voz principal do avatar precisa ser uma voz sua.'); primaryFor = null; save(); renderAvatarList(); }
+  else if (voiceTarget === 'tts') { state.tts.voice = v; const mv = myVoice(v); if (mv && mv.settings) state.tts.settings = { ...mv.settings }; save(); renderTts(); }
+  else if (voiceTarget === 'vc') { state.vc.voice = v; save(); renderVc(); }
+  else { D.voice = v; save(); syncComposer(); }
+  closeModal($('#mVoice'));
+}
+
+/* ---- adicionar voz: clone instantâneo, criar por descrição, clone profissional ---- */
+const READ_TEXTS = [
+  'Oi, tudo bem? Eu estou gravando esta amostra para criar a minha voz digital. Vou falar com calma, no meu ritmo normal, como se estivesse conversando com um amigo.',
+  'Gosto de contar histórias, explicar ideias e compartilhar o que aprendo no dia a dia. Às vezes eu falo mais animado, às vezes mais sério, depende do assunto.',
+  'Será que a minha voz vai ficar parecida? Vamos descobrir juntos! Se gostou, salva esse post e manda para alguém que precisa ver.'
+];
+function openVoiceClone(forAvatar, start = null) {
+  $('#vcTitle').textContent = 'Adicionar voz';
+  const body = $('#voiceCloneBody');
+  body.innerHTML = `<div class="choice" style="grid-template-columns:repeat(3,1fr)">
+    <button data-vmode="ivc"><div class="art" style="background:${gradients[0]};height:80px">🎙️</div><b>Clone instantâneo</b><div class="muted" style="font-size:12.5px">Grave ou envie ~1 minuto da sua voz. Pronto na hora.</div></button>
+    <button data-vmode="design"><div class="art" style="background:${gradients[2]};height:80px">✨</div><b>Criar por descrição</b><div class="muted" style="font-size:12.5px">Descreva a voz que você quer e escolha entre 3 opções.</div></button>
+    <button data-vmode="pvc"><div class="art" style="background:${gradients[4]};height:80px">🎚️</div><b>Clone profissional</b><div class="muted" style="font-size:12.5px">Treino com 30 min+ de áudio, máxima fidelidade. Em breve.</div></button></div>`;
+  body.querySelectorAll('[data-vmode]').forEach(b => b.onclick = () => b.dataset.vmode === 'ivc' ? ivcUI(forAvatar) : b.dataset.vmode === 'design' ? designUI() : toast('O clone profissional depende do motor de voz conectado (próxima etapa).'));
+  openModal('#mVoiceClone');
+  if (start === 'ivc') ivcUI(forAvatar);
+}
+function ivcUI(forAvatar) {
+  $('#vcTitle').textContent = 'Clone instantâneo de voz';
+  const samples = []; let readIdx = 0;
+  $('#voiceCloneBody').innerHTML = `<div class="tabs" style="margin-top:-4px"><button class="on" data-vk="rec">Gravar</button><button data-vk="up">Enviar arquivos</button></div><div id="vkBody"></div>
+    <div class="label" style="margin-top:14px">Amostras</div><div class="samples" id="sampleList"></div>
+    <div class="meter"><i id="sampleMeter" style="width:0"></i></div><div class="muted" style="font-size:12px" id="sampleTotal">0 s de áudio · recomendado: 1 minuto ou mais</div>
+    <div class="field"><label>Nome da voz</label><input id="vName" placeholder="ex.: Minha voz — animada" maxlength="40"></div>
+    <div class="labels"><div class="field"><label>Idioma</label><select id="lbLang"><option>Português (Brasil)</option><option>Português (Portugal)</option><option>Espanhol</option><option>Inglês</option></select></div>
+      <div class="field"><label>Tom</label><select id="lbTone"><option>Conversa</option><option>Narração</option><option>Animado</option><option>Sério</option></select></div>
+      <div class="field"><label>Descrição curta</label><input id="lbDesc" placeholder="ex.: calma, próxima" maxlength="40"></div></div>
+    <label class="switch"><input type="checkbox" id="vNoise" checked> Remover ruído de fundo das amostras</label><br>
+    <label class="switch" style="align-items:flex-start"><input type="checkbox" id="vConsent"> <span>Esta é a minha própria voz (ou tenho autorização expressa do dono dela) e vou usá-la só nos meus conteúdos.</span></label>
+    <div class="row" style="justify-content:space-between;margin-top:14px"><button class="linkish" id="vBack">← voltar</button><button class="btn accent" id="saveVoice" disabled>Salvar voz</button></div>`;
+  $('#vBack').onclick = () => { stopStreams(); openVoiceClone(forAvatar); };
+  const refresh = () => {
+    const total = Math.round(samples.reduce((a, s) => a + (s.secs || 0), 0));
+    $('#sampleList').innerHTML = samples.length ? samples.map((s, i) => `<div class="hist"><audio controls src="${s.url}" style="height:32px;flex:1"></audio><small class="muted">${s.secs ? s.secs + ' s' : ''}</small><button class="icon-btn" data-srm="${i}">✕</button></div>`).join('') : '<div class="muted" style="font-size:12.5px;margin:6px 0">Nenhuma amostra ainda.</div>';
+    $('#sampleList').querySelectorAll('[data-srm]').forEach(b => b.onclick = () => { samples.splice(+b.dataset.srm, 1); refresh(); });
+    $('#sampleMeter').style.width = Math.min(100, total / 60 * 100) + '%';
+    $('#sampleTotal').textContent = `${total} s de áudio · ${total >= 60 ? 'ótimo ✓' : total >= 20 ? 'já dá para testar; 1 minuto fica melhor' : 'recomendado: 1 minuto ou mais'}`;
+    $('#saveVoice').disabled = !samples.length;
+  };
+  const durationOf = url => new Promise(r => { const a = new Audio(); a.preload = 'metadata'; a.onloadedmetadata = () => r(isFinite(a.duration) ? Math.round(a.duration) : 0); a.onerror = () => r(0); a.src = url; });
+  const tab = k => {
+    $$('[data-vk]').forEach(b => b.classList.toggle('on', b.dataset.vk === k)); stopStreams();
+    if (k === 'rec') {
+      $('#vkBody').innerHTML = `<p class="muted" style="margin-top:0">Leia em voz alta, no seu tom normal. Microfone a um palmo da boca, sem eco e sem barulho. Cada leitura vira uma amostra.</p>
+        <div class="read-box" id="readBox">${READ_TEXTS[readIdx]}</div><div class="row" style="margin-top:10px"><button class="btn accent sm" id="vRec">● Gravar</button><button class="linkish" id="nextText">outro texto</button><span class="muted" id="vInfo" style="font-size:12px"></span></div>`;
+      $('#nextText').onclick = () => { readIdx = (readIdx + 1) % READ_TEXTS.length; $('#readBox').textContent = READ_TEXTS[readIdx]; };
+      $('#vRec').onclick = async () => {
+        if (recorder && recorder.state === 'recording') return recorder.stop();
+        try {
+          const s = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: $('#vNoise').checked } }); streams.push(s);
+          const chunks = []; recorder = new MediaRecorder(s); let sec = 0;
+          recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+          recorder.onstop = () => { clearInterval(window._recTimer); streams.forEach(x => x.getTracks().forEach(t => t.stop())); streams = []; const b = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+            samples.push({ blob: b, url: URL.createObjectURL(b), secs: sec }); $('#vRec').textContent = '● Gravar outra'; $('#vInfo').textContent = ''; readIdx = (readIdx + 1) % READ_TEXTS.length; $('#readBox').textContent = READ_TEXTS[readIdx]; refresh(); };
+          recorder.start(); $('#vRec').textContent = '■ Parar';
+          window._recTimer = setInterval(() => { sec++; $('#vInfo').textContent = `Gravando… ${sec} s`; if (sec >= 180) recorder.stop(); }, 1000);
+        } catch { toast('Não consegui acessar o microfone.'); }
+      };
+    } else {
+      $('#vkBody').innerHTML = `<div class="drop" id="aDrop"><div style="font-size:24px">⬆</div><b>Clique ou arraste áudios aqui</b><span class="muted" style="font-size:12px">MP3, WAV, M4A · só a sua voz, sem música</span><input type="file" id="aFile" accept="audio/*" multiple hidden></div>`;
+      const add = async files => { for (const f of files) { const url = URL.createObjectURL(f); samples.push({ blob: f, url, secs: await durationOf(url) }); } refresh(); };
+      $('#aDrop').onclick = () => $('#aFile').click();
+      $('#aFile').onchange = e => add([...e.target.files]);
+      $('#aDrop').ondragover = e => { e.preventDefault(); $('#aDrop').classList.add('over'); };
+      $('#aDrop').ondragleave = () => $('#aDrop').classList.remove('over');
+      $('#aDrop').ondrop = e => { e.preventDefault(); $('#aDrop').classList.remove('over'); add([...e.dataTransfer.files].filter(f => f.type.startsWith('audio'))); };
+    }
+  };
+  $$('[data-vk]').forEach(b => b.onclick = () => tab(b.dataset.vk)); tab('rec'); refresh();
+  $('#saveVoice').onclick = async () => {
+    if (!$('#vConsent').checked) return toast('Marque a confirmação de que a voz é sua.');
+    const id = uid(), keys = samples.map((_, i) => `vo-${id}-${i}`);
+    for (let i = 0; i < samples.length; i++) await db.put(keys[i], samples[i].blob);
+    const v = { id, kind: 'clone', name: ($('#vName').value || '').trim() || `Minha voz ${state.voices.length + 1}`, sampleKeys: keys, secs: samples.reduce((a, s) => a + (s.secs || 0), 0),
+      labels: { lang: $('#lbLang').value, tone: $('#lbTone').value, desc: $('#lbDesc').value.trim() }, noise: $('#vNoise').checked, settings: { ...DEFAULT_SET }, created: Date.now() };
+    state.voices.push(v); finishVoice(v, forAvatar);
+  };
+}
+function designUI() {
+  $('#vcTitle').textContent = 'Criar voz por descrição';
+  $('#voiceCloneBody').innerHTML = `<div class="field"><label>Descreva a voz</label><textarea id="dsPrompt" class="sel" style="min-height:80px;resize:vertical" placeholder="ex.: Português do Brasil. Mulher, 30 anos. Tom caloroso e confiante, ritmo tranquilo, ótima para posts de dicas."></textarea></div>
+    <div class="field"><label>Texto da prévia</label><textarea id="dsText" class="sel" style="min-height:60px;resize:vertical">Oi! Hoje eu vou te mostrar uma dica rápida que vai mudar o jeito que você grava seus vídeos.</textarea></div>
+    <div class="row" style="justify-content:space-between"><button class="linkish" id="vBack">← voltar</button><button class="btn accent sm" id="dsGen">Gerar 3 opções</button></div>
+    <div id="dsOpts"></div>`;
+  $('#vBack').onclick = () => openVoiceClone();
+  $('#dsGen').onclick = () => {
+    const prompt = $('#dsPrompt').value.trim(); if (!prompt) return toast('Descreva a voz que você quer.');
+    const list = sysVoices(); if (!list.length) return toast('Seu navegador não tem vozes pt-BR para a prévia. Use Chrome ou Edge.');
+    const fem = /mulher|feminin/i.test(prompt), mas = /homem|masculin/i.test(prompt);
+    const ordered = [...list].sort((a, b) => { const sc = v => (fem && /maria|francisca|female|feminin|luciana|thalita/i.test(v.name)) || (mas && /daniel|antonio|male|masculin/i.test(v.name)) ? -1 : 0; return sc(a) - sc(b); });
+    const base = /grave|profund/i.test(prompt) ? 0.85 : /agud|jovem|crian/i.test(prompt) ? 1.15 : 1;
+    const opts = [0, 1, 2].map(i => ({ sysVoice: ordered[i % ordered.length].voiceURI, pitch: +(base + (i - 1) * 0.1).toFixed(2) }));
+    let chosen = null;
+    $('#dsOpts').innerHTML = `<div class="design-opts">${opts.map((o, i) => `<button data-ds="${i}"><b>Opção ${i + 1}</b><div class="muted" style="font-size:12px">▶ ouvir</div></button>`).join('')}</div>
+      <div class="field"><label>Nome da voz</label><input id="dsName" placeholder="ex.: Narradora calma" maxlength="40"></div>
+      <div class="row" style="justify-content:flex-end"><button class="btn accent" id="dsSave" disabled>Salvar voz escolhida</button></div>
+      <div class="note">Prévia feita com as vozes do navegador. Com o motor de voz conectado, as 3 opções são geradas a partir da sua descrição.</div>`;
+    $$('[data-ds]').forEach(b => b.onclick = () => { chosen = opts[+b.dataset.ds]; $$('[data-ds]').forEach(x => x.classList.toggle('sel', x === b)); $('#dsSave').disabled = false;
+      const tmp = { id: '_tmp', kind: 'design', ...chosen }; state.voices.push(tmp); speak($('#dsText').value, { type: 'clone', id: '_tmp' }); state.voices = state.voices.filter(x => x !== tmp); });
+    $('#dsSave').onclick = () => { const v = { id: uid(), kind: 'design', name: ($('#dsName').value || '').trim() || `Voz criada ${state.voices.length + 1}`, ...chosen, labels: { desc: prompt.slice(0, 40) }, prompt, settings: { ...DEFAULT_SET }, created: Date.now() }; state.voices.push(v); finishVoice(v); };
+  };
+}
+function finishVoice(v, forAvatar) {
+  const target = forAvatar ? getAvatar(forAvatar) : (D.avatarId && getAvatar(D.avatarId));
+  if (v.kind === 'clone' && target && !target.sample && !target.voiceId) target.voiceId = v.id;
+  D.voice = { type: 'clone', id: v.id }; if (!state.tts.voice) state.tts.voice = { type: 'clone', id: v.id };
+  save(); stopStreams(); closeModal($('#mVoiceClone'));
+  toast(v.kind === 'clone' && target && target.voiceId === v.id ? 'Voz salva e ligada ao seu avatar.' : 'Voz salva.');
+  syncComposer(); refreshVoiceViews(); if (state.page === 'inicio') renderHome();
+}
+function refreshVoiceViews() { if (state.page === 'vozes') renderVoiceList(); if (state.page === 'tts') renderTts(); if (state.page === 'trocador') renderVc(); }
+
+/* ---- página Minhas vozes ---- */
+let vlTab = 'minhas';
+$$('[data-vltab]').forEach(b => b.onclick = () => { vlTab = b.dataset.vltab; renderVoiceList(); });
+$('#voiceSearch').oninput = () => renderVoiceList(); $('#voiceFilter').onchange = () => renderVoiceList();
+function renderVoiceList() {
+  $$('[data-vltab]').forEach(b => b.classList.toggle('on', b.dataset.vltab === vlTab));
+  $('#voiceFilter').style.display = vlTab === 'minhas' ? '' : 'none';
+  const q = $('#voiceSearch').value.trim().toLowerCase(), kind = $('#voiceFilter').value, el = $('#voiceList');
+  if (vlTab === 'explorar') {
+    const list = sysVoices().filter(v => !q || v.name.toLowerCase().includes(q));
+    el.innerHTML = list.length ? list.map(v => `<div class="voice-row" style="background:var(--panel)"><button class="icon-btn" data-xplay="${esc(v.voiceURI)}">▶</button><span class="vs-av" style="background:${voiceColor(v.name)}">${esc(shortVoice(v.name)[0])}</span><div class="nm"><b>${esc(shortVoice(v.name))}</b><small>${esc(v.lang)} · voz do navegador (só para prévia)</small></div><button class="btn ghost sm" data-xuse="${esc(v.voiceURI)}">Usar no texto para fala</button></div>`).join('')
+      : `<div class="empty"><b>Nenhuma voz encontrada</b>Use o Chrome ou o Edge para ter vozes pt-BR.</div>`;
+    el.querySelectorAll('[data-xplay]').forEach(b => b.onclick = () => speak('Olá! Esta é uma prévia desta voz.', { type: 'sys', id: b.dataset.xplay }));
+    el.querySelectorAll('[data-xuse]').forEach(b => b.onclick = () => { const sv = speechSynthesis.getVoices().find(x => x.voiceURI === b.dataset.xuse); state.tts.voice = { type: 'sys', id: b.dataset.xuse, name: sv ? shortVoice(sv.name) : 'Voz' }; save(); go('tts'); });
+    return;
+  }
+  const list = state.voices.filter(v => (!kind || v.kind === kind) && (!q || (v.name + ' ' + JSON.stringify(v.labels || {})).toLowerCase().includes(q)));
+  el.innerHTML = list.length ? list.map(v => `<div class="voice-row" style="background:var(--panel)"><button class="icon-btn" data-vplay2="${v.id}">▶</button><span class="vs-av" style="background:${voiceColor(v.name)}">${esc(v.name[0])}</span>
+      <div class="nm"><b>${esc(v.name)}</b><small><span class="vtag">${v.kind === 'design' ? 'Descrição' : 'Clone'}</span>${v.labels && v.labels.lang ? esc(v.labels.lang) + ' · ' : ''}${v.labels && v.labels.tone ? esc(v.labels.tone) + ' · ' : ''}${v.kind === 'clone' ? `${v.sampleKeys.length} amostra(s), ${Math.round(v.secs || 0)} s · ` : ''}${new Date(v.created).toLocaleDateString('pt-BR')}</small></div>
+      <button class="btn ghost sm" data-vtts="${v.id}">Texto para fala</button><button class="btn ghost sm" data-vuse="${v.id}">Usar no vídeo</button><button class="icon-btn" data-vren="${v.id}" title="Renomear">✎</button><button class="icon-btn" data-vdel="${v.id}" title="Excluir">🗑</button></div>`).join('')
+    : state.voices.length ? `<div class="empty"><b>Nada encontrado</b>Tente outro termo.</div>`
+    : `<div class="empty"><div style="font-size:28px">🎙️</div><b>Nenhuma voz sua ainda</b>Clone sua voz em cerca de 1 minuto de leitura.<div style="margin-top:12px"><button class="btn accent sm" onclick="openVoiceClone(null,'ivc')">Clonar minha voz</button></div></div>`;
+  el.querySelectorAll('[data-vplay2]').forEach(b => b.onclick = () => speak('Olá! Esta é uma prévia da minha voz.', { type: 'clone', id: b.dataset.vplay2 }));
+  el.querySelectorAll('[data-vuse]').forEach(b => b.onclick = () => { D.voice = { type: 'clone', id: b.dataset.vuse }; save(); go('cena'); syncComposer(); });
+  el.querySelectorAll('[data-vtts]').forEach(b => b.onclick = () => { state.tts.voice = { type: 'clone', id: b.dataset.vtts }; const v = myVoice(state.tts.voice); if (v.settings) state.tts.settings = { ...v.settings }; save(); go('tts'); });
+  el.querySelectorAll('[data-vren]').forEach(b => b.onclick = () => { const v = state.voices.find(x => x.id === b.dataset.vren); const n = prompt('Novo nome da voz:', v.name); if (n && n.trim()) { v.name = n.trim().slice(0, 40); save(); renderVoiceList(); syncComposer(); } });
+  el.querySelectorAll('[data-vdel]').forEach(b => b.onclick = () => { if (!confirm('Excluir esta voz?')) return; const v = state.voices.find(x => x.id === b.dataset.vdel); (v.sampleKeys || []).forEach(k => db.del(k)); state.voices = state.voices.filter(x => x !== v); state.avatars.forEach(a => { if (a.voiceId === v.id) a.voiceId = null; }); [D, state.tts, state.vc].forEach(o => { if (o.voice && o.voice.id === v.id) o.voice = null; }); save(); renderVoiceList(); syncComposer(); });
+}
+$('#newVoiceBtn').onclick = () => openVoiceClone();
+
+/* ---- página Texto para fala ---- */
+state.tts ||= { text: '', voice: null, model: 'padrao', settings: { ...DEFAULT_SET } };
+state.vc ||= { voice: null };
+const SLIDERS = [
+  ['speed', 'Velocidade', 0.7, 1.2, 0.01, 'Mais lenta', 'Mais rápida'],
+  ['stability', 'Estabilidade', 0, 1, 0.01, 'Mais variável', 'Mais estável'],
+  ['similarity', 'Semelhança', 0, 1, 0.01, 'Baixa', 'Alta'],
+  ['style', 'Exagero de estilo', 0, 1, 0.01, 'Nenhum', 'Exagerado']
+];
+function renderSliders() {
+  const s = state.tts.settings;
+  $('#ttsSliders').innerHTML = SLIDERS.map(([k, l, mn, mx, st, a, b]) => `<div class="sl"><div class="sl-top"><span>${l}</span><span class="muted">${k === 'speed' ? (+s[k]).toFixed(2) + '×' : Math.round(s[k] * 100) + '%'}</span></div><input type="range" data-sl="${k}" min="${mn}" max="${mx}" step="${st}" value="${s[k]}"><div class="sl-ends"><span>${a}</span><span>${b}</span></div></div>`).join('');
+  $$('[data-sl]').forEach(r => r.oninput = () => { s[r.dataset.sl] = +r.value; save(); r.closest('.sl').querySelector('.muted').textContent = r.dataset.sl === 'speed' ? (+r.value).toFixed(2) + '×' : Math.round(r.value * 100) + '%'; });
+  $('#setBoost').checked = s.boost !== false;
+}
+function setVoiceButton(prefix, ref) {
+  const name = ref ? voiceLabel(ref) : 'Escolher voz';
+  $(`#${prefix}VoiceName`).textContent = name; const av = $(`#${prefix}VoiceAv`); av.textContent = ref ? name[0] : '?'; av.style.background = ref ? voiceColor(name) : '';
+}
+function renderTts() {
+  const T = state.tts; $('#ttsText').value = T.text; $('#ttsModel').value = T.model; setVoiceButton('tts', T.voice); renderSliders(); ttsCount();
+  const h = state.ttsHistory;
+  $('#ttsHistory').innerHTML = h.length ? h.map(x => `<div class="hist"><button class="icon-btn" data-hplay="${x.id}">▶</button><div class="tx"><div>${esc(x.text)}</div><small>${esc(voiceLabel(x.voice))} · ${x.model === 'rapido' ? 'Rápido' : 'Multilíngue'} · ${new Date(x.created).toLocaleString('pt-BR')}</small></div>
+      <button class="btn ghost sm" data-hreuse="${x.id}">Reusar</button><button class="btn ghost sm" data-hdl="${x.id}" title="Baixar áudio">⬇</button><button class="icon-btn" data-hdel="${x.id}">✕</button></div>`).join('')
+    : `<div class="empty" style="padding:24px"><b>Nada gerado ainda</b>As falas que você gerar ficam aqui para ouvir e reaproveitar.</div>`;
+  $$('[data-hplay]').forEach(b => b.onclick = () => { const x = h.find(i => i.id === b.dataset.hplay); speak(x.text, x.voice, x.settings); });
+  $$('[data-hreuse]').forEach(b => b.onclick = () => { const x = h.find(i => i.id === b.dataset.hreuse); Object.assign(T, { text: x.text, voice: x.voice, model: x.model, settings: { ...x.settings } }); save(); renderTts(); });
+  $$('[data-hdl]').forEach(b => b.onclick = () => toast('O download do áudio (MP3) depende do motor de voz conectado.'));
+  $$('[data-hdel]').forEach(b => b.onclick = () => { state.ttsHistory = h.filter(i => i.id !== b.dataset.hdel); save(); renderTts(); });
+}
+const ttsCount = () => { const n = $('#ttsText').value.length; $('#ttsCount').textContent = `${n} / 5000 caracteres · ~${fmtTime(estSeconds($('#ttsText').value))}`; };
+$('#ttsText').oninput = e => { state.tts.text = e.target.value; save(); ttsCount(); };
+$('#ttsModel').onchange = e => { state.tts.model = e.target.value; save(); };
+$('#setBoost').onchange = e => { state.tts.settings.boost = e.target.checked; save(); };
+$('#ttsVoiceBtn').onclick = () => openVoicePicker('tts');
+$('#ttsReset').onclick = () => { state.tts.settings = { ...DEFAULT_SET }; save(); renderSliders(); };
+$('#ttsSaveDefault').onclick = () => { const v = myVoice(state.tts.voice); if (!v) return toast('Só dá para salvar o padrão de uma voz sua.'); v.settings = { ...state.tts.settings }; save(); toast(`Ajustes salvos como padrão de “${v.name}”.`); };
+$('#ttsPause').onclick = () => { const t = $('#ttsText'), a = t.selectionStart, ins = ' [pausa 0,5s] '; t.value = t.value.slice(0, a) + ins + t.value.slice(t.selectionEnd); t.focus(); t.setSelectionRange(a + ins.length, a + ins.length); state.tts.text = t.value; save(); ttsCount(); };
+$('#ttsToStudio').onclick = () => { if (!state.tts.text.trim()) return toast('Escreva o texto primeiro.'); D.script = state.tts.text.slice(0, 2500); if (state.tts.voice) D.voice = state.tts.voice; save(); go('cena'); syncComposer(); };
+$('#ttsGen').onclick = () => {
+  const T = state.tts; if (!T.text.trim()) return toast('Escreva o texto primeiro.'); if (!T.voice) { toast('Escolha uma voz.'); return openVoicePicker('tts'); }
+  const item = { id: uid(), text: T.text, voice: T.voice, model: T.model, settings: { ...T.settings }, created: Date.now() };
+  state.ttsHistory.unshift(item); state.ttsHistory = state.ttsHistory.slice(0, 50); save(); renderTts();
+  const how = speak(T.text, T.voice, T.settings); if (how === 'sample') toast('A fala com voz clonada sai do motor de voz; por enquanto toco sua amostra.');
+};
+$('#ttsClear').onclick = () => { if (state.ttsHistory.length && confirm('Limpar o histórico?')) { state.ttsHistory = []; save(); renderTts(); } };
+
+/* ---- página Trocador de voz ---- */
+let vcBlob = null;
+function renderVc() {
+  setVoiceButton('vc', state.vc.voice); $('#vcGen').disabled = !vcBlob;
+  const h = state.vcHistory;
+  $('#vcHistory').innerHTML = h.length ? h.map(x => `<div class="hist"><span class="status ${x.status === 'pronto' ? 'ready' : 'proc'}">● ${x.status === 'pronto' ? 'Pronto' : 'Aguardando motor'}</span><div class="tx"><div>${esc(x.name)}</div><small>→ ${esc(voiceLabel(x.voice))} · ${new Date(x.created).toLocaleString('pt-BR')}</small></div><button class="icon-btn" data-vcplay="${x.key}">▶ original</button><button class="icon-btn" data-vcdel="${x.id}">✕</button></div>`).join('')
+    : `<div class="empty" style="padding:24px"><b>Nenhuma conversão</b>Envie ou grave um áudio para começar.</div>`;
+  $$('[data-vcplay]').forEach(b => b.onclick = async () => { const u = await blobUrl(b.dataset.vcplay); if (u) playAudio(u); });
+  $$('[data-vcdel]').forEach(b => b.onclick = () => { const x = h.find(i => i.id === b.dataset.vcdel); db.del(x.key); state.vcHistory = h.filter(i => i !== x); save(); renderVc(); });
+}
+const vcSet = (b, name) => { vcBlob = b; vcBlob._name = name; $('#vcPrev').innerHTML = `<audio controls src="${URL.createObjectURL(b)}" style="width:100%"></audio>`; renderVc(); };
+$('#vcDrop').onclick = () => $('#vcFile').click();
+$('#vcFile').onchange = e => { const f = e.target.files[0]; if (f) vcSet(f, f.name); e.target.value = ''; };
+$('#vcDrop').ondragover = e => { e.preventDefault(); $('#vcDrop').classList.add('over'); };
+$('#vcDrop').ondragleave = () => $('#vcDrop').classList.remove('over');
+$('#vcDrop').ondrop = e => { e.preventDefault(); $('#vcDrop').classList.remove('over'); const f = [...e.dataTransfer.files].find(x => x.type.startsWith('audio')); if (f) vcSet(f, f.name); };
+$('#vcRec').onclick = async () => {
+  if (recorder && recorder.state === 'recording') return recorder.stop();
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({ audio: { noiseSuppression: $('#vcNoise').checked } }); streams.push(s);
+    const chunks = []; recorder = new MediaRecorder(s); let sec = 0;
+    recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+    recorder.onstop = () => { clearInterval(window._recTimer); stopStreams(); $('#vcRec').textContent = '● Gravar de novo'; $('#vcInfo').textContent = `${sec} s`; vcSet(new Blob(chunks, { type: recorder.mimeType || 'audio/webm' }), `Gravação ${new Date().toLocaleTimeString('pt-BR')}`); };
+    recorder.start(); $('#vcRec').textContent = '■ Parar';
+    window._recTimer = setInterval(() => { sec++; $('#vcInfo').textContent = `Gravando… ${sec} s`; if (sec >= 300) recorder.stop(); }, 1000);
+  } catch { toast('Não consegui acessar o microfone.'); }
+};
+$('#vcVoiceBtn').onclick = () => openVoicePicker('vc');
+$('#vcGen').onclick = async () => {
+  if (!vcBlob) return; if (!state.vc.voice) { toast('Escolha a voz de destino.'); return openVoicePicker('vc'); }
+  const id = uid(), key = 'vc-' + id; await db.put(key, vcBlob);
+  state.vcHistory.unshift({ id, key, name: vcBlob._name || 'Áudio', voice: state.vc.voice, noise: $('#vcNoise').checked, status: 'aguardando', created: Date.now() });
+  save(); renderVc(); toast('Conversão registrada. Ela roda quando o motor de voz estiver conectado.');
+};
+
+/* ============ início ============ */
+window.openClone = openClone; window.openVoiceClone = openVoiceClone;
+renderNav(); go(state.page || 'cena'); syncComposer(); updateCredits();
+if (state.projects.some(p => p.status !== 'pronto')) runQueue();
+</script>
+</body>
+</html>

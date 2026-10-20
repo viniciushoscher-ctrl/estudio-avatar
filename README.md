@@ -72,6 +72,19 @@ python motor/gerar.py --treino meu.mp4 --roteiro roteiros/teste-15s.txt --saida 
 
 (voz vira um tom e a boca não mexe; serve para conferir recortes e junção.)
 
+## Estúdio (interface)
+
+`estudio/index.html` é a tela do estúdio, em português, num arquivo só:
+- **Criar → Cena única:** avatar, roteiro com pausas, movimento, voz com prévia, formato (9:16, 4:5,
+  1:1, 16:9), resolução e o botão Gerar.
+- **Avatar:** grava 15 s pela webcam ou envia um vídeo ou uma foto, com consentimento.
+- **Voz:** clone instantâneo com várias amostras, criação de voz por descrição, texto para fala com
+  ajustes (velocidade, estabilidade, semelhança, estilo), biblioteca e trocador de voz.
+- **Projetos:** fila, status e downloads (legendas .srt, roteiro .txt).
+
+Para abrir, dê dois cliques no arquivo (Chrome ou Edge) ou rode `npx http-server estudio -p 8765`.
+Gravações e projetos ficam só no seu navegador. Os mapas de referência das telas estão em `docs/`.
+
 ## Arquivos
 
 - `.github/workflows/gerar-video.yml`: o fluxo
