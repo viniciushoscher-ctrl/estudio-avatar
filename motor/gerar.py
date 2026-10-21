@@ -113,9 +113,23 @@ def falar(trab: Path, texto: str, idioma: str, simular: bool, exagero: float = 0
             ffmpeg("-f", "lavfi", "-i", f"sine=frequency=220:duration={seg}",
                    str(audios / f"trecho_{i:03d}.wav"))
     else:
-        subprocess.run([sys.executable, str(AQUI / "voz.py"), str(trab / "voz_referencia.wav"),
-                        str(trab / "trechos.json"), str(audios), idioma, str(exagero), str(cfg)],
-                       check=True)
+        args = [str(trab / "voz_referencia.wav"), str(trab / "trechos.json"), str(audios), idioma,
+                str(exagero), str(cfg)]
+        # Português: F5-TTS pt-br (sotaque brasileiro), num ambiente Python à parte (VOZ_F5_PYTHON,
+        # criado pelo workflow). Se não estiver instalado ou falhar, cai no Chatterbox.
+        f5 = os.environ.get("VOZ_F5_PYTHON")
+        usou_f5 = False
+        if idioma == "pt" and f5 and Path(f5).exists() and os.environ.get("VOZ_MOTOR", "f5") == "f5":
+            r = subprocess.run([f5, str(AQUI / "voz_f5.py"), *args], stderr=subprocess.PIPE, text=True)
+            usou_f5 = r.returncode == 0 and any(audios.glob("trecho_*.wav"))
+            if not usou_f5:
+                fim = " | ".join(r.stderr.strip().splitlines()[-3:])[:300]
+                print(f"::warning::Voz pt-br (F5) falhou, uso o Chatterbox: {fim}", flush=True)
+                for p in audios.glob("trecho_*.wav"):
+                    p.unlink()
+        if not usou_f5:
+            subprocess.run([sys.executable, str(AQUI / "voz.py"), *args], check=True)
+        print(f"voz: modelo {'F5-TTS pt-br' if usou_f5 else 'Chatterbox'}", flush=True)
     lista = trab / "audios.txt"
     lista.write_text("".join(f"file '{p.resolve()}'\n" for p in sorted(audios.glob("trecho_*.wav"))))
     fala = trab / "fala.wav"

@@ -1,0 +1,4 @@
+# Voz em português do Brasil (motor/voz_f5.py), num ambiente Python separado do Chatterbox:
+# o f5-tts pede versões de torch/numpy diferentes. O workflow instala o torch CPU antes.
+f5-tts==1.1.22
+num2words==0.5.14

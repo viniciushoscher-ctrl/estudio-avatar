@@ -81,11 +81,21 @@ jobs:
           pip install torch==2.6.0 torchaudio==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
           pip install -r motor/requirements.txt
 
-      - name: Modelo de voz (cache)
+      # Voz com sotaque brasileiro (F5-TTS pt-br). Ambiente separado; se falhar, o Gerar usa o Chatterbox.
+      - name: Voz pt-br (F5-TTS) em ambiente separado
+        if: vars.VOZ_MOTOR != 'chatterbox'
+        continue-on-error: true
+        run: |
+          python -m venv f5env
+          f5env/bin/pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          f5env/bin/pip install -q -r motor/requirements-f5.txt
+          f5env/bin/python -c "import f5_tts.api, num2words; print('F5-TTS pronto')"
+
+      - name: Modelos de voz (cache)
         uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
-          key: chatterbox-mtl-v1
+          key: vozes-chatterbox-f5ptbr-v1
 
       - name: Wav2Lip e pesos (cache)
         id: w2l
@@ -204,6 +214,9 @@ jobs:
           # Ajuste fino da sincronia boca/voz, em ms (positivo = boca mais tarde). Mude em
           # Settings > Secrets and variables > Actions > Variables, sem mexer no código.
           ATRASO_BOCA_MS: ${{ vars.ATRASO_BOCA_MS || '0' }}
+          # Voz: F5-TTS pt-br (padrão) ou Chatterbox (variável do repositório VOZ_MOTOR = chatterbox).
+          VOZ_F5_PYTHON: ${{ github.workspace }}/f5env/bin/python
+          VOZ_MOTOR: ${{ vars.VOZ_MOTOR || 'f5' }}
         run: |
           EXTRA=()
           if [[ "$ETAPA" == "voz" ]]; then EXTRA+=(--so-voz); else EXTRA+=(--realce pesos-realce/GFPGANv1.4.pth); fi
