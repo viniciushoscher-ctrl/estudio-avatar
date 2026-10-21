@@ -98,7 +98,7 @@ def preparar_voz(voz_ref: Path, trab: Path):
     print("preparar: só a voz (gravação separada)", flush=True)
 
 
-def falar(trab: Path, texto: str, idioma: str, simular: bool, exagero: float = 0.7,
+def falar(trab: Path, texto: str, idioma: str, simular: bool, exagero: float = 0.85,
           cfg: float = 0.3) -> Path:
     trechos = [pecas_voz(t) for t in agrupar(frases(texto), CHARS_TRECHO)]
     (trab / "trechos.json").write_text(json.dumps(trechos, ensure_ascii=False))
@@ -116,7 +116,8 @@ def falar(trab: Path, texto: str, idioma: str, simular: bool, exagero: float = 0
     lista = trab / "audios.txt"
     lista.write_text("".join(f"file '{p.resolve()}'\n" for p in sorted(audios.glob("trecho_*.wav"))))
     fala = trab / "fala.wav"
-    ffmpeg("-f", "concat", "-safe", "0", "-i", str(lista), "-ar", "24000", "-ac", "1", str(fala))
+    ffmpeg("-f", "concat", "-safe", "0", "-i", str(lista), "-af",
+           "loudnorm=I=-16:TP=-1.5:LRA=9", "-ar", "24000", "-ac", "1", str(fala))  # volume de post
     print(f"voz: {len(trechos)} trecho(s), {duracao(fala):.1f} s de fala", flush=True)
     return fala
 
@@ -161,7 +162,7 @@ def main():
     ap.add_argument("--pesos", type=Path)
     ap.add_argument("--voz-ref", type=Path, help="gravação só da voz (senão usa o áudio do treino)")
     # Padrões mais expressivos que os do Chatterbox (0.5/0.5), que soavam robóticos.
-    ap.add_argument("--exagero", type=float, default=0.7, help="expressividade da voz, de 0 a 1")
+    ap.add_argument("--exagero", type=float, default=0.85, help="expressividade da voz, de 0 a 1")
     ap.add_argument("--cfg", type=float, default=0.3, help="menor = ritmo mais solto e natural (0 a 1)")
     ap.add_argument("--realce", type=Path, help="pesos do GFPGAN: restaura o rosto depois do Wav2Lip")
     ap.add_argument("--atraso-boca-ms", type=float, default=0,
