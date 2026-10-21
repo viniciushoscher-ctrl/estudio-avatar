@@ -20,6 +20,9 @@ FORMATOS = {"vertical": (720, 1280), "feed": (576, 720), "quadrado": (720, 720),
             "horizontal": (1280, 720)}
 VOZ_REF_S = 12   # o Chatterbox usa ~10 s de referência
 BASE_S = 8       # trecho do rosto; vai e volta (ping-pong) para repetir sem pulo
+# Gravação baixa vira clone baixo e sem energia: a referência é limpa do ruído grave e
+# normalizada antes de clonar (o volume final é nivelado depois, em falar()).
+FILTRO_REFERENCIA = "highpass=f=70,loudnorm=I=-18:TP=-2:LRA=11"
 CHARS_TRECHO = 600
 # Sem medida confiável, não mexe: a janela de áudio já está centrada no quadro (patch do Wav2Lip).
 ATRASO_IMAGEM_PADRAO_S = 0.0
@@ -75,7 +78,7 @@ def preparar(treino: Path, trab: Path, formato: str, inicio_voz: float, inicio_v
     origem = voz_ref or treino
     dv = duracao(origem) if voz_ref else d
     iv = min(max(0.5 if voz_ref else inicio_voz, 0), max(dv - VOZ_REF_S, 0))
-    ffmpeg("-ss", str(iv), "-t", str(VOZ_REF_S), "-i", str(origem), "-vn", "-ac", "1",
+    ffmpeg("-ss", str(iv), "-t", str(VOZ_REF_S), "-i", str(origem), "-vn", "-af", FILTRO_REFERENCIA, "-ac", "1",
            "-ar", "24000", str(trab / "voz_referencia.wav"))
     w, h = FORMATOS[formato]
     ida = trab / "base_ida.mp4"
@@ -93,7 +96,7 @@ def preparar(treino: Path, trab: Path, formato: str, inicio_voz: float, inicio_v
 def preparar_voz(voz_ref: Path, trab: Path):
     """Só a referência de voz, para gerar áudio sem vídeo de treino (texto para fala)."""
     iv = min(0.5, max(duracao(voz_ref) - VOZ_REF_S, 0))
-    ffmpeg("-ss", str(iv), "-t", str(VOZ_REF_S), "-i", str(voz_ref), "-vn", "-ac", "1",
+    ffmpeg("-ss", str(iv), "-t", str(VOZ_REF_S), "-i", str(voz_ref), "-vn", "-af", FILTRO_REFERENCIA, "-ac", "1",
            "-ar", "24000", str(trab / "voz_referencia.wav"))
     print("preparar: só a voz (gravação separada)", flush=True)
 

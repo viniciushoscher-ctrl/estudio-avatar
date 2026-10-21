@@ -28,7 +28,7 @@ def pausa(sr: int, texto: str) -> torch.Tensor:
 
 def main():
     ref, trechos_json, saida, idioma = sys.argv[1:5]
-    exagero = float(sys.argv[5]) if len(sys.argv) > 5 else 0.7
+    exagero = float(sys.argv[5]) if len(sys.argv) > 5 else 0.85
     cfg = float(sys.argv[6]) if len(sys.argv) > 6 else 0.3
     saida = Path(saida)
     saida.mkdir(parents=True, exist_ok=True)
