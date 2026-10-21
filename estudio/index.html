@@ -1142,8 +1142,8 @@ async function ensureVoiceUploaded(v) {
   await putDados(path, best, 'Estúdio: amostra de voz'); v.remote = path; save(); return path;
 }
 const motorText = s => s.replace(/\[pausa ([\d,\.]+)s\]/g, (_, n) => parseFloat(n.replace(',', '.')) >= 1 ? '… … ' : '… ').replace(/[ \t]+/g, ' ').trim();
-// Ajustes padrão (estilo 0, estabilidade 50%) = exagero 0.85 e cfg 0.3, os padrões do motor; menos que isso soa robótico.
-const motorSettings = set => ({ exagero: +(0.85 + (set.style || 0) * 0.1).toFixed(2), cfg: +(0.15 + (set.stability ?? 0.5) * 0.3).toFixed(2) });
+// Ajustes padrão (estilo 0, estabilidade 50%) = exagero 0.6 e cfg 0.55, os padrões do motor (fiéis ao sotaque da gravação).
+const motorSettings = set => ({ exagero: +(0.6 + (set.style || 0) * 0.3).toFixed(2), cfg: +(0.4 + (set.stability ?? 0.5) * 0.3).toFixed(2) });
 
 /* Envia arquivos, dispara o workflow e devolve { id, html_url } da execução. */
 async function motorSubmit(job, report) {

@@ -35,7 +35,14 @@ def main():
                                         paste_back=True, weight=forca)
         except Exception:  # noqa: BLE001
             melhor = None
-        out.write(melhor if melhor is not None and melhor.shape == quadro.shape else quadro)
+        if melhor is not None and melhor.shape == quadro.shape:
+            # O GFPGAN "clean" (v1.4) ignora o `weight` e sempre redesenha o rosto 100%: pele
+            # lisa, "cara de IA". A força real vem daqui: mistura o rosto restaurado com o
+            # original, mantendo a textura da pele e ganhando só um pouco de nitidez.
+            melhor = cv2.addWeighted(melhor, forca, quadro, 1 - forca, 0)
+        else:
+            melhor = quadro
+        out.write(melhor)
         i += 1
         if i % 25 == 0:
             print(f"realce: {i}/{total} quadros ({time.time() - t0:.0f} s)", flush=True)
