@@ -87,10 +87,11 @@ jobs:
         continue-on-error: true
         run: |
           python -m venv f5env
-          f5env/bin/pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          f5env/bin/pip install -q torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu
           # Trava torch/torchaudio na versão CPU para o f5-tts não trocar por uma versão de GPU.
           f5env/bin/pip freeze | grep -E '^(torch|torchaudio)==' > f5-trava.txt
           f5env/bin/pip install -q -c f5-trava.txt -r motor/requirements-f5.txt
+          f5env/bin/pip uninstall -y torchcodec >/dev/null 2>&1 || true  # feito para outro torch
           f5env/bin/pip freeze | grep -iE '^(torch|torchaudio|torchcodec|numpy)=' | tr '\n' ' ' | sed 's/^/::notice::F5 env: /'
           f5env/bin/python -c "import f5_tts.api, num2words; print('F5-TTS pronto')" 2>&1 | tail -3 | tr '\n' ' ' | sed 's/^/::notice::F5 import: /'
           f5env/bin/python -c "import f5_tts.api"
