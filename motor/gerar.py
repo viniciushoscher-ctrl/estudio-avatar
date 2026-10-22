@@ -19,7 +19,10 @@ AQUI = Path(__file__).resolve().parent
 FORMATOS = {"vertical": (720, 1280), "feed": (576, 720), "quadrado": (720, 720),
             "horizontal": (1280, 720)}
 VOZ_REF_S = 12   # o Chatterbox usa ~10 s de referência
-BASE_S = 8       # trecho do rosto; vai e volta (ping-pong) para repetir sem pulo
+# Trecho do rosto e do corpo usado como base; vai e volta (ping-pong) para repetir sem pulo.
+# Mais longo = mais expressão corporal natural (cabeça, ombros, mãos), já que o Wav2Lip redesenha
+# só a boca. Ajuste sem mexer no código pela variável do repositório BASE_S (segundos).
+BASE_S = float(os.environ.get("BASE_S") or 20)
 # Gravação baixa vira clone baixo e sem energia: a referência é limpa do ruído grave e
 # normalizada antes de clonar (o volume final é nivelado depois, em falar()).
 FILTRO_REFERENCIA = "highpass=f=70,loudnorm=I=-18:TP=-2:LRA=11"
@@ -90,7 +93,7 @@ def preparar(treino: Path, trab: Path, formato: str, inicio_voz: float, inicio_v
            "-c:v", "libx264", "-crf", "16", "-pix_fmt", "yuv420p", str(trab / "base.mp4"))
     fonte = "gravação separada" if voz_ref else "treino"
     print(f"preparar: treino de {d:.0f} s, voz ({fonte}) a partir de {iv:.0f} s, "
-          f"rosto a partir de {ii:.0f} s", flush=True)
+          f"rosto a partir de {ii:.0f} s por {min(BASE_S, d - ii):.0f} s", flush=True)
 
 
 def preparar_voz(voz_ref: Path, trab: Path):

@@ -219,6 +219,8 @@ jobs:
           # Ajuste fino da sincronia boca/voz, em ms (positivo = boca mais tarde). Mude em
           # Settings > Secrets and variables > Actions > Variables, sem mexer no código.
           ATRASO_BOCA_MS: ${{ vars.ATRASO_BOCA_MS || '0' }}
+          # Segundos do treino usados como base do corpo (mais = mais expressão). Variável BASE_S.
+          BASE_S: ${{ vars.BASE_S || '20' }}
           # Voz: F5-TTS pt-br (padrão) ou Chatterbox (variável do repositório VOZ_MOTOR = f5 liga a F5).
           VOZ_F5_PYTHON: ${{ github.workspace }}/f5env/bin/python
           VOZ_MOTOR: ${{ vars.VOZ_MOTOR || 'chatterbox' }}
