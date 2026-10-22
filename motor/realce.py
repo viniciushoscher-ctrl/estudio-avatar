@@ -7,12 +7,29 @@ import sys
 import time
 
 import cv2
+import numpy as np
 import torchvision.transforms.functional as _F
 
 # O basicsr (usado pelo GFPGAN) ainda procura um módulo que o torchvision novo removeu.
 sys.modules.setdefault("torchvision.transforms.functional_tensor", _F)
 
 from gfpgan import GFPGANer  # noqa: E402
+
+
+def _mascara_boca(rest, formato) -> np.ndarray:
+    """Máscara suave (0 a 1, com 3 canais) em volta da boca e do queixo; zeros se não achar o rosto."""
+    h, w = formato[:2]
+    m = np.zeros((h, w), np.float32)
+    pts = getattr(rest.face_helper, "all_landmarks_5", None)
+    if pts is not None and len(pts):
+        p = np.asarray(pts[0], np.float32)  # olho E, olho D, nariz, canto E da boca, canto D da boca
+        boca = (p[3] + p[4]) / 2
+        larg = float(np.linalg.norm(p[4] - p[3]))
+        centro = (int(boca[0]), int(boca[1] + larg * 0.25))
+        cv2.ellipse(m, centro, (int(larg * 1.0), int(larg * 0.95)), 0, 0, 360, 1.0, -1)
+        k = max(3, int(larg * 0.9) | 1)
+        m = cv2.GaussianBlur(m, (k, k), 0)
+    return m[..., None]
 
 
 def main():
@@ -37,9 +54,11 @@ def main():
             melhor = None
         if melhor is not None and melhor.shape == quadro.shape:
             # O GFPGAN "clean" (v1.4) ignora o `weight` e sempre redesenha o rosto 100%: pele
-            # lisa, "cara de IA". A força real vem daqui: mistura o rosto restaurado com o
-            # original, mantendo a textura da pele e ganhando só um pouco de nitidez.
-            melhor = cv2.addWeighted(melhor, forca, quadro, 1 - forca, 0)
+            # lisa, "cara de IA". Então a mistura é feita aqui: o rosto fica `forca` restaurado
+            # (mantém a textura da pele), mas a boca e o queixo são restaurados por inteiro,
+            # porque é onde o Wav2Lip deixa a imagem borrada.
+            peso = forca + (1 - forca) * _mascara_boca(rest, quadro.shape)
+            melhor = (quadro * (1 - peso) + melhor * peso).clip(0, 255).astype("uint8")
         else:
             melhor = quadro
         out.write(melhor)
