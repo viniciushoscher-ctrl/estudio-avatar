@@ -22,7 +22,7 @@ VOZ_REF_S = 12   # o Chatterbox usa ~10 s de referência
 # Trecho do rosto e do corpo usado como base; vai e volta (ping-pong) para repetir sem pulo.
 # Mais longo = mais expressão corporal natural (cabeça, ombros, mãos), já que o Wav2Lip redesenha
 # só a boca. Ajuste sem mexer no código pela variável do repositório BASE_S (segundos).
-BASE_S = float(os.environ.get("BASE_S") or 20)
+BASE_S = float(os.environ.get("BASE_S") or 8)  # 8 s = o vídeo 28, o melhor até agora; 20 s com movimento piorou muito
 # Gravação baixa vira clone baixo e sem energia: a referência é limpa do ruído grave e
 # normalizada antes de clonar (o volume final é nivelado depois, em falar()).
 FILTRO_REFERENCIA = "highpass=f=70,loudnorm=I=-18:TP=-2:LRA=11"
