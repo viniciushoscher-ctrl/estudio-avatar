@@ -24,9 +24,9 @@ import modal
 
 SPACE = "https://huggingface.co/spaces/victor/LongCat-Video-Avatar-1.5"
 SPACE_COMMIT = "daeb7c18bdfd051b5f94a2e88287a50ccf2988e3"
-# Plano grátis sem cartão só libera GPUs de 24 GB: o DiT INT8 + Whisper ficam na GPU e o
-# codificador de texto (T5, 11 GB, roda uma vez por clipe) fica na CPU.
-GPU = os.environ.get("AVATAR_GPU", "A10G,L4").split(",")
+# L40S (48 GB) cabe tudo na GPU. Em GPUs de 24 GB (A10G/L4) o codificador de texto (T5, 11 GB,
+# roda uma vez por clipe) fica na CPU automaticamente.
+GPU = os.environ.get("AVATAR_GPU", "L40S").split(",")
 
 app = modal.App("kenji-avatar")
 pesos = modal.Volume.from_name("longcat-pesos", create_if_missing=True)
@@ -96,7 +96,8 @@ class Avatar:
             pipe.text_encoder = t5 if isinstance(t5, TextoNaCPU) else TextoNaCPU(t5)
             return pipe
 
-        P.LongCatVideoAvatarPipeline.to = mover_sem_t5
+        if torch.cuda.get_device_properties(0).total_memory < 40e9:
+            P.LongCatVideoAvatarPipeline.to = mover_sem_t5
         import app as lc  # baixa os pesos no volume na 1ª vez (~30 GB) e monta o pipeline na GPU
         self.lc = lc
         pesos.commit()
