@@ -31,7 +31,7 @@ pesos = modal.Volume.from_name("longcat-pesos", create_if_missing=True)
 
 TORCH = "https://download.pytorch.org/whl/cu124"
 image = (
-    modal.Image.debian_slim(python_version="3.10")
+    modal.Image.debian_slim(python_version="3.11")
     .apt_install("git", "ffmpeg", "libgl1", "libglib2.0-0")
     .pip_install("torch==2.6.0", "torchvision==0.21.0", "torchaudio==2.6.0", index_url=TORCH)
     .pip_install("xformers==0.0.29.post3", index_url=TORCH)
