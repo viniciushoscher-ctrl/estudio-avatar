@@ -1,0 +1,92 @@
+name: Kenji falando
+run-name: Kenji falando ${{ github.run_number }}
+
+# Clone open source do HeyGen (Photo Avatar): anima SÓ a imagem gerada por IA, falando o roteiro.
+# Voz: Kokoro-82M (Apache-2.0) na CPU do GitHub. Vídeo: LongCat-Video-Avatar 1.5 (MIT) na GPU
+# grátis da Modal. Cada linha do roteiro vira um clipe (até ~9 s por linha fica melhor).
+
+on:
+  workflow_dispatch:
+    inputs:
+      roteiro:
+        description: "Arquivo do roteiro (uma fala por linha = um clipe)"
+        default: roteiros/kenji-falas.txt
+      texto:
+        description: "OU escreva aqui uma fala (substitui o arquivo)"
+        default: ""
+      imagem:
+        description: "Imagem do avatar"
+        default: avatares/rosto-japones.png
+      cena:
+        description: "Como ele se mexe (em inglês; vazio = padrão)"
+        default: ""
+      voz:
+        description: "Voz do Kokoro (am_michael, am_fenrir, am_puck, bm_george, bm_fable...)"
+        default: am_michael
+      velocidade:
+        description: "Velocidade da fala"
+        default: "0.9"
+      resolucao:
+        type: choice
+        options: ["480p", "720p"]
+        default: "480p"
+
+permissions:
+  contents: read
+
+jobs:
+  falar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg espeak-ng
+          pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -q kokoro==0.9.4 soundfile modal \
+            "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"
+      - name: Voz (Kokoro)
+        env:
+          ROTEIRO: ${{ inputs.roteiro }}
+          TEXTO: ${{ inputs.texto }}
+          VOZ: ${{ inputs.voz }}
+          VELOCIDADE: ${{ inputs.velocidade }}
+        run: |
+          if [[ -n "$TEXTO" ]]; then printf '%s\n' "$TEXTO" > /tmp/roteiro.txt; else cp "$ROTEIRO" /tmp/roteiro.txt; fi
+          python motor/voz_kokoro.py /tmp/roteiro.txt falas "$VOZ" "$VELOCIDADE"
+      - name: Vídeo (LongCat-Video-Avatar na GPU da Modal)
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          IMAGEM: ${{ inputs.imagem }}
+          CENA: ${{ inputs.cena }}
+          RESOLUCAO: ${{ inputs.resolucao }}
+          RUN: ${{ github.run_number }}
+        run: |
+          [[ -n "$MODAL_TOKEN_ID" ]] || { echo "::error::Falta o segredo MODAL_TOKEN_ID (veja o README)"; exit 1; }
+          mkdir -p clipes
+          for f in falas/*.wav; do
+            n=$(basename "$f" .wav | sed 's/fala-//')
+            modal run gpu/kenji_longcat.py --imagem "$IMAGEM" --audio "$f" \
+              --saida "clipes/kenji-$RUN-$n.mp4" --prompt "$CENA" --resolucao "$RESOLUCAO"
+          done
+          ls -l clipes
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kenji-${{ github.run_number }}
+          path: |
+            clipes/*.mp4
+            falas/*.wav
+      - name: Guardar na Release "kenji"
+        env:
+          GH_TOKEN: ${{ secrets.DADOS_TOKEN }}
+          DADOS: ${{ github.repository_owner }}/estudio-avatar-dados
+        run: |
+          [[ -n "$GH_TOKEN" ]] || exit 0
+          gh release view kenji --repo "$DADOS" >/dev/null 2>&1 \
+            || gh release create kenji --repo "$DADOS" --title "Kenji" --notes "Clipes do avatar"
+          gh release upload kenji clipes/*.mp4 --repo "$DADOS" --clobber
