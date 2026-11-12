@@ -2,7 +2,7 @@
 
 ## Novo: avatar falando a partir de UMA imagem (clone do HeyGen Photo Avatar)
 
-Anima só a imagem gerada por IA (ex.: `avatares/rosto-japones.png`, o Kenji): do peito para cima,
+Anima só a imagem gerada por IA (ex.: `avatares/rosto-japones.png`, o Hiroshi): do peito para cima,
 boca sincronizada, piscadas, cabeça, ombros e mãos se mexendo. Nenhum vídeo de pessoa real.
 
 | Etapa | Modelo | Licença | Onde roda |
@@ -16,7 +16,7 @@ boca sincronizada, piscadas, cabeça, ombros e mãos se mexendo. Nenhum vídeo d
 3. Aqui no GitHub: *Settings > Secrets and variables > Actions > New repository secret*:
    `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET`.
 
-**Gerar:** *Actions > Kenji falando > Run workflow*. Cada linha de `roteiros/kenji-falas.txt` vira um
+**Gerar:** *Actions > Hiroshi falando > Run workflow*. Cada linha de `roteiros/kenji-falas.txt` vira um
 clipe (falas de até ~9 s ficam melhores). Os clipes saem em *Artifacts* da execução e na Release
 `kenji` do repositório privado. A 1ª execução baixa os pesos (~30 GB) para um volume da Modal e demora
 mais; as seguintes já começam prontas.
