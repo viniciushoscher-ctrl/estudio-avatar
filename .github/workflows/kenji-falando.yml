@@ -31,6 +31,11 @@ on:
         options: ["480p", "720p"]
         default: "480p"
 
+  # Teste automático: um push neste ramo com mudança no roteiro ou no motor gera os clipes.
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [roteiros/kenji-falas.txt, gpu/kenji_longcat.py, .github/workflows/kenji-falando.yml]
+
 permissions:
   contents: read
 
@@ -51,10 +56,10 @@ jobs:
             "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"
       - name: Voz (Kokoro)
         env:
-          ROTEIRO: ${{ inputs.roteiro }}
+          ROTEIRO: ${{ inputs.roteiro || 'roteiros/kenji-falas.txt' }}
           TEXTO: ${{ inputs.texto }}
-          VOZ: ${{ inputs.voz }}
-          VELOCIDADE: ${{ inputs.velocidade }}
+          VOZ: ${{ inputs.voz || 'am_michael' }}
+          VELOCIDADE: ${{ inputs.velocidade || '0.9' }}
         run: |
           if [[ -n "$TEXTO" ]]; then printf '%s\n' "$TEXTO" > /tmp/roteiro.txt; else cp "$ROTEIRO" /tmp/roteiro.txt; fi
           python motor/voz_kokoro.py /tmp/roteiro.txt falas "$VOZ" "$VELOCIDADE"
@@ -62,9 +67,9 @@ jobs:
         env:
           MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
           MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
-          IMAGEM: ${{ inputs.imagem }}
+          IMAGEM: ${{ inputs.imagem || 'avatares/rosto-japones.png' }}
           CENA: ${{ inputs.cena }}
-          RESOLUCAO: ${{ inputs.resolucao }}
+          RESOLUCAO: ${{ inputs.resolucao || '480p' }}
           RUN: ${{ github.run_number }}
         run: |
           [[ -n "$MODAL_TOKEN_ID" ]] || { echo "::error::Falta o segredo MODAL_TOKEN_ID (veja o README)"; exit 1; }
