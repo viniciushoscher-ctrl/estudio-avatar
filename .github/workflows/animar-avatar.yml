@@ -1,0 +1,83 @@
+name: Animar avatar
+run-name: Animar avatar ${{ github.run_number }}
+
+# Anima a imagem de um avatar com os movimentos de cabeça, rosto e boca do seu vídeo de treino
+# (LivePortrait, na CPU do GitHub). O resultado vai para a Release "resultados" do repositório privado.
+
+on:
+  workflow_dispatch:
+    inputs:
+      imagem:
+        description: "Imagem do avatar neste repositório"
+        default: avatares/rosto-japones.png
+      video_treino:
+        description: "tag/arquivo de uma Release do repositório de dados com os seus movimentos"
+        default: treino/video-treino.mp4
+      inicio:
+        description: "Segundo do vídeo de treino onde começam os movimentos"
+        default: "12"
+      duracao:
+        description: "Quantos segundos animar"
+        default: "6"
+      dados_repo:
+        default: estudio-avatar-dados
+
+permissions:
+  contents: read
+
+jobs:
+  animar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      LP_COMMIT: 9b294b3d0536135442ea73cb01e6cb3ca7029dd3
+      DADOS: ${{ github.repository_owner }}/${{ inputs.dados_repo }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Instalar LivePortrait
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          git clone -q https://github.com/KwaiVGI/LivePortrait lp
+          git -C lp checkout -q "$LP_COMMIT"
+          grep -v gradio lp/requirements_base.txt > lp/req-cpu.txt
+          pip install torch==2.3.0 torchvision==0.18.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r lp/req-cpu.txt onnxruntime==1.18.0 transformers==4.38.0 "huggingface_hub[cli]<0.26"
+      - uses: actions/cache@v4
+        with:
+          path: lp/pretrained_weights
+          key: liveportrait-pesos-v1
+      - name: Baixar os pesos
+        run: |
+          [[ -f lp/pretrained_weights/liveportrait/base_models/warping_module.pth ]] \
+            || huggingface-cli download KwaiVGI/LivePortrait --local-dir lp/pretrained_weights \
+                 --exclude "*.git*" "README.md" "docs/*"
+      - name: Baixar e cortar o vídeo de movimentos
+        env:
+          GH_TOKEN: ${{ secrets.DADOS_TOKEN }}
+          ENTRADA: ${{ inputs.video_treino }}
+          INICIO: ${{ inputs.inicio }}
+          DURACAO: ${{ inputs.duracao }}
+        run: |
+          mkdir -p treino
+          gh release download "${ENTRADA%%/*}" -p "${ENTRADA#*/}" --dir treino --repo "$DADOS"
+          ffmpeg -loglevel error -y -ss "$INICIO" -t "$DURACAO" -i "treino/${ENTRADA#*/}" \
+            -vf "fps=25" -c:v libx264 -crf 16 -c:a aac movimentos.mp4
+      - name: Animar
+        env:
+          IMAGEM: ${{ inputs.imagem }}
+        run: |
+          cd lp
+          python inference.py -s "../$IMAGEM" -d ../movimentos.mp4 -o ../saida \
+            --flag-force-cpu --flag-crop-driving-video
+          ls -l ../saida
+      - name: Enviar o resultado para o seu repositório privado
+        env:
+          GH_TOKEN: ${{ secrets.DADOS_TOKEN }}
+          RUN: ${{ github.run_number }}
+        run: |
+          F=$(ls saida/*.mp4 | grep -v concat | head -n 1)
+          cp "$F" "saida/avatar-$RUN.mp4"
+          gh release upload resultados "saida/avatar-$RUN.mp4" --repo "$DADOS" --clobber
