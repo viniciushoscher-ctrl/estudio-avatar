@@ -24,7 +24,9 @@ import modal
 
 SPACE = "https://huggingface.co/spaces/victor/LongCat-Video-Avatar-1.5"
 SPACE_COMMIT = "daeb7c18bdfd051b5f94a2e88287a50ccf2988e3"
-GPU = os.environ.get("AVATAR_GPU", "L40S")  # 48 GB: cabe o DiT INT8 + T5 + Whisper
+# Plano grátis sem cartão só libera GPUs de 24 GB: o DiT INT8 + Whisper ficam na GPU e o
+# codificador de texto (T5, 11 GB, roda uma vez por clipe) fica na CPU.
+GPU = os.environ.get("AVATAR_GPU", "A10G,L4").split(",")
 
 app = modal.App("kenji-avatar")
 pesos = modal.Volume.from_name("longcat-pesos", create_if_missing=True)
@@ -72,6 +74,29 @@ class Avatar:
         os.chdir("/longcat")
         sys.path.insert(0, "/longcat")
         t = time.time()
+        import torch
+        import longcat_video.pipeline_longcat_video_avatar as P
+
+        class TextoNaCPU:
+            def __init__(self, m):
+                self.m, self.config, self.dtype = m.eval(), m.config, m.dtype
+
+            def to(self, *_a, **_k):
+                return self
+
+            def __call__(self, ids, mask):
+                with torch.no_grad():
+                    return self.m(ids.cpu(), mask.cpu())
+
+        mover = P.LongCatVideoAvatarPipeline.to
+
+        def mover_sem_t5(pipe, device):
+            t5, pipe.text_encoder = pipe.text_encoder, None
+            mover(pipe, device)
+            pipe.text_encoder = t5 if isinstance(t5, TextoNaCPU) else TextoNaCPU(t5)
+            return pipe
+
+        P.LongCatVideoAvatarPipeline.to = mover_sem_t5
         import app as lc  # baixa os pesos no volume na 1ª vez (~30 GB) e monta o pipeline na GPU
         self.lc = lc
         pesos.commit()
