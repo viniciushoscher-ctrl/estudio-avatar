@@ -1,0 +1,56 @@
+name: Gerar rosto de avatar
+run-name: Rostos de avatar ${{ github.run_number }}
+
+# Gera candidatos de rosto de um personagem de IA, grátis, na CPU do GitHub.
+# Os rostos vão para a Release "rostos" do repositório privado de dados (DADOS_TOKEN).
+
+on:
+  workflow_dispatch:
+    inputs:
+      descricao:
+        description: "Descrição do personagem (em inglês)"
+        default: "professional photo portrait of a 60 year old Japanese man, kind face, short gray hair, light wrinkles, wearing a clean light blue shirt, looking straight at the camera, neutral relaxed expression, mouth closed, plain bright background, soft studio light, sharp focus, 85mm"
+      quantos:
+        description: "Quantos rostos gerar"
+        default: "4"
+      dados_repo:
+        default: estudio-avatar-dados
+
+permissions:
+  contents: read
+
+jobs:
+  rosto:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      DADOS: ${{ github.repository_owner }}/${{ inputs.dados_repo }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar
+        run: |
+          pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install diffusers==0.31.0 transformers==4.46.3 accelerate==1.1.1 "huggingface_hub<0.26" safetensors pillow
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-sd15
+      - name: Gerar
+        env:
+          DESC: ${{ inputs.descricao }}
+          N: ${{ inputs.quantos }}
+        run: python motor/rosto_ia.py rostos "$N" "$DESC"
+      - name: Enviar
+        env:
+          GH_TOKEN: ${{ secrets.DADOS_TOKEN }}
+          RUN: ${{ github.run_number }}
+        run: |
+          gh release view rostos --repo "$DADOS" >/dev/null 2>&1 \
+            || gh release create rostos --repo "$DADOS" --prerelease --title "Rostos" --notes "Rostos de avatar gerados por IA."
+          for f in rostos/*.png; do
+            cp "$f" "rostos/run$RUN-$(basename "$f")"
+            gh release upload rostos "rostos/run$RUN-$(basename "$f")" --repo "$DADOS" --clobber
+          done
