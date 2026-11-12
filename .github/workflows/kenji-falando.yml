@@ -1,5 +1,5 @@
-name: Kenji falando
-run-name: Kenji falando ${{ github.run_number }}
+name: Hiroshi falando
+run-name: Hiroshi falando ${{ github.run_number }}
 
 # Clone open source do HeyGen (Photo Avatar): anima SÓ a imagem gerada por IA, falando o roteiro.
 # Voz: Kokoro-82M (Apache-2.0) na CPU do GitHub. Vídeo: LongCat-Video-Avatar 1.5 (MIT) na GPU
@@ -34,7 +34,7 @@ on:
   # Teste automático: um push neste ramo com mudança no roteiro ou no motor gera os clipes.
   push:
     branches: [claude/project-thread-f10yr5]
-    paths: [roteiros/kenji-falas.txt, gpu/kenji_longcat.py, .github/workflows/kenji-falando.yml]
+    paths: [roteiros/kenji-falas.txt]
 
 permissions:
   contents: read
@@ -68,7 +68,7 @@ jobs:
           if [[ -n "$TEXTO" ]]; then printf '%s\n' "$TEXTO" > /tmp/roteiro.txt; else cp "$ROTEIRO" /tmp/roteiro.txt; fi
           python motor/voz_kokoro.py /tmp/roteiro.txt falas "$VOZ" "$VELOCIDADE"
       - name: Vídeo (LongCat-Video-Avatar na GPU da Modal)
-        timeout-minutes: 45
+        timeout-minutes: 120
         env:
           MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
           MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
@@ -85,11 +85,9 @@ jobs:
           [[ -n "$ID" && -n "$SEC" ]] || { echo "::error::Os segredos da Modal não têm um código ak-... e um as-... (veja o README)"; exit 1; }
           export MODAL_TOKEN_ID="$ID" MODAL_TOKEN_SECRET="$SEC"
           mkdir -p clipes
-          for f in falas/*.wav; do
-            n=$(basename "$f" .wav | sed 's/fala-//')
-            modal run gpu/kenji_longcat.py --imagem "$IMAGEM" --audio "$f" \
-              --saida "clipes/kenji-$RUN-$n.mp4" --prompt "$CENA" --resolucao "$RESOLUCAO"
-          done
+          modal run gpu/kenji_longcat.py --imagem "$IMAGEM" --audio falas --saida clipes \
+            --prompt "$CENA" --resolucao "$RESOLUCAO"
+          for f in clipes/fala-*.mp4; do mv "$f" "clipes/hiroshi-$RUN-${f#clipes/fala-}"; done
           ls -l clipes
       - uses: actions/upload-artifact@v4
         with:

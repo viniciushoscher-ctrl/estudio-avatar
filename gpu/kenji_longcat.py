@@ -166,10 +166,19 @@ class Avatar:
 @app.local_entrypoint()
 def main(imagem: str, audio: str, saida: str = "kenji.mp4", prompt: str = "", seed: int = 42,
          resolucao: str = "480p"):
+    """audio pode ser um .wav ou uma pasta de .wav; com pasta, saida é a pasta dos clipes e o
+    modelo é carregado uma vez só para todos (o mesmo contêiner atende os clipes em sequência)."""
     t = time.time()
-    video = Avatar().gerar.remote(
-        Path(imagem).read_bytes(), Path(imagem).suffix, Path(audio).read_bytes(),
-        prompt.strip() or PROMPT_PADRAO, seed, resolucao,
-    )
-    Path(saida).write_bytes(video)
-    print(f"[kenji] {saida} pronto ({len(video) / 1e6:.1f} MB) em {time.time() - t:.0f}s")
+    foto = Path(imagem).read_bytes()
+    avatar = Avatar()
+    if Path(audio).is_dir():
+        falas = sorted(Path(audio).glob("*.wav"))
+        Path(saida).mkdir(parents=True, exist_ok=True)
+        destinos = [Path(saida) / f.with_suffix(".mp4").name for f in falas]
+    else:
+        falas, destinos = [Path(audio)], [Path(saida)]
+    for fala, destino in zip(falas, destinos):
+        video = avatar.gerar.remote(foto, Path(imagem).suffix, fala.read_bytes(),
+                                    prompt.strip() or PROMPT_PADRAO, seed, resolucao)
+        destino.write_bytes(video)
+        print(f"[kenji] {destino} pronto ({len(video) / 1e6:.1f} MB) em {time.time() - t:.0f}s", flush=True)
