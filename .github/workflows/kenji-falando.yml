@@ -39,6 +39,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: kenji-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   falar:
     runs-on: ubuntu-latest
@@ -64,6 +68,7 @@ jobs:
           if [[ -n "$TEXTO" ]]; then printf '%s\n' "$TEXTO" > /tmp/roteiro.txt; else cp "$ROTEIRO" /tmp/roteiro.txt; fi
           python motor/voz_kokoro.py /tmp/roteiro.txt falas "$VOZ" "$VELOCIDADE"
       - name: Vídeo (LongCat-Video-Avatar na GPU da Modal)
+        timeout-minutes: 45
         env:
           MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
           MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
