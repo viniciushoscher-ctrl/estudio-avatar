@@ -43,7 +43,7 @@ image = (
         "einops>=0.8", "loguru", "ftfy", "regex", "imageio", "imageio-ffmpeg",
         "opencv-python-headless", "Pillow", "numpy==1.26.4", "scipy==1.15.3",
         "scikit-image==0.25.2", "soundfile==0.13.1", "librosa==0.11.0", "pyloudnorm==0.1.1",
-        "audio-separator==0.30.2", "onnx==1.18.0", "onnxruntime==1.16.3",
+        "audio-separator==0.30.2", "onnx==1.18.0", "onnxruntime==1.20.1",
     )
     .run_commands(
         f"GIT_LFS_SKIP_SMUDGE=1 git clone {SPACE} /longcat",
