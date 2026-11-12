@@ -25,7 +25,7 @@ on:
         default: am_michael
       velocidade:
         description: "Velocidade da fala"
-        default: "0.9"
+        default: "0.95"
       resolucao:
         type: choice
         options: ["480p", "720p"]
@@ -59,7 +59,7 @@ jobs:
           ROTEIRO: ${{ inputs.roteiro || 'roteiros/kenji-falas.txt' }}
           TEXTO: ${{ inputs.texto }}
           VOZ: ${{ inputs.voz || 'am_michael' }}
-          VELOCIDADE: ${{ inputs.velocidade || '0.9' }}
+          VELOCIDADE: ${{ inputs.velocidade || '0.95' }}
         run: |
           if [[ -n "$TEXTO" ]]; then printf '%s\n' "$TEXTO" > /tmp/roteiro.txt; else cp "$ROTEIRO" /tmp/roteiro.txt; fi
           python motor/voz_kokoro.py /tmp/roteiro.txt falas "$VOZ" "$VELOCIDADE"
