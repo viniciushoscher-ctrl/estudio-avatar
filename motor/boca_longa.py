@@ -160,7 +160,7 @@ def roteiro_base(m, total, semente=7):
 
 
 @torch.no_grad()
-def falar(cache, audio, saida, de=0, ate=None, lote=4, so_video=False, realce=None):
+def falar(cache, audio, saida, de=0, ate=None, lote=4, so_video=False, realce=None, suave=0.4):
     from transformers import WhisperModel
     from musetalk.utils.audio_processor import AudioProcessor
     from musetalk.utils.blending import get_image_blending
@@ -177,6 +177,11 @@ def falar(cache, audio, saida, de=0, ate=None, lote=4, so_video=False, realce=No
     pedacos = ap.get_whisper_chunk(feats, "cpu", torch.float32, whisper, comp, fps=FPS,
                                    audio_padding_length_left=2, audio_padding_length_right=2)
     ate = len(pedacos) if ate is None else min(ate, len(pedacos))
+    if suave > 0:
+        # áudio suavizado entre quadros vizinhos: a boca não reage a cada micro-variação (menos tremida)
+        p = torch.stack(list(pedacos))
+        viz = torch.cat([p[:1], p[:-1]]), torch.cat([p[1:], p[-1:]])
+        pedacos = list(0.25 * viz[0] + 0.5 * p + 0.25 * viz[1])
     m = len(b["quadros"]) // 2  # o cache guarda ida + volta; usa só a ida
     ordem = roteiro_base(m, ate)
     h, w = b["quadros"][0].shape[:2]
@@ -192,6 +197,12 @@ def falar(cache, audio, saida, de=0, ate=None, lote=4, so_video=False, realce=No
         aud = pe(torch.stack([pedacos[i] for i in idx]))
         lat = torch.cat([latentes[ordem[i]] for i in idx], dim=0)
         pred = unet.model(lat, t, encoder_hidden_states=aud).sample
+        if suave > 0:
+            # média móvel no tempo (no latente do rosto, que acompanha a cabeça): tira o tremor quadro a quadro
+            if ini == de:  # começo da parte: aquece com o quadro anterior para emendar sem salto
+                anterior = pred[:1].clone()
+            for j in range(len(pred)):
+                pred[j] = anterior[0] = (1 - suave) * pred[j] + suave * anterior[0]
         rostos = vae.decode_latents(pred)
         for i, r in zip(idx, rostos):
             k = ordem[i]
@@ -227,6 +238,7 @@ if __name__ == "__main__":
     ap.add_argument("--de", type=int, default=0)
     ap.add_argument("--ate", type=int, default=None)
     ap.add_argument("--so-video", action="store_true")
+    ap.add_argument("--suave", type=float, default=0.4, help="0 = sem suavização; 0.4 = boca estável")
     ap.add_argument("--lote", type=int, default=4, help="quadros por passo (4 cabe em 16 GB de RAM)")
     ap.add_argument("--realce", default=None, help="pesos do GFPGANv1.4.pth para nitidez da boca")
     ap.add_argument("--parte", type=int, default=None, help="índice da parte (0..partes-1)")
@@ -241,5 +253,5 @@ if __name__ == "__main__":
             passo = -(-total // a.partes)
             a.de, a.ate = a.parte * passo, min(total + 2, (a.parte + 1) * passo)
             a.so_video = True
-        falar(a.cache, a.audio, a.saida, a.de, a.ate, lote=a.lote, so_video=a.so_video,
+        falar(a.cache, a.audio, a.saida, a.de, a.ate, lote=a.lote, suave=a.suave, so_video=a.so_video,
               realce=os.path.abspath(a.realce) if a.realce else None)
