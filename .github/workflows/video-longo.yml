@@ -177,6 +177,8 @@ jobs:
           export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
           modal run gpu/kenji_longcat.py --imagem "$IMAGEM" --audio falas --saida clipes --resolucao 480p \
             --prompt "$PROMPT"
+          # dentes e lábios nítidos: 1080p + GFPGAN só na boca (o rosto no plano aberto é pequeno)
+          modal run gpu/realce_rosto.py --entrada clipes --saida clipes
       - uses: actions/upload-artifact@v4
         with:
           name: clipes

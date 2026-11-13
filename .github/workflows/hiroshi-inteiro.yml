@@ -17,7 +17,7 @@ on:
         default: bases/base-hiroshi-mesa.mp4
   push:
     branches: [claude/project-thread-f10yr5]
-    paths: [roteiros/amostra-podcast.txt, .github/workflows/hiroshi-inteiro.yml, gpu/hiroshi_inteiro.py]
+    paths: [roteiros/amostra-podcast.txt, .github/workflows/hiroshi-inteiro.yml, gpu/hiroshi_inteiro.py, gpu/realce_rosto.py]
 
 permissions:
   contents: read
@@ -84,7 +84,8 @@ jobs:
           TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
           export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
           export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
-          modal run gpu/hiroshi_inteiro.py --base "$BASE" --audio fala.wav --saida saida/sem-legenda.mp4
+          modal run gpu/hiroshi_inteiro.py --base "$BASE" --audio fala.wav --saida saida/boca.mp4
+          modal run gpu/realce_rosto.py --entrada saida/boca.mp4 --saida saida/sem-legenda.mp4
       - name: Legenda palavra por palavra + 1080p
         run: |
           pip install -q faster-whisper
