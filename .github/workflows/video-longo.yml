@@ -125,7 +125,7 @@ jobs:
   broll:
     needs: audio
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 100
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -162,6 +162,9 @@ jobs:
             export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
             export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
             timeout 35m modal run gpu/broll_imagens.py --roteiro faltam.txt --saida broll || echo "::warning::imagens falharam"
+            # imagem parada vira vídeo com movimento (LTX-Video); se falhar, fica a imagem com zoom
+            timeout 40m modal run gpu/broll_animar.py --roteiro "$ROTEIRO" --tempos tempos.json --broll broll \
+              || echo "::warning::animação falhou"
           fi
           exit 0
       - uses: actions/upload-artifact@v4
