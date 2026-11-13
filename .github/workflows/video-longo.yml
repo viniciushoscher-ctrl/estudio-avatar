@@ -219,7 +219,8 @@ jobs:
         run: |
           python motor/boca_longa.py $REALCE falar --cache "$GITHUB_WORKSPACE/cache_base" --audio "$GITHUB_WORKSPACE/fala.wav" \
             --saida "$GITHUB_WORKSPACE/parte-$(printf %02d ${{ matrix.parte }}).mp4" \
-            --parte ${{ matrix.parte }} --partes ${{ strategy.job-total }}
+            --parte ${{ matrix.parte }} --partes ${{ strategy.job-total }} \
+            --roteiro "$GITHUB_WORKSPACE/$ROTEIRO" --tempos "$GITHUB_WORKSPACE/tempos.json"
       - uses: actions/upload-artifact@v4
         with:
           name: parte-${{ matrix.parte }}

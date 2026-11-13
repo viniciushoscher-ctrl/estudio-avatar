@@ -178,7 +178,7 @@ def roteiro_base(m, total, semente=7):
 
 
 @torch.no_grad()
-def falar(cache, audio, saida, de=0, ate=None, lote=4, so_video=False, realce=None, suave=0.4):
+def falar(cache, audio, saida, de=0, ate=None, lote=4, so_video=False, realce=None, suave=0.4, pular=None):
     from transformers import WhisperModel
     from musetalk.utils.audio_processor import AudioProcessor
     from musetalk.utils.blending import get_image_blending
@@ -210,19 +210,32 @@ def falar(cache, audio, saida, de=0, ate=None, lote=4, so_video=False, realce=No
     t = torch.tensor([0])
     rest = Realce(realce) if realce else None
     print(f"[fala] quadros {de}..{ate} de {len(pedacos)}", flush=True)
-    for ini in range(de, ate, lote):
-        idx = list(range(ini, min(ini + lote, ate)))
+    pular = pular or set()
+    fazer = [i for i in range(de, ate) if i not in pular]
+    proximo, ultimo = de, None
+
+    def escrever_ate(fim):  # quadros cobertos pelo b-roll: vão sem boca (ninguém vê), quase de graça
+        nonlocal proximo
+        while proximo < fim:
+            ff.stdin.write(np.ascontiguousarray(b["quadros"][ordem[proximo]]).tobytes())
+            proximo += 1
+
+    for n0 in range(0, len(fazer), lote):
+        idx = fazer[n0:n0 + lote]
+        ini = idx[0]
         aud = pe(torch.stack([pedacos[i] for i in idx]))
         lat = torch.cat([latentes[ordem[i]] for i in idx], dim=0)
         pred = unet.model(lat, t, encoder_hidden_states=aud).sample
         if suave > 0:
             # média móvel no tempo (no latente do rosto, que acompanha a cabeça): tira o tremor quadro a quadro
-            if ini == de:  # começo da parte: aquece com o quadro anterior para emendar sem salto
-                anterior = pred[:1].clone()
-            for j in range(len(pred)):
+            for j, i in enumerate(idx):
+                if ultimo is None or i != ultimo + 1:  # começo de trecho: sem herança de outro ponto
+                    anterior = pred[j:j + 1].clone()
                 pred[j] = anterior[0] = (1 - suave) * pred[j] + suave * anterior[0]
+                ultimo = i
         rostos = vae.decode_latents(pred)
         for i, r in zip(idx, rostos):
+            escrever_ate(i)
             k = ordem[i]
             x1, y1, x2, y2 = b["caixas"][k]
             r = cv2.resize(r.astype(np.uint8), (x2 - x1, y2 - y1))
@@ -231,9 +244,11 @@ def falar(cache, audio, saida, de=0, ate=None, lote=4, so_video=False, realce=No
             if rest is not None:
                 q = rest(k, b["quadros"][k], q, b["mascaras"][k], b["caixas_mascara"][k])
             ff.stdin.write(np.ascontiguousarray(q).tobytes())
-        if (ini - de) % (lote * 25) == 0:
-            feito = min(ini + lote, ate) - de
-            print(f"[fala] {feito}/{ate - de} quadros, {feito / (time.time() - t0):.2f} q/s", flush=True)
+            proximo = i + 1
+        if n0 % (lote * 25) == 0:
+            feito = n0 + len(idx)
+            print(f"[fala] {feito}/{len(fazer)} quadros com boca, {feito / (time.time() - t0):.2f} q/s", flush=True)
+    escrever_ate(ate)
     ff.stdin.close()
     ff.wait()
     if so_video:  # parte de um vídeo longo: o áudio inteiro entra na junção final
@@ -257,6 +272,8 @@ if __name__ == "__main__":
     ap.add_argument("--ate", type=int, default=None)
     ap.add_argument("--so-video", action="store_true")
     ap.add_argument("--suave", type=float, default=0.4, help="0 = sem suavização; 0.4 = boca estável")
+    ap.add_argument("--roteiro", default=None, help="com --tempos: pula a boca nos trechos [broll:]")
+    ap.add_argument("--tempos", default=None)
     ap.add_argument("--lote", type=int, default=4, help="quadros por passo (4 cabe em 16 GB de RAM)")
     ap.add_argument("--realce", default=None, help="pesos do GFPGANv1.4.pth para nitidez da boca")
     ap.add_argument("--parte", type=int, default=None, help="índice da parte (0..partes-1)")
@@ -271,5 +288,14 @@ if __name__ == "__main__":
             passo = -(-total // a.partes)
             a.de, a.ate = a.parte * passo, min(total + 2, (a.parte + 1) * passo)
             a.so_video = True
-        falar(a.cache, a.audio, a.saida, a.de, a.ate, lote=a.lote, suave=a.suave, so_video=a.so_video,
+        pular = set()
+        if a.roteiro and a.tempos:
+            import json
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            from montar import trechos
+            for tr in trechos(a.roteiro, json.load(open(a.tempos))):
+                if tr["tipo"] == "broll":
+                    pular.update(range(tr["q0"] + 3, tr["q1"] - 3))  # margem de 3 quadros nos cortes
+            print(f"[fala] {len(pular)} quadros de b-roll sem boca", flush=True)
+        falar(a.cache, a.audio, a.saida, a.de, a.ate, lote=a.lote, suave=a.suave, pular=pular, so_video=a.so_video,
               realce=os.path.abspath(a.realce) if a.realce else None)
