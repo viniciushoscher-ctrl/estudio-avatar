@@ -1,0 +1,196 @@
+name: Vídeo longo do Hiroshi
+run-name: Vídeo longo ${{ github.run_number }} (${{ inputs.roteiro || 'roteiros/longo-teste.txt' }})
+
+# Vídeo de 20 a 30 min do Hiroshi falando, 100% grátis na CPU do GitHub (repositório público).
+# 1) voz: o roteiro é dividido em partes e cada máquina fala a sua (Qwen3-TTS, voz fixa do Hiroshi)
+# 2) base: o vídeo-base do Hiroshi é preparado uma vez (fica em cache)
+# 3) boca: o vídeo é dividido em até 20 partes; cada máquina redesenha a boca (MuseTalk 1.5, MIT)
+# 4) junta tudo com o áudio completo
+# Roteiro: um parágrafo por linha.
+
+on:
+  workflow_dispatch:
+    inputs:
+      roteiro:
+        description: "Arquivo do roteiro (um parágrafo por linha)"
+        default: roteiros/longo-teste.txt
+      base:
+        description: "Vídeo-base do Hiroshi"
+        default: bases/base-hiroshi.mp4
+      partes:
+        description: "Máquinas em paralelo para a boca (1 a 20)"
+        default: "20"
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [roteiros/longo-teste.txt]
+
+permissions:
+  contents: read
+
+env:
+  ROTEIRO: ${{ inputs.roteiro || 'roteiros/longo-teste.txt' }}
+  BASE: ${{ inputs.base || 'bases/base-hiroshi.mp4' }}
+  MUSETALK: ${{ github.workspace }}/musetalk
+  MUSETALK_COMMIT: 0a89dec
+  PARTES_VOZ: 8
+
+jobs:
+  planejar:
+    runs-on: ubuntu-latest
+    outputs:
+      voz: ${{ steps.p.outputs.voz }}
+      boca: ${{ steps.p.outputs.boca }}
+    steps:
+      - id: p
+        run: |
+          N=${{ inputs.partes || '20' }}
+          echo "voz=$(python3 -c "print(list(range($PARTES_VOZ)))")" >> "$GITHUB_OUTPUT"
+          echo "boca=$(python3 -c "print(list(range(min(20,max(1,$N)))))")" >> "$GITHUB_OUTPUT"
+
+  voz:
+    needs: planejar
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      matrix:
+        parte: ${{ fromJSON(needs.planejar.outputs.voz) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: qwen3-tts-base-v1
+      - name: Falar a parte ${{ matrix.parte }}
+        run: |
+          sudo apt-get install -y -qq sox > /dev/null
+          pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -q qwen-tts soundfile
+          python motor/voz_hiroshi.py "$ROTEIRO" voz-${{ matrix.parte }}.wav --parte ${{ matrix.parte }} --partes $PARTES_VOZ
+      - uses: actions/upload-artifact@v4
+        with:
+          name: voz-${{ matrix.parte }}
+          path: voz-${{ matrix.parte }}.wav
+
+  audio:
+    needs: voz
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: voz-*
+          merge-multiple: true
+      - name: Juntar a fala completa
+        run: |
+          ls voz-*.wav | sort -t- -k2 -n | sed "s/^/file '/; s/$/'/" > lista.txt
+          ffmpeg -loglevel error -f concat -safe 0 -i lista.txt -ar 24000 -ac 1 fala.wav
+          echo "Fala completa: $(ffprobe -v error -show_entries format=duration -of csv=p=0 fala.wav) s"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fala
+          path: fala.wav
+
+  base:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - &python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - &musetalk
+        name: Instalar o MuseTalk
+        run: |
+          git clone -q https://github.com/TMElyralab/MuseTalk "$MUSETALK" && git -C "$MUSETALK" checkout -q "$MUSETALK_COMMIT"
+          pip install -q torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q diffusers==0.30.2 accelerate==0.28.0 "numpy<2" opencv-python-headless==4.9.0.80 soundfile \
+            librosa==0.11.0 einops omegaconf transformers==4.39.2 "huggingface_hub==0.30.2" face-alignment setuptools
+      - &pesos
+        uses: actions/cache@v4
+        with:
+          path: musetalk/models
+          key: musetalk-pesos-v15
+      - &baixar
+        name: Baixar os pesos
+        run: |
+          cd "$MUSETALK" && python - <<'PY'
+          import os
+          from huggingface_hub import hf_hub_download as d
+          for repo, files, dest in [
+              ("TMElyralab/MuseTalk", ["musetalkV15/musetalk.json", "musetalkV15/unet.pth"], "models"),
+              ("stabilityai/sd-vae-ft-mse", ["config.json", "diffusion_pytorch_model.bin"], "models/sd-vae"),
+              ("openai/whisper-tiny", ["config.json", "pytorch_model.bin", "preprocessor_config.json"], "models/whisper"),
+              ("ManyOtherFunctions/face-parse-bisent", ["79999_iter.pth", "resnet18-5c106cde.pth"], "models/face-parse-bisent")]:
+              for f in files:
+                  if not os.path.exists(os.path.join(dest, f)):
+                      d(repo, f, local_dir=dest)
+          PY
+      - name: Chave do cache da base
+        run: echo "BASE_HASH=$(sha256sum "$BASE" | cut -c1-16)" >> "$GITHUB_ENV"
+      - id: cache
+        uses: actions/cache@v4
+        with:
+          path: cache_base
+          key: base-${{ env.BASE_HASH }}-v1
+      - name: Preparar a base (só quando a base muda)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: python motor/boca_longa.py preparar --base "$GITHUB_WORKSPACE/$BASE" --cache "$GITHUB_WORKSPACE/cache_base"
+
+  boca:
+    needs: [planejar, audio, base]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        parte: ${{ fromJSON(needs.planejar.outputs.boca) }}
+    steps:
+      - uses: actions/checkout@v4
+      - *python
+      - *musetalk
+      - *pesos
+      - *baixar
+      - name: Chave do cache da base
+        run: echo "BASE_HASH=$(sha256sum "$BASE" | cut -c1-16)" >> "$GITHUB_ENV"
+      - uses: actions/cache/restore@v4
+        with:
+          path: cache_base
+          key: base-${{ env.BASE_HASH }}-v1
+          fail-on-cache-miss: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: fala
+      - name: Boca da parte ${{ matrix.parte }}
+        run: |
+          python motor/boca_longa.py falar --cache "$GITHUB_WORKSPACE/cache_base" --audio "$GITHUB_WORKSPACE/fala.wav" \
+            --saida "$GITHUB_WORKSPACE/parte-$(printf %02d ${{ matrix.parte }}).mp4" \
+            --parte ${{ matrix.parte }} --partes ${{ strategy.job-total }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: parte-${{ matrix.parte }}
+          path: parte-*.mp4
+
+  juntar:
+    needs: boca
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: parte-*
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: fala
+      - name: Juntar o vídeo
+        run: |
+          ls parte-*.mp4 | sort | sed "s/^/file '/; s/$/'/" > lista.txt
+          ffmpeg -loglevel error -f concat -safe 0 -i lista.txt -i fala.wav -map 0:v -map 1:a \
+            -c:v copy -c:a aac -b:a 192k -shortest hiroshi-longo-${{ github.run_number }}.mp4
+          ffprobe -v error -show_entries format=duration -of csv=p=0 hiroshi-longo-*.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hiroshi-longo-${{ github.run_number }}
+          path: hiroshi-longo-*.mp4
