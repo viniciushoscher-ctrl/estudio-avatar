@@ -130,7 +130,19 @@ def nota(c, termos):
         + c["largura"] / 10000
 
 
-def candidatos(q, chave):
+JAPAO = {"japan", "japanese", "tokyo", "kyoto", "osaka", "okinawa", "okinawan", "asian", "asia", "kimono", "geisha"}
+PESSOAS = {"man", "men", "woman", "women", "people", "person", "family", "couple", "grandmother", "grandfather",
+           "grandma", "grandpa", "seniors", "senior", "elderly", "friends", "child", "children", "hands", "hand",
+           "fisherman", "gardener", "mother", "father", "group", "girl", "boy", "chef", "cook"}
+
+
+def precisa_japao(marca):
+    """Cena com gente descrita como japonesa: o clipe tem que ser de pessoa asiática (nada de jantar americano)."""
+    p = set(re.findall(r"[a-z]+", marca.lower()))
+    return bool(p & JAPAO) and bool(p & PESSOAS)
+
+
+def candidatos(q, chave, marca=""):
     termos = [t for t in re.findall(r"[a-z]+", q.lower()) if t not in ("japan", "japanese")]
     cands = []
     buscas = [q] + ([" ".join(termos)] if termos else []) + ([termos[-1]] if len(termos) > 1 else [])
@@ -145,8 +157,13 @@ def candidatos(q, chave):
         if c["id"] not in vistos:
             vistos.add(c["id"])
             unicos.append(c)
-    minimo = 2 if len(termos) >= 2 else 1
-    unicos = [c for c in unicos if acertos(c, termos) >= minimo or not termos]
+    # busca curta (até 3 palavras): todas têm que estar no nome do clipe ("green tea field" não aceita
+    # "green cabbage field"); busca maior: falta no máximo 1, e o 1º termo é obrigatório
+    minimo = len(termos) if len(termos) <= 3 else len(termos) - 1
+    primeiro = termos[0] if termos else ""
+    unicos = [c for c in unicos if not termos or (acertos(c, termos) >= minimo and acertos(c, [primeiro]))]
+    if precisa_japao(marca + " " + q):
+        unicos = [c for c in unicos if c["palavras"] & JAPAO]
     return sorted(unicos, key=lambda c: -nota(c, termos))
 
 
@@ -175,7 +192,7 @@ def main(roteiro, tempos, saida):
         precisa = (t["q1"] - t["q0"]) / 25 + 0.5
         q = busca(m.group(1))
         tem, k = 0.0, 0
-        for c in candidatos(q, chave):
+        for c in candidatos(q, chave, m.group(1)):
             if c["id"] in usados:
                 continue
             destino = Path(saida, f"linha-{t['linha']:03d}-{k + 1}.mp4")
