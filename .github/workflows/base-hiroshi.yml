@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   push:
     branches: [claude/project-thread-f10yr5]
-    paths: [bases/fala-base.wav, avatares/hiroshi-mesa.png]
+    paths: [bases/fala-base.wav, avatares/hiroshi-mesa.png, .github/workflows/base-hiroshi.yml]
 
 env:
   # Hiroshi sentado à mesa, 16:9, como o canal de referência (avatar quase parado, mãos na mesa)
