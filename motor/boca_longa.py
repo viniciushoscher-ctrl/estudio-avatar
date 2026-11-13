@@ -30,9 +30,23 @@ FPS = 25
 MARGEM = 10  # extra_margin do MuseTalk 1.5
 
 
-def caixa_do_rosto(fa, quadro):
-    """Mesma regra do MuseTalk (preprocessing.get_landmark_and_bbox), com face_alignment no lugar do DWPose."""
-    pts = fa.get_landmarks(quadro[:, :, ::-1])
+def detectar(fa, quadro):
+    """Caixa do rosto pelo detector (S3FD) numa cópia reduzida do quadro: ~4x mais rápido na CPU."""
+    f = 480 / max(quadro.shape[:2]) if max(quadro.shape[:2]) > 480 else 1.0
+    peq = cv2.resize(quadro, None, fx=f, fy=f, interpolation=cv2.INTER_AREA) if f < 1 else quadro
+    caixas = fa.face_detector.detect_from_image(peq[:, :, ::-1].copy())
+    if len(caixas) == 0:
+        return None
+    c = max(caixas, key=lambda c: (c[2] - c[0]) * (c[3] - c[1]))
+    return [c[0] / f, c[1] / f, c[2] / f, c[3] / f, c[4]]
+
+
+def caixa_do_rosto(fa, quadro, detectado=None):
+    """Mesma regra do MuseTalk (preprocessing.get_landmark_and_bbox), com face_alignment no lugar do DWPose.
+
+    detectado: caixa do detector (reaproveitada por alguns quadros; o detector é a parte lenta).
+    """
+    pts = fa.get_landmarks(quadro[:, :, ::-1], detected_faces=[detectado]) if detectado else None
     if not pts:
         return None
     lm = pts[0].astype(np.int32)
@@ -60,9 +74,13 @@ def preparar(base, cache):
             break
         quadros.append(q)
     print(f"[base] {len(quadros)} quadros", flush=True)
-    caixas, ultima = [], None
-    for q in quadros:
-        c = caixa_do_rosto(fa, q) or ultima
+    caixas, ultima, det = [], None, None
+    for i, q in enumerate(quadros):
+        if i % 5 == 0 or det is None:  # o detector roda a cada 5 quadros; os pontos do rosto, em todos
+            det = detectar(fa, q) or det
+        c = caixa_do_rosto(fa, q, det) or ultima
+        if i % 100 == 0:
+            print(f"[base] rosto {i}/{len(quadros)}", flush=True)
         c[3] = min(c[3] + MARGEM, q.shape[0])
         caixas.append(c)
         ultima = list(c)
