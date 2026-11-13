@@ -28,6 +28,15 @@ CENA_MESA = (
     "a small bonsai and a cup of green tea on the desk. Photorealistic, natural skin texture, 35mm "
     "documentary photo, shallow depth of field."
 )
+CENA_PODCAST = (
+    "Show this exact same man, same face, same gray hair, same age and same navy shirt, sitting in a "
+    "calm traditional Japanese room recording a podcast. Wide horizontal 16:9 medium shot from the chest "
+    "up, centered, a black podcast microphone on a boom arm in front of him at chin height, slightly to "
+    "the side so the whole mouth stays visible, looking straight at the camera with a gentle expression, "
+    "mouth closed. Behind him shoji paper screens with warm soft light, a low wooden shelf with a few "
+    "ceramics and a small bonsai, warm lamp glow. Photorealistic, natural skin texture, 35mm "
+    "documentary photo, shallow depth of field."
+)
 NEGATIVO = "cartoon, illustration, 3d render, blurry, deformed hands, extra fingers, text, watermark"
 
 
@@ -61,6 +70,6 @@ def main(imagem: str = "avatares/rosto-japones.png", saida: str = "cenas", promp
     foto = Path(imagem).read_bytes()
     c = Cena()
     for s in range(1, variacoes + 1):
-        png = c.gerar.remote(foto, prompt.strip() or CENA_MESA, s, largura, altura)
+        png = c.gerar.remote(foto, prompt.strip() or CENA_PODCAST, s, largura, altura)
         Path(saida, f"cena-{s}.png").write_bytes(png)
         print(f"[cena] {saida}/cena-{s}.png", flush=True)
