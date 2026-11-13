@@ -31,8 +31,8 @@ app = modal.App("hiroshi-latentsync")
 pesos = modal.Volume.from_name("latentsync-pesos", create_if_missing=True)
 
 image = (
-    modal.Image.debian_slim(python_version="3.10")
-    .apt_install("git", "ffmpeg", "libgl1", "libglib2.0-0")
+    modal.Image.debian_slim(python_version="3.11")
+    .apt_install("git", "ffmpeg", "libgl1", "libglib2.0-0", "build-essential")
     .pip_install("torch==2.5.1", "torchvision==0.20.1", index_url="https://download.pytorch.org/whl/cu121")
     .pip_install(
         "diffusers==0.32.2", "transformers==4.48.0", "decord==0.6.0", "accelerate==0.26.1",
