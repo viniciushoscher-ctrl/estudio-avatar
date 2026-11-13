@@ -53,7 +53,7 @@ image = (
 )
 
 FPS = 25
-QUADROS = 125          # 5 s por trecho (igual ao Space)
+QUADROS = 125          # 5 s por trecho (igual ao Space); falas longas usam vários trechos
 COND = 13              # quadros de continuidade entre trechos (igual ao demo oficial)
 PROMPT_PADRAO = (
     "A real elderly Japanese man in his sixties, filmed from the chest up, talking warmly and "

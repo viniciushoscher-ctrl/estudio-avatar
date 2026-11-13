@@ -21,8 +21,8 @@ on:
         description: "Como ele se mexe (em inglês; vazio = padrão)"
         default: ""
       voz:
-        description: "Voz do Kokoro (am_michael, am_fenrir, am_puck, bm_george, bm_fable...)"
-        default: am_michael
+        description: "hiroshi (voz fixa do canal) ou uma voz do Kokoro (am_michael, bm_george...)"
+        default: hiroshi
       velocidade:
         description: "Velocidade da fala"
         default: "0.95"
@@ -56,17 +56,21 @@ jobs:
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg espeak-ng
           pip install -q torch --index-url https://download.pytorch.org/whl/cpu
-          pip install -q kokoro==0.9.4 soundfile modal \
+          pip install -q kokoro==0.9.4 qwen-tts soundfile modal \
             "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"
-      - name: Voz (Kokoro)
+      - name: Voz (Hiroshi no Qwen3-TTS; Kokoro se voz != hiroshi)
         env:
           ROTEIRO: ${{ inputs.roteiro || 'roteiros/kenji-falas.txt' }}
           TEXTO: ${{ inputs.texto }}
-          VOZ: ${{ inputs.voz || 'am_michael' }}
+          VOZ: ${{ inputs.voz || 'hiroshi' }}
           VELOCIDADE: ${{ inputs.velocidade || '0.95' }}
         run: |
           if [[ -n "$TEXTO" ]]; then printf '%s\n' "$TEXTO" > /tmp/roteiro.txt; else cp "$ROTEIRO" /tmp/roteiro.txt; fi
-          python motor/voz_kokoro.py /tmp/roteiro.txt falas "$VOZ" "$VELOCIDADE"
+          if [[ "$VOZ" == hiroshi ]]; then
+            python motor/voz_hiroshi.py /tmp/roteiro.txt falas
+          else
+            python motor/voz_kokoro.py /tmp/roteiro.txt falas "$VOZ" "$VELOCIDADE"
+          fi
       - name: Vídeo (LongCat-Video-Avatar na GPU da Modal)
         timeout-minutes: 120
         env:
