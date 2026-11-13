@@ -1,0 +1,88 @@
+name: Novo avatar
+run-name: Novo avatar ${{ github.run_number }}
+
+# Avatar novo a partir de UMA imagem (ex.: retrato gerado no Gemini):
+# 1) cena: o mesmo rosto sentado à mesa, 16:9, mãos na mesa (Qwen-Image-Edit-2509, GPU da Modal), 4 opções
+# 2) voz: 4 vozes criadas por descrição (Qwen3-TTS VoiceDesign, CPU do GitHub, grátis)
+# Configuração em avatares/novos/<nome>.json (ver a skill video-avatar-longcat).
+
+on:
+  workflow_dispatch:
+    inputs:
+      config:
+        description: "avatares/novos/<nome>.json"
+        required: true
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [avatares/novos/*.json]
+
+permissions:
+  contents: read
+
+jobs:
+  planejar:
+    runs-on: ubuntu-latest
+    outputs:
+      config: ${{ steps.c.outputs.config }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: c
+        run: |
+          C="${{ inputs.config }}"
+          [ -z "$C" ] && C=$(git diff --name-only HEAD~1 HEAD -- 'avatares/novos/*.json' | tail -n1)
+          echo "config=$C" >> "$GITHUB_OUTPUT"; echo "Config: $C"
+
+  cena:
+    needs: planejar
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Cena à mesa com o mesmo rosto (GPU da Modal)
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          CONFIG: ${{ needs.planejar.outputs.config }}
+        run: |
+          pip install -q modal
+          TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
+          export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          ROSTO=$(python3 -c "import json;print(json.load(open('$CONFIG'))['rosto'])")
+          CENA=$(python3 -c "import json;print(json.load(open('$CONFIG'))['cena'])")
+          modal run gpu/hiroshi_cena.py --imagem "$ROSTO" --saida cenas --prompt "$CENA"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cenas
+          path: cenas/
+
+  voz:
+    needs: planejar
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: qwen3-tts-voicedesign-v1
+      - name: Vozes por descrição (Qwen3-TTS VoiceDesign, CPU)
+        env:
+          CONFIG: ${{ needs.planejar.outputs.config }}
+        run: |
+          sudo apt-get install -y -qq sox > /dev/null
+          pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -q qwen-tts soundfile
+          python motor/voz_criar.py "$CONFIG" vozes-novas
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vozes
+          path: vozes-novas/

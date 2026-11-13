@@ -30,8 +30,9 @@ a = ap.parse_args()
 
 torch.manual_seed(1); random.seed(1); np.random.seed(1)
 m = Qwen3TTSModel.from_pretrained("Qwen/Qwen3-TTS-12Hz-1.7B-Base", dtype=torch.float32, device_map="cpu")
-prompt = m.create_voice_clone_prompt(ref_audio=str(AQUI / "vozes" / "hiroshi.wav"),
-                                     ref_text=(AQUI / "vozes" / "hiroshi.txt").read_text(encoding="utf-8").strip())
+VOZ = __import__("os").environ.get("VOZ", "hiroshi").strip() or "hiroshi"  # vozes/<VOZ>.wav + .txt
+prompt = m.create_voice_clone_prompt(ref_audio=str(AQUI / "vozes" / f"{VOZ}.wav"),
+                                     ref_text=(AQUI / "vozes" / f"{VOZ}.txt").read_text(encoding="utf-8").strip())
 # "[broll: ...]" / "[split: ...]" / "[avatar]" no começo da linha são instruções de edição (motor/montar.py)
 falas = [re.sub(r"^\s*\[[^\]]*\]\s*", "", l).strip()
          for l in Path(a.roteiro).read_text(encoding="utf-8").splitlines() if l.strip()]

@@ -30,7 +30,7 @@ on:
         default: longcat
   push:
     branches: [claude/project-thread-f10yr5]
-    paths: [roteiros/produzir.txt]
+    paths: [roteiros/produzir.txt, roteiros/produzir-avatar.txt]
 
 permissions:
   contents: read
@@ -85,6 +85,7 @@ jobs:
           sudo apt-get install -y -qq sox > /dev/null
           pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
           pip install -q qwen-tts soundfile
+          export VOZ=$(cat roteiros/produzir-avatar.txt 2>/dev/null | tr -d '[:space:]'); VOZ=${VOZ:-hiroshi}
           python motor/voz_hiroshi.py "$ROTEIRO" voz-${{ matrix.parte }}.wav --parte ${{ matrix.parte }} --partes $PARTES_VOZ
       - uses: actions/upload-artifact@v4
         with:
@@ -199,6 +200,10 @@ jobs:
           TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
           export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
           export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          AV=$(cat roteiros/produzir-avatar.txt 2>/dev/null | tr -d '[:space:]'); AV=${AV:-hiroshi}
+          IMAGEM=avatares/$AV-mesa.png
+          [ -f avatares/$AV-prompt.txt ] && PROMPT=$(cat avatares/$AV-prompt.txt)
+          echo "Avatar: $AV ($IMAGEM)"
           modal run gpu/kenji_longcat.py::main --imagem "$IMAGEM" --audio falas --saida clipes --resolucao 720p \
             --prompt "$PROMPT"
       - name: Cor da boca (dentes brancos, lábios naturais; só cor, sem redesenhar)
