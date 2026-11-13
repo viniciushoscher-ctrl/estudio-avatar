@@ -1,12 +1,14 @@
 name: Vídeo longo do Hiroshi
 run-name: Vídeo longo ${{ github.run_number }} (${{ inputs.roteiro || 'roteiros/amostra-mesa.txt' }})
 
-# Vídeo de 20 a 30 min do Hiroshi falando, 100% grátis na CPU do GitHub (repositório público).
+# Vídeo de 20 a 30 min do Hiroshi no formato dos canais de avatar (Hiroshi + tela dividida + b-roll).
 # 1) voz: o roteiro é dividido em partes e cada máquina fala a sua (Qwen3-TTS, voz fixa do Hiroshi)
-# 2) base: o vídeo-base do Hiroshi é preparado uma vez (fica em cache)
-# 3) boca: o vídeo é dividido em até 20 partes; cada máquina redesenha a boca (MuseTalk 1.5, MIT)
-# 4) junta tudo com o áudio completo
-# Roteiro: um parágrafo por linha.
+# 2) avatar (padrão): cada trecho em que o Hiroshi aparece é gerado pelo LongCat na GPU da Modal com o
+#    áudio daquele trecho (boca, cabeça, mãos e expressão nascem da fala). ~US$ 1,5 por 37 s de Hiroshi.
+#    motor=musetalk: alternativa 100% grátis na CPU (qualidade bem menor: base em laço + boca MuseTalk)
+# 3) b-roll: imagens de IA (Qwen-Image) para as linhas [broll:] e [split:]
+# 4) montagem final em 1080p com a fala completa
+# Roteiro: um parágrafo por linha; [broll: ...] e [split: ...] no começo da linha.
 
 on:
   workflow_dispatch:
@@ -21,8 +23,11 @@ on:
         description: "Máquinas em paralelo para a boca (1 a 20)"
         default: "20"
       realce:
-        description: "Boca nítida com GFPGAN 1.4 (sim/nao)"
+        description: "Boca nítida com GFPGAN 1.4 (sim/nao) - só motor musetalk"
         default: "sim"
+      motor:
+        description: "longcat (qualidade, GPU da Modal) ou musetalk (grátis, CPU)"
+        default: longcat
   push:
     branches: [claude/project-thread-f10yr5]
     paths: [roteiros/amostra-mesa.txt]
@@ -33,6 +38,14 @@ permissions:
 env:
   ROTEIRO: ${{ inputs.roteiro || 'roteiros/amostra-mesa.txt' }}
   BASE: ${{ inputs.base || 'bases/base-hiroshi-mesa.mp4' }}
+  MOTOR: ${{ inputs.motor || 'longcat' }}
+  IMAGEM: avatares/hiroshi-mesa.png
+  PROMPT: >-
+    A real elderly Japanese man in his sixties sitting at a wooden desk in his home study, filmed
+    in a wide horizontal medium shot, talking calmly and warmly to the camera like a YouTuber
+    explaining something important. Hands stay folded and resting on the desk, only small natural
+    hand movements. Natural blinking, subtle head nods and tilts, relaxed shoulders, realistic skin
+    texture, soft natural window light, static camera, documentary realism.
   MUSETALK: ${{ github.workspace }}/musetalk
   MUSETALK_COMMIT: 0a89dec
   PARTES_VOZ: 8
@@ -138,7 +151,39 @@ jobs:
           path: broll/
           include-hidden-files: true
 
+  avatar:
+    needs: audio
+    if: ${{ (inputs.motor || 'longcat') == 'longcat' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@v4
+        with:
+          name: fala
+      - name: Hiroshi falando cada trecho (LongCat 480p, GPU da Modal)
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          python motor/cortar_falas.py --roteiro "$ROTEIRO" --tempos tempos.json --audio fala.wav --saida falas
+          pip install -q modal
+          TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
+          export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          modal run gpu/kenji_longcat.py --imagem "$IMAGEM" --audio falas --saida clipes --resolucao 480p \
+            --prompt "$PROMPT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clipes
+          path: clipes/
+
   base:
+    if: ${{ inputs.motor == 'musetalk' }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
     steps:
@@ -188,6 +233,7 @@ jobs:
 
   boca:
     needs: [planejar, audio, base]
+    if: ${{ inputs.motor == 'musetalk' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     strategy:
@@ -229,12 +275,13 @@ jobs:
           path: parte-*.mp4
 
   juntar:
-    needs: [boca, broll]
-    if: ${{ !cancelled() && needs.boca.result == 'success' }}
+    needs: [boca, avatar, broll]
+    if: ${{ !cancelled() && (needs.boca.result == 'success' || needs.avatar.result == 'success') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
+        if: ${{ needs.boca.result == 'success' }}
         with:
           pattern: parte-*
           merge-multiple: true
@@ -245,12 +292,22 @@ jobs:
         with:
           name: broll
           path: broll
+      - uses: actions/download-artifact@v4
+        if: ${{ needs.avatar.result == 'success' }}
+        with:
+          name: clipes
+          path: clipes
       - name: Juntar e editar o vídeo (avatar, tela dividida e b-roll)
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
-          ls parte-*.mp4 | sort | sed "s/^/file '/; s/$/'/" > lista.txt
-          ffmpeg -loglevel error -f concat -safe 0 -i lista.txt -c copy avatar.mp4
-          python3 motor/montar.py --roteiro "$ROTEIRO" --tempos tempos.json --avatar avatar.mp4 \
+          if ls parte-*.mp4 >/dev/null 2>&1; then
+            ls parte-*.mp4 | sort | sed "s/^/file '/; s/$/'/" > lista.txt
+            ffmpeg -loglevel error -f concat -safe 0 -i lista.txt -c copy avatar.mp4
+            FONTE="--avatar avatar.mp4"
+          else
+            FONTE="--clipes clipes"
+          fi
+          python3 motor/montar.py --roteiro "$ROTEIRO" --tempos tempos.json $FONTE \
             --audio fala.wav --broll broll --saida hiroshi-longo-${{ github.run_number }}.mp4
           ffprobe -v error -show_entries format=duration -of csv=p=0 hiroshi-longo-*.mp4
       - uses: actions/upload-artifact@v4

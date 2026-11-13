@@ -53,7 +53,7 @@ def zoom(img, quadros, w, h, sentido):
             f"setsar=1")
 
 
-def montar(roteiro, tempos, avatar, audio, broll, saida):
+def montar(roteiro, tempos, avatar, audio, broll, saida, clipes=None):
     tempos = json.loads(Path(tempos).read_text())
     tmp = Path(tempfile.mkdtemp())
     lista = []
@@ -64,17 +64,20 @@ def montar(roteiro, tempos, avatar, audio, broll, saida):
         ini, dur = t["q0"] / FPS, n / FPS
         seg = tmp / f"s{k:04d}.mp4"
         img = Path(broll, f"linha-{t['linha']:03d}.jpg")
+        clipe = Path(clipes, f"linha-{t['linha']:03d}.mp4") if clipes else None
+        fonte, ini_fonte = (str(clipe), 0.0) if clipe and clipe.exists() else (avatar, ini)
         tipo = t["tipo"] if img.exists() or t["tipo"] == "avatar" else "avatar"
         enc = ["-frames:v", str(n), "-r", str(FPS), "-an", "-c:v", "libx264", "-crf", "18", "-preset", "fast",
                "-pix_fmt", "yuv420p", str(seg)]
         if tipo == "avatar":
-            ff("-ss", f"{ini:.3f}", "-i", avatar, "-vf",
-               f"scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,crop={W}:{H},setsar=1", *enc)
+            ff("-ss", f"{ini_fonte:.3f}", "-i", fonte, "-vf",
+               f"scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,crop={W}:{H},setsar=1,"
+               "tpad=stop_mode=clone:stop=50", *enc)
         elif tipo == "broll":
             ff("-loop", "1", "-i", str(img), "-vf", zoom(img, n, W, H, k % 2 == 0), *enc)
         else:  # split: Hiroshi à esquerda (recorte central), imagem à direita
-            ff("-ss", f"{ini:.3f}", "-i", avatar, "-loop", "1", "-i", str(img), "-filter_complex",
-               f"[0:v]crop=ih*{W // 2}/{H}:ih,scale={W // 2}:{H}:flags=lanczos,setsar=1[a];"
+            ff("-ss", f"{ini_fonte:.3f}", "-i", fonte, "-loop", "1", "-i", str(img), "-filter_complex",
+               f"[0:v]crop=ih*{W // 2}/{H}:ih,scale={W // 2}:{H}:flags=lanczos,setsar=1,tpad=stop_mode=clone:stop=50[a];"
                f"[1:v]{zoom(img, n, W // 2, H, k % 2 == 0)}[b];[a][b]hstack=inputs=2[v]",
                "-map", "[v]", *enc)
         lista.append(seg)
@@ -87,7 +90,9 @@ def montar(roteiro, tempos, avatar, audio, broll, saida):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    for a in ["roteiro", "tempos", "avatar", "audio", "broll", "saida"]:
+    for a in ["roteiro", "tempos", "audio", "broll", "saida"]:
         ap.add_argument(f"--{a}", required=True)
+    ap.add_argument("--avatar", default=None, help="vídeo do avatar inteiro (motor MuseTalk)")
+    ap.add_argument("--clipes", default=None, help="pasta com um clipe do LongCat por trecho (linha-NNN.mp4)")
     a = ap.parse_args()
-    montar(a.roteiro, a.tempos, a.avatar, a.audio, a.broll, a.saida)
+    montar(a.roteiro, a.tempos, a.avatar, a.audio, a.broll, a.saida, a.clipes)
