@@ -40,12 +40,13 @@ env:
   BASE: ${{ inputs.base || 'bases/base-hiroshi-mesa.mp4' }}
   MOTOR: ${{ inputs.motor || 'longcat' }}
   IMAGEM: avatares/hiroshi-perto.png
+  # prompt padrão do LongCat (teste de 13/11: pedir "teeth"/"close-up" no prompt deixava dentes verdes,
+  # lábios roxos e legendas inventadas)
   PROMPT: >-
-    A real elderly Japanese man in his sixties in his calm traditional Japanese home, filmed in a
-    horizontal medium close-up from the chest up, talking calmly and warmly to the camera like a
-    YouTuber explaining something important. Natural blinking, subtle head nods and tilts, relaxed
-    shoulders, realistic skin texture and natural teeth, soft natural window light, static camera,
-    documentary realism.
+    A real elderly Japanese man in his sixties, filmed from the chest up, talking warmly and
+    naturally to the camera like a YouTuber sharing life advice. Natural blinking, subtle head
+    nods and tilts, relaxed shoulders, occasional gentle hand gestures, realistic skin texture,
+    soft natural window light, documentary realism.
   MUSETALK: ${{ github.workspace }}/musetalk
   MUSETALK_COMMIT: 0a89dec
   PARTES_VOZ: 8
