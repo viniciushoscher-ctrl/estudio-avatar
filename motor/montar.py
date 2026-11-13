@@ -20,7 +20,8 @@ import tempfile
 from pathlib import Path
 
 FPS = 25
-W, H = 1920, 1080
+# saída padrão em 4K (o YouTube dá bitrate e codec melhores para vídeos 4K); SAIDA_RES=1920x1080 volta para HD
+W, H = map(int, os.environ.get("SAIDA_RES", "3840x2160").split("x"))
 
 
 def ff(*args):
@@ -48,7 +49,9 @@ def trechos(roteiro, tempos):
 def zoom(img, quadros, w, h, sentido):
     """Filtro de zoom lento (Ken Burns) para uma imagem parada."""
     z = f"min(1+0.10*on/{quadros},1.10)" if sentido else f"max(1.10-0.10*on/{quadros},1.0)"
-    return (f"scale={w * 2}:{h * 2}:force_original_aspect_ratio=increase,crop={w * 2}:{h * 2},"
+    k = 2 if w <= 1920 else 1.25  # imagem maior que a saída: zoom suave sem tremer
+    sw, sh = int(w * k) // 2 * 2, int(h * k) // 2 * 2
+    return (f"scale={sw}:{sh}:force_original_aspect_ratio=increase:flags=lanczos,crop={sw}:{sh},"
             f"zoompan=z='{z}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={quadros}:s={w}x{h}:fps={FPS},"
             f"setsar=1")
 
@@ -71,13 +74,13 @@ def montar(roteiro, tempos, avatar, audio, broll, saida, clipes=None):
                "-pix_fmt", "yuv420p", str(seg)]
         if tipo == "avatar":
             ff("-ss", f"{ini_fonte:.3f}", "-i", fonte, "-vf",
-               f"scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,crop={W}:{H},setsar=1,"
+               f"scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,crop={W}:{H},unsharp=5:5:0.6,setsar=1,"
                "tpad=stop_mode=clone:stop=50", *enc)
         elif tipo == "broll":
             ff("-loop", "1", "-i", str(img), "-vf", zoom(img, n, W, H, k % 2 == 0), *enc)
         else:  # split: Hiroshi à esquerda (recorte central), imagem à direita
             ff("-ss", f"{ini_fonte:.3f}", "-i", fonte, "-loop", "1", "-i", str(img), "-filter_complex",
-               f"[0:v]crop=ih*{W // 2}/{H}:ih,scale={W // 2}:{H}:flags=lanczos,setsar=1,tpad=stop_mode=clone:stop=50[a];"
+               f"[0:v]crop=ih*{W // 2}/{H}:ih,scale={W // 2}:{H}:flags=lanczos,unsharp=5:5:0.6,setsar=1,tpad=stop_mode=clone:stop=50[a];"
                f"[1:v]{zoom(img, n, W // 2, H, k % 2 == 0)}[b];[a][b]hstack=inputs=2[v]",
                "-map", "[v]", *enc)
         lista.append(seg)

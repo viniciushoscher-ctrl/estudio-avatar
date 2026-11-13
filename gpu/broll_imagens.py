@@ -45,7 +45,7 @@ class Broll:
         pesos.commit()
 
     @modal.method()
-    def gerar(self, prompts: list, largura: int = 1344, altura: int = 768) -> list:
+    def gerar(self, prompts: list, largura: int = 1664, altura: int = 928) -> list:
         import torch
         pngs = []
         for i, p in enumerate(prompts):

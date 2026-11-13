@@ -4,6 +4,7 @@ Tempos das palavras com faster-whisper (MIT) na CPU; desenho com o libass do ffm
 Uso: python motor/legendas.py video.mp4 saida.mp4 [--modelo base.en]
 """
 import argparse
+import os
 import subprocess
 from pathlib import Path
 
@@ -56,15 +57,15 @@ def main():
     ap.add_argument("saida")
     ap.add_argument("--modelo", default="base.en")
     a = ap.parse_args()
-    w, h = 1920, 1080  # sai sempre em 1080p
+    w, h = map(int, os.environ.get("SAIDA_RES", "3840x2160").split("x"))  # 4K para o YouTube
     wav = Path(a.saida).with_suffix(".wav")
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", a.video, "-ar", "16000", "-ac", "1", str(wav)], check=True)
     ps = palavras(str(wav), a.modelo)
     arq = Path(a.saida).with_suffix(".ass")
     arq.write_text(ass(ps, w, h), encoding="utf-8")
     print(len(ps), "palavras")
-    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", a.video, "-vf", f"scale={w}:{h}:force_original_aspect_ratio=increase:flags=lanczos,crop={w}:{h},ass={arq}", "-c:v", "libx264",
-                    "-crf", "18", "-preset", "medium", "-pix_fmt", "yuv420p", "-c:a", "copy", a.saida], check=True)
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", a.video, "-vf", f"scale={w}:{h}:force_original_aspect_ratio=increase:flags=lanczos,crop={w}:{h},unsharp=5:5:0.6,ass={arq}", "-c:v", "libx264",
+                    "-crf", "18", "-preset", "fast", "-pix_fmt", "yuv420p", "-c:a", "copy", a.saida], check=True)
 
 
 if __name__ == "__main__":

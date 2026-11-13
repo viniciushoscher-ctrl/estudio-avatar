@@ -6,11 +6,13 @@ Como funciona (tudo open source, Apache-2.0):
 2. A base é esticada até o tamanho do áudio andando para a frente e para trás em trechos de
    duração aleatória (sem repetição periódica, que o olho percebe).
 3. O LatentSync 1.6 (ByteDance) redesenha só a boca em 512 px sincronizada com a voz.
+   A base é ampliada para 1080p antes, para os dentes saírem nítidos.
 4. O áudio é dividido em pedaços de ~60 s que rodam em paralelo em várias GPUs e são
    colados no fim, com a trilha original inteira (sem emendas no som).
 
 Uso:
     modal run gpu/hiroshi_inteiro.py --base bases/base-hiroshi-podcast.mp4 --audio fala.wav --saida hiroshi.mp4
+    modal run gpu/hiroshi_inteiro.py --clipes-dir clipes --falas falas --saida clipes   # clipes do LongCat
 """
 import json
 import os
@@ -116,11 +118,56 @@ def _quadros(p):
     return int(r.stdout.strip())
 
 
-@app.local_entrypoint()
-def main(base: str, audio: str, saida: str = "hiroshi-falando.mp4", passos: int = 20, semente: int = 7):
+HD = "scale=1920:1080:force_original_aspect_ratio=increase:flags=lanczos,crop=1920:1080,setsar=1"
+
+
+def _hd(origem, destino):
+    """Base em 1080p antes da boca: o rosto fica com ~270 px e o LatentSync desenha dentes e lábios
+    nessa resolução (no vídeo de 480p a boca tem ~40 px e os dentes viram mancha)."""
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(origem), "-r", str(FPS), "-an", "-vf", HD,
+                    "-c:v", "libx264", "-crf", "14", "-pix_fmt", "yuv420p", str(destino)], check=True)
+
+
+def _wav16(origem, destino, ini=None, dur=None):
+    corte = ["-ss", str(ini), "-t", str(dur)] if ini is not None else []
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", *corte, "-i", str(origem), "-ar", "16000", "-ac", "1",
+                    str(destino)], check=True)
+
+
+def clipes(pasta_clipes, pasta_falas, saida, passos):
+    """Formato com b-roll: cada clipe do LongCat (linha-NNN.mp4) recebe a boca do LatentSync com a
+    própria fala (falas/linha-NNN.wav), em 1080p, todos em paralelo."""
     t = Path(tempfile.mkdtemp())
-    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", base, "-r", str(FPS), "-an", "-c:v", "libx264",
-                    "-crf", "16", "-pix_fmt", "yuv420p", str(t / "base.mp4")], check=True)
+    nomes, cargas = [], []
+    for c in sorted(Path(pasta_clipes).glob("linha-*.mp4")):
+        fala = Path(pasta_falas) / (c.stem + ".wav")
+        if not fala.exists():
+            continue
+        _hd(c, t / c.name)
+        _wav16(fala, t / (c.stem + ".wav"))
+        n = _quadros(str(t / c.name))
+        total = int(round(_dur(str(fala)) * FPS)) + FPS // 2
+        ordem = [min(i, n - 1) for i in range(total)]
+        cargas.append(((t / c.name).read_bytes(), (t / (c.stem + ".wav")).read_bytes(), ordem, passos))
+        nomes.append(c)
+    print(f"{len(cargas)} clipe(s) em paralelo")
+    Path(saida).mkdir(parents=True, exist_ok=True)
+    for c, video in zip(nomes, sincronizar.starmap(cargas)):
+        bruto = t / (c.stem + "-boca.mp4")
+        bruto.write_bytes(video)
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(bruto), "-i", str(Path(pasta_falas) / (c.stem + ".wav")),
+                        "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-shortest",
+                        str(Path(saida) / c.name)], check=True)
+        print(f"[boca] {Path(saida) / c.name}", flush=True)
+
+
+@app.local_entrypoint()
+def main(base: str = "", audio: str = "", saida: str = "hiroshi-falando.mp4", passos: int = 20, semente: int = 7,
+         clipes_dir: str = "", falas: str = ""):
+    if clipes_dir:
+        return clipes(clipes_dir, falas, saida, passos)
+    t = Path(tempfile.mkdtemp())
+    _hd(base, t / "base.mp4")
     n = _quadros(str(t / "base.mp4"))
     dur = _dur(audio)
     total = int(round(dur * FPS))
@@ -130,8 +177,7 @@ def main(base: str, audio: str, saida: str = "hiroshi-falando.mp4", passos: int 
     while k * PEDACO < dur:
         ini, fim = k * PEDACO, min((k + 1) * PEDACO, dur)
         wav = t / f"a{k:03d}.wav"
-        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-ss", str(ini), "-t", str(fim - ini), "-i", audio,
-                        "-ar", "16000", "-ac", "1", str(wav)], check=True)
+        _wav16(audio, wav, ini, fim - ini)
         q0, q1 = int(round(ini * FPS)), int(round(fim * FPS)) + FPS // 2
         cargas.append((wav.read_bytes(), ordem[q0:q1]))
         pedacos.append(t / f"v{k:03d}.mp4")
