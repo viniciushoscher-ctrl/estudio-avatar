@@ -75,7 +75,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: voz-${{ matrix.parte }}
-          path: voz-${{ matrix.parte }}.wav
+          path: |
+            voz-${{ matrix.parte }}.wav
+            voz-${{ matrix.parte }}.json
 
   audio:
     needs: voz
@@ -91,10 +93,48 @@ jobs:
           ls voz-*.wav | sort -t- -k2 -n | sed "s/^/file '/; s/$/'/" > lista.txt
           ffmpeg -loglevel error -f concat -safe 0 -i lista.txt -ar 24000 -ac 1 fala.wav
           echo "Fala completa: $(ffprobe -v error -show_entries format=duration -of csv=p=0 fala.wav) s"
+          python3 - <<'PY'
+          import glob, json, re
+          arqs = sorted(glob.glob("voz-*.json"), key=lambda f: int(re.findall(r"\d+", f)[0]))
+          tempos = {"sr": 24000, "amostras": []}
+          for f in arqs:
+              tempos["amostras"] += json.load(open(f))["amostras"]
+          json.dump(tempos, open("tempos.json", "w"))
+          print(len(tempos["amostras"]), "linhas")
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: fala
-          path: fala.wav
+          path: |
+            fala.wav
+            tempos.json
+
+  broll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Imagens de b-roll (FLUX.1-schnell, Apache-2.0, GPU da Modal)
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        run: |
+          mkdir -p broll && echo ok > broll/.vazio
+          if grep -qiE '^\s*\[(broll|split)' "$ROTEIRO"; then
+            pip install -q modal
+            TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
+            export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+            export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+            modal run gpu/broll_imagens.py --roteiro "$ROTEIRO" --saida broll
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: broll
+          path: broll/
+          include-hidden-files: true
 
   base:
     runs-on: ubuntu-latest
@@ -186,9 +226,10 @@ jobs:
           path: parte-*.mp4
 
   juntar:
-    needs: boca
+    needs: [boca, broll]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           pattern: parte-*
@@ -196,12 +237,17 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: fala
-      - name: Juntar o vídeo
+      - uses: actions/download-artifact@v4
+        with:
+          name: broll
+          path: broll
+      - name: Juntar e editar o vídeo (avatar, tela dividida e b-roll)
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
           ls parte-*.mp4 | sort | sed "s/^/file '/; s/$/'/" > lista.txt
-          ffmpeg -loglevel error -f concat -safe 0 -i lista.txt -i fala.wav -map 0:v -map 1:a \
-            -c:v copy -c:a aac -b:a 192k -shortest hiroshi-longo-${{ github.run_number }}.mp4
+          ffmpeg -loglevel error -f concat -safe 0 -i lista.txt -c copy avatar.mp4
+          python3 motor/montar.py --roteiro "$ROTEIRO" --tempos tempos.json --avatar avatar.mp4 \
+            --audio fala.wav --broll broll --saida hiroshi-longo-${{ github.run_number }}.mp4
           ffprobe -v error -show_entries format=duration -of csv=p=0 hiroshi-longo-*.mp4
       - uses: actions/upload-artifact@v4
         with:
