@@ -111,25 +111,27 @@ jobs:
 
   broll:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Imagens de b-roll (FLUX.1-schnell, Apache-2.0, GPU da Modal)
+      - name: Imagens de b-roll (Qwen-Image, Apache-2.0, GPU da Modal)
         env:
           MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
           MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
         run: |
           mkdir -p broll && echo ok > broll/.vazio
+          set +e  # sem imagens o vídeo sai só com o Hiroshi, mas sai
           if grep -qiE '^\s*\[(broll|split)' "$ROTEIRO"; then
             pip install -q modal
             TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
             export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
             export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
-            modal run gpu/broll_imagens.py --roteiro "$ROTEIRO" --saida broll
+            timeout 35m modal run gpu/broll_imagens.py --roteiro "$ROTEIRO" --saida broll || echo "::warning::b-roll falhou"
           fi
+          exit 0
       - uses: actions/upload-artifact@v4
         with:
           name: broll
@@ -228,6 +230,7 @@ jobs:
 
   juntar:
     needs: [boca, broll]
+    if: ${{ !cancelled() && needs.boca.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

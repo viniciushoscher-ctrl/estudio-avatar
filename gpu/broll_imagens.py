@@ -1,7 +1,7 @@
 """Imagens de b-roll para os vídeos do Hiroshi (uma por instrução [broll: ...] / [split: ...] do roteiro).
 
-Modelo: FLUX.1-schnell (Black Forest Labs, licença Apache-2.0, uso comercial liberado), 4 passos,
-na GPU da Modal. Cada imagem leva ~1-2 s numa L40S.
+Modelo: Qwen-Image (Alibaba, licença Apache-2.0, uso comercial liberado, sem cadastro no Hugging Face),
+na GPU da Modal. (O FLUX.1-schnell exige login no Hugging Face, por isso não é usado.)
 Uso:
     modal run gpu/broll_imagens.py --roteiro roteiros/x.txt --saida broll
 """
@@ -12,11 +12,11 @@ from pathlib import Path
 import modal
 
 app = modal.App("hiroshi-broll")
-pesos = modal.Volume.from_name("flux-pesos", create_if_missing=True)
+pesos = modal.Volume.from_name("qwen-image-pesos", create_if_missing=True)
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install("torch==2.6.0", "torchvision==0.21.0", index_url="https://download.pytorch.org/whl/cu124")
-    .pip_install("diffusers>=0.32", "transformers>=4.48,<5", "accelerate>=1.0", "safetensors",
+    .pip_install("diffusers>=0.36", "transformers>=4.51,<5", "accelerate>=1.0", "safetensors",
                  "sentencepiece", "protobuf", "huggingface_hub[hf_transfer]<1.0", "Pillow")
     .env({"HF_HOME": "/pesos", "HF_HUB_ENABLE_HF_TRANSFER": "1"})
 )
@@ -35,14 +35,13 @@ def instrucoes(roteiro):
     return saida
 
 
-@app.cls(gpu="L40S", image=image, volumes={"/pesos": pesos}, memory=32768, timeout=3600, scaledown_window=60)
+@app.cls(gpu="A100-80GB", image=image, volumes={"/pesos": pesos}, memory=65536, timeout=3600, scaledown_window=60)
 class Broll:
     @modal.enter()
     def carregar(self):
         import torch
-        from diffusers import FluxPipeline
-        self.pipe = FluxPipeline.from_pretrained("black-forest-labs/FLUX.1-schnell",
-                                                 torch_dtype=torch.bfloat16).to("cuda")
+        from diffusers import DiffusionPipeline
+        self.pipe = DiffusionPipeline.from_pretrained("Qwen/Qwen-Image", torch_dtype=torch.bfloat16).to("cuda")
         pesos.commit()
 
     @modal.method()
@@ -50,8 +49,8 @@ class Broll:
         import torch
         pngs = []
         for i, p in enumerate(prompts):
-            img = self.pipe(p + ESTILO, num_inference_steps=4, guidance_scale=0.0, width=largura,
-                            height=altura, max_sequence_length=256,
+            img = self.pipe(prompt=p + ESTILO, negative_prompt="text, watermark, cartoon, deformed hands",
+                            num_inference_steps=30, true_cfg_scale=4.0, width=largura, height=altura,
                             generator=torch.Generator("cuda").manual_seed(100 + i)).images[0]
             buf = io.BytesIO()
             img.save(buf, "JPEG", quality=93)
