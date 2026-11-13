@@ -46,6 +46,14 @@ CENA_PERTO = (
     "in the upper half, looking straight at the camera with a gentle expression, mouth closed. "
     "Photorealistic, sharp natural skin texture, 50mm documentary photo, shallow depth of field."
 )
+CENA_MEIO = (
+    "Show this exact same man in this exact same room at the same wooden desk, same face, same gray "
+    "hair, same navy shirt, same shoji window, shelf, bonsai and cup of tea, but the camera is a little "
+    "closer: a horizontal 16:9 medium shot from the waist up, his hands folded and resting on the desk "
+    "clearly visible at the bottom of the frame, his head and shoulders larger than before, face centered "
+    "in the upper third, looking straight at the camera with a gentle expression, mouth closed. "
+    "Photorealistic, sharp natural skin texture, 50mm documentary photo, shallow depth of field."
+)
 NEGATIVO = "microphone in front of the face, microphone covering the mouth, cartoon, illustration, 3d render, blurry, deformed hands, extra fingers, text, watermark"
 
 
@@ -79,6 +87,6 @@ def main(imagem: str = "avatares/rosto-japones.png", saida: str = "cenas", promp
     foto = Path(imagem).read_bytes()
     c = Cena()
     for s in range(1, variacoes + 1):
-        png = c.gerar.remote(foto, prompt.strip() or CENA_PERTO, s, largura, altura)
+        png = c.gerar.remote(foto, prompt.strip() or CENA_MEIO, s, largura, altura)
         Path(saida, f"cena-{s}.png").write_bytes(png)
         print(f"[cena] {saida}/cena-{s}.png", flush=True)
