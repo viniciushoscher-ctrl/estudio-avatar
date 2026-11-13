@@ -1,5 +1,5 @@
 name: Vídeo longo do Hiroshi
-run-name: Vídeo longo ${{ github.run_number }} (${{ inputs.roteiro || 'roteiros/amostra-30s.txt' }})
+run-name: Vídeo longo ${{ github.run_number }} (${{ inputs.roteiro || 'roteiros/amostra-mesa.txt' }})
 
 # Vídeo de 20 a 30 min do Hiroshi falando, 100% grátis na CPU do GitHub (repositório público).
 # 1) voz: o roteiro é dividido em partes e cada máquina fala a sua (Qwen3-TTS, voz fixa do Hiroshi)
@@ -13,10 +13,10 @@ on:
     inputs:
       roteiro:
         description: "Arquivo do roteiro (um parágrafo por linha)"
-        default: roteiros/amostra-30s.txt
+        default: roteiros/amostra-mesa.txt
       base:
         description: "Vídeo-base do Hiroshi"
-        default: bases/base-hiroshi.mp4
+        default: bases/base-hiroshi-mesa.mp4
       partes:
         description: "Máquinas em paralelo para a boca (1 a 20)"
         default: "20"
@@ -25,14 +25,14 @@ on:
         default: "sim"
   push:
     branches: [claude/project-thread-f10yr5]
-    paths: [roteiros/amostra-30s.txt]
+    paths: [roteiros/amostra-mesa.txt]
 
 permissions:
   contents: read
 
 env:
-  ROTEIRO: ${{ inputs.roteiro || 'roteiros/amostra-30s.txt' }}
-  BASE: ${{ inputs.base || 'bases/base-hiroshi.mp4' }}
+  ROTEIRO: ${{ inputs.roteiro || 'roteiros/amostra-mesa.txt' }}
+  BASE: ${{ inputs.base || 'bases/base-hiroshi-mesa.mp4' }}
   MUSETALK: ${{ github.workspace }}/musetalk
   MUSETALK_COMMIT: 0a89dec
   PARTES_VOZ: 8
