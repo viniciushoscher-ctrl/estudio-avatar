@@ -39,7 +39,7 @@ env:
   ROTEIRO: ${{ inputs.roteiro || 'roteiros/produzir.txt' }}
   BASE: ${{ inputs.base || 'bases/base-hiroshi-mesa.mp4' }}
   MOTOR: ${{ inputs.motor || 'longcat' }}
-  IMAGEM: avatares/hiroshi-perto.png
+  IMAGEM: avatares/hiroshi-mesa.png
   # prompt padrão do LongCat (teste de 13/11: pedir "teeth"/"close-up" no prompt deixava dentes verdes,
   # lábios roxos e legendas inventadas)
   PROMPT: >-
@@ -198,7 +198,7 @@ jobs:
           TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
           export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
           export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
-          modal run gpu/kenji_longcat.py::main --imagem "$IMAGEM" --audio falas --saida clipes --resolucao 480p \
+          modal run gpu/kenji_longcat.py::main --imagem "$IMAGEM" --audio falas --saida clipes --resolucao 720p \
             --prompt "$PROMPT"
       - name: Cor da boca (dentes brancos, lábios naturais; só cor, sem redesenhar)
         run: |
