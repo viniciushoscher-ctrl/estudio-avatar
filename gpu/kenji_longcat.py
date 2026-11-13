@@ -96,8 +96,9 @@ class Avatar:
             pipe.text_encoder = t5 if isinstance(t5, TextoNaCPU) else TextoNaCPU(t5)
             return pipe
 
-        if torch.cuda.get_device_properties(0).total_memory < 40e9:
-            P.LongCatVideoAvatarPipeline.to = mover_sem_t5
+        # T5 (11 GB, roda uma vez por clipe) fica na CPU: sobra memória para a continuação dos
+        # clipes longos (vários trechos de 5 s com cache de atenção).
+        P.LongCatVideoAvatarPipeline.to = mover_sem_t5
         import app as lc  # baixa os pesos no volume na 1ª vez (~30 GB) e monta o pipeline na GPU
         self.lc = lc
         pesos.commit()
@@ -142,6 +143,8 @@ class Avatar:
             ref = latente[:, :, :1].clone()
             largura, altura = atual[0].size
             inicio = 0
+            del saida
+            torch.cuda.empty_cache()
             for i in range(1, trechos):
                 inicio += QUADROS - COND
                 print(f"[kenji] trecho {i + 1}/{trechos}", flush=True)
@@ -150,12 +153,14 @@ class Avatar:
                     negative_prompt=lc.NEGATIVE_PROMPT, height=altura, width=largura,
                     num_frames=QUADROS, num_cond_frames=COND, num_inference_steps=8,
                     text_guidance_scale=1.0, audio_guidance_scale=1.0, generator=gen,
-                    output_type="both", use_kv_cache=True, offload_kv_cache=False,
+                    output_type="both", use_kv_cache=True, offload_kv_cache=True,
                     enhance_hf=False, audio_emb=emb[:, inicio:inicio + QUADROS],
                     ref_latent=ref, ref_img_index=10, mask_frame_range=3, use_distill=True,
                 )
                 atual = [Image.fromarray((q * 255).astype(np.uint8)) for q in saida[0]]
                 todos.extend(atual[COND:])
+                del saida
+                torch.cuda.empty_cache()
         print(f"[kenji] geração {time.time() - t0:.0f}s", flush=True)
 
         quadros = np.stack([np.asarray(q) for q in todos[:quadros_fala]])
