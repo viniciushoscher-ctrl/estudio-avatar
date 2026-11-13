@@ -84,6 +84,7 @@ jobs:
           merge-multiple: true
       - name: Juntar a fala completa
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
           ls voz-*.wav | sort -t- -k2 -n | sed "s/^/file '/; s/$/'/" > lista.txt
           ffmpeg -loglevel error -f concat -safe 0 -i lista.txt -ar 24000 -ac 1 fala.wav
           echo "Fala completa: $(ffprobe -v error -show_entries format=duration -of csv=p=0 fala.wav) s"
@@ -104,6 +105,7 @@ jobs:
       - &musetalk
         name: Instalar o MuseTalk
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
           git clone -q https://github.com/TMElyralab/MuseTalk "$MUSETALK" && git -C "$MUSETALK" checkout -q "$MUSETALK_COMMIT"
           pip install -q torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cpu
           pip install -q diffusers==0.30.2 accelerate==0.28.0 "numpy<2" opencv-python-headless==4.9.0.80 soundfile \
@@ -186,6 +188,7 @@ jobs:
           name: fala
       - name: Juntar o vídeo
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
           ls parte-*.mp4 | sort | sed "s/^/file '/; s/$/'/" > lista.txt
           ffmpeg -loglevel error -f concat -safe 0 -i lista.txt -i fala.wav -map 0:v -map 1:a \
             -c:v copy -c:a aac -b:a 192k -shortest hiroshi-longo-${{ github.run_number }}.mp4
