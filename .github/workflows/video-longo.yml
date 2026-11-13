@@ -197,7 +197,7 @@ jobs:
           TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
           export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
           export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
-          modal run gpu/kenji_longcat.py --imagem "$IMAGEM" --audio falas --saida clipes --resolucao 480p \
+          modal run gpu/kenji_longcat.py::main --imagem "$IMAGEM" --audio falas --saida clipes --resolucao 480p \
             --prompt "$PROMPT"
       - uses: actions/upload-artifact@v4
         with:

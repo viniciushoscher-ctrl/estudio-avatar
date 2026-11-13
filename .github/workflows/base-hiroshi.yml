@@ -46,7 +46,7 @@ jobs:
           export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
           export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
           mkdir -p saida
-          modal run gpu/kenji_longcat.py --imagem "$IMAGEM" --audio bases/fala-base.wav \
+          modal run gpu/kenji_longcat.py::main --imagem "$IMAGEM" --audio bases/fala-base.wav \
             --saida saida/$NOME.mp4 --resolucao "$RESOLUCAO" --prompt "$PROMPT"
       - uses: actions/upload-artifact@v4
         with:

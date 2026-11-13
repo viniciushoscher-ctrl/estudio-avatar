@@ -89,7 +89,7 @@ jobs:
           [[ -n "$ID" && -n "$SEC" ]] || { echo "::error::Os segredos da Modal não têm um código ak-... e um as-... (veja o README)"; exit 1; }
           export MODAL_TOKEN_ID="$ID" MODAL_TOKEN_SECRET="$SEC"
           mkdir -p clipes
-          modal run gpu/kenji_longcat.py --imagem "$IMAGEM" --audio falas --saida clipes \
+          modal run gpu/kenji_longcat.py::main --imagem "$IMAGEM" --audio falas --saida clipes \
             --prompt "$CENA" --resolucao "$RESOLUCAO"
           for f in clipes/fala-*.mp4; do mv "$f" "clipes/hiroshi-$RUN-${f#clipes/fala-}"; done
           ls -l clipes
