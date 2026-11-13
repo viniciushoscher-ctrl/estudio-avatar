@@ -29,15 +29,17 @@ CENA_MESA = (
     "documentary photo, shallow depth of field."
 )
 CENA_PODCAST = (
-    "Show this exact same man, same face, same gray hair, same age and same navy shirt, sitting in a "
-    "calm traditional Japanese room recording a podcast. Wide horizontal 16:9 medium shot from the chest "
-    "up, centered, a black podcast microphone on a boom arm in front of him at chin height, slightly to "
-    "the side so the whole mouth stays visible, looking straight at the camera with a gentle expression, "
-    "mouth closed. Behind him shoji paper screens with warm soft light, a low wooden shelf with a few "
+    "Show this exact same man, same face, same gray hair, same age and same navy shirt, sitting at a "
+    "wooden desk in a calm traditional Japanese room, recording a podcast. Wide horizontal 16:9 medium "
+    "shot from the waist up, centered, hands folded on the desk. A black podcast microphone on a boom "
+    "arm stands at the LEFT edge of the desk, low at chest height and far to the side of his body, "
+    "pointing toward him; the microphone never covers his face: his whole face, lips, mouth and chin "
+    "are completely clear and unobstructed. Looking straight at the camera, gentle expression, mouth "
+    "closed. Behind him shoji paper screens with warm soft light, a low wooden shelf with a few "
     "ceramics and a small bonsai, warm lamp glow. Photorealistic, natural skin texture, 35mm "
     "documentary photo, shallow depth of field."
 )
-NEGATIVO = "cartoon, illustration, 3d render, blurry, deformed hands, extra fingers, text, watermark"
+NEGATIVO = "microphone in front of the face, microphone covering the mouth, cartoon, illustration, 3d render, blurry, deformed hands, extra fingers, text, watermark"
 
 
 @app.cls(gpu="A100-80GB", image=image, volumes={"/pesos": pesos}, memory=65536, timeout=3600,
