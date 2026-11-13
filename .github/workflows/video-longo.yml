@@ -187,8 +187,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: fala
-      - name: Hiroshi falando cada trecho (LongCat 480p, GPU da Modal)
+      - name: Hiroshi falando cada trecho (LongCat 720p, GPU da Modal)
         env:
+          AVATAR_GPU: H100,A100-80GB
           MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
           MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
         run: |
