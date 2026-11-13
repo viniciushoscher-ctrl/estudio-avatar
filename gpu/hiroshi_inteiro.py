@@ -10,7 +10,7 @@ Como funciona (tudo open source, Apache-2.0):
    colados no fim, com a trilha original inteira (sem emendas no som).
 
 Uso:
-    modal run gpu/latentsync.py --base bases/base-hiroshi-podcast.mp4 --audio fala.wav --saida hiroshi.mp4
+    modal run gpu/hiroshi_inteiro.py --base bases/base-hiroshi-podcast.mp4 --audio fala.wav --saida hiroshi.mp4
 """
 import json
 import os
