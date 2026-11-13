@@ -48,6 +48,22 @@ image = (
     .run_commands(
         f"GIT_LFS_SKIP_SMUDGE=1 git clone {SPACE} /longcat",
         f"cd /longcat && git checkout {SPACE_COMMIT} && rm -rf assets",
+        # pesos completos em bf16 em vez do INT8 do Space: o INT8 deixava dentes verdes e lábios roxos
+        # quando a boca ocupa mais pixels (câmera perto / 720p)
+        "cd /longcat && python - <<'PY'\n"
+        "import re\n"
+        "s = open('app.py').read()\n"
+        "s = s.replace('\"base_model_int8/*\",', '\"base_model_int8/*\", \"base_model/*\",')\n"
+        "s = s.replace('dit = load_quantized_dit(str(AVATAR_DIR), subfolder=\"base_model_int8\", cp_split_hw=CP_SPLIT_HW)',"
+        " 'from longcat_video.modules.avatar.longcat_video_dit_avatar import LongCatVideoAvatarTransformer3DModel as _M\\n"
+        "dit = (load_quantized_dit(str(AVATAR_DIR), subfolder=\"base_model_int8\", cp_split_hw=CP_SPLIT_HW) "
+        "if os.environ.get(\"AVATAR_PESOS\", \"bf16\") == \"int8\" else _M.from_pretrained(str(AVATAR_DIR), "
+        "subfolder=\"base_model\", cp_split_hw=CP_SPLIT_HW, torch_dtype=torch_dtype))')\n"
+        "s = s.replace('if not (AVATAR_DIR / \"base_model_int8\" / \"config.json\").exists():',"
+        " 'if not (AVATAR_DIR / \"base_model\" / \"config.json\").exists():')\n"
+        "assert '_M.from_pretrained' in s and '\"base_model/*\"' in s\n"
+        "open('app.py', 'w').write(s)\n"
+        "PY",
     )
     .env({"WEIGHTS_DIR": "/pesos", "HF_HUB_ENABLE_HF_TRANSFER": "1",
           "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"})
@@ -68,7 +84,7 @@ def _sem_progresso(*_a, **_k):
     return None
 
 
-@app.cls(gpu=GPU, image=image, volumes={"/pesos": pesos}, memory=40960, timeout=7200, scaledown_window=60)
+@app.cls(gpu=GPU, image=image, volumes={"/pesos": pesos}, memory=65536, timeout=7200, scaledown_window=60)
 class Avatar:
     @modal.enter()
     def carregar(self):
