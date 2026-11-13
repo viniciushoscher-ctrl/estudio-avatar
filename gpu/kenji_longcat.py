@@ -205,3 +205,20 @@ def main(imagem: str, audio: str, saida: str = "kenji.mp4", prompt: str = "", se
                                     prompt.strip() or PROMPT_PADRAO, seed, resolucao)
         destino.write_bytes(video)
         print(f"[kenji] {destino} pronto ({len(video) / 1e6:.1f} MB) em {time.time() - t:.0f}s", flush=True)
+
+
+@app.local_entrypoint()
+def teste(audio: str = "bases/teste-8s.wav", saida: str = "teste"):
+    """Experimento: mesma fala em várias imagens/prompts num contêiner só (para achar a causa dos dentes)."""
+    casos = [
+        ("A-rosto-original", "avatares/rosto-japones.png", PROMPT_PADRAO, "480p"),
+        ("B-perto-16x9", "avatares/hiroshi-perto.png", PROMPT_PADRAO, "480p"),
+        ("C-mesa-16x9", "avatares/hiroshi-mesa.png", PROMPT_PADRAO, "480p"),
+    ]
+    avatar = Avatar()
+    Path(saida).mkdir(parents=True, exist_ok=True)
+    fala = Path(audio).read_bytes()
+    for nome, img, prompt, res in casos:
+        v = avatar.gerar.remote(Path(img).read_bytes(), Path(img).suffix, fala, prompt, 42, res)
+        Path(saida, nome + ".mp4").write_bytes(v)
+        print(f"[teste] {nome} pronto", flush=True)
