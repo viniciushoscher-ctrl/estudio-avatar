@@ -1,5 +1,5 @@
 name: Vídeo longo do Hiroshi
-run-name: Vídeo longo ${{ github.run_number }} (${{ inputs.roteiro || 'roteiros/longo-teste.txt' }})
+run-name: Vídeo longo ${{ github.run_number }} (${{ inputs.roteiro || 'roteiros/amostra-30s.txt' }})
 
 # Vídeo de 20 a 30 min do Hiroshi falando, 100% grátis na CPU do GitHub (repositório público).
 # 1) voz: o roteiro é dividido em partes e cada máquina fala a sua (Qwen3-TTS, voz fixa do Hiroshi)
@@ -13,22 +13,25 @@ on:
     inputs:
       roteiro:
         description: "Arquivo do roteiro (um parágrafo por linha)"
-        default: roteiros/longo-teste.txt
+        default: roteiros/amostra-30s.txt
       base:
         description: "Vídeo-base do Hiroshi"
         default: bases/base-hiroshi.mp4
       partes:
         description: "Máquinas em paralelo para a boca (1 a 20)"
         default: "20"
+      realce:
+        description: "Boca nítida com GFPGAN 1.4 (sim/nao)"
+        default: "sim"
   push:
     branches: [claude/project-thread-f10yr5]
-    paths: [roteiros/longo-teste.txt]
+    paths: [roteiros/amostra-30s.txt]
 
 permissions:
   contents: read
 
 env:
-  ROTEIRO: ${{ inputs.roteiro || 'roteiros/longo-teste.txt' }}
+  ROTEIRO: ${{ inputs.roteiro || 'roteiros/amostra-30s.txt' }}
   BASE: ${{ inputs.base || 'bases/base-hiroshi.mp4' }}
   MUSETALK: ${{ github.workspace }}/musetalk
   MUSETALK_COMMIT: 0a89dec
@@ -165,9 +168,16 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: fala
+      - name: Instalar o realce da boca (GFPGAN 1.4, Apache-2.0)
+        if: ${{ (inputs.realce || 'sim') == 'sim' }}
+        run: |
+          pip install -q --no-build-isolation basicsr facexlib gfpgan "numpy<2" opencv-python-headless==4.9.0.80
+          mkdir -p pesos && curl -sSL -o pesos/GFPGANv1.4.pth \
+            https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.4.pth
+          echo "REALCE=--realce $GITHUB_WORKSPACE/pesos/GFPGANv1.4.pth" >> "$GITHUB_ENV"
       - name: Boca da parte ${{ matrix.parte }}
         run: |
-          python motor/boca_longa.py falar --cache "$GITHUB_WORKSPACE/cache_base" --audio "$GITHUB_WORKSPACE/fala.wav" \
+          python motor/boca_longa.py $REALCE falar --cache "$GITHUB_WORKSPACE/cache_base" --audio "$GITHUB_WORKSPACE/fala.wav" \
             --saida "$GITHUB_WORKSPACE/parte-$(printf %02d ${{ matrix.parte }}).mp4" \
             --parte ${{ matrix.parte }} --partes ${{ strategy.job-total }}
       - uses: actions/upload-artifact@v4
