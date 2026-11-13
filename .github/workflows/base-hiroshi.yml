@@ -8,16 +8,17 @@ on:
   workflow_dispatch:
   push:
     branches: [claude/project-thread-f10yr5]
-    paths: [bases/fala-base.wav, avatares/hiroshi-mesa.png, .github/workflows/base-hiroshi.yml]
+    paths: [bases/fala-base.wav, avatares/hiroshi-mesa.png, avatares/hiroshi-podcast.png, .github/workflows/base-hiroshi.yml]
 
 env:
-  # Hiroshi sentado à mesa, 16:9, como o canal de referência (avatar quase parado, mãos na mesa)
-  IMAGEM: avatares/hiroshi-mesa.png
-  RESOLUCAO: 720p
-  # 720p não cabe na L40S (48 GB) na continuação; H100 (80 GB) cabe e é ~2x mais rápida
-  AVATAR_GPU: H100
+  # Hiroshi gravando podcast (microfone ao lado, boca livre), 16:9 - base do formato "avatar o tempo todo"
+  IMAGEM: avatares/hiroshi-podcast.png
+  NOME: base-hiroshi-podcast
+  # 480p: 720p deixou a boca roxa/verde
+  RESOLUCAO: 480p
+  AVATAR_GPU: L40S
   PROMPT: >-
-    A real elderly Japanese man in his sixties sitting at a wooden desk in his home study, filmed
+    A real elderly Japanese man in his sixties sitting at a wooden desk recording a podcast in a calm Japanese room, a microphone on a boom arm beside him, filmed
     in a wide horizontal medium shot, talking calmly and warmly to the camera like a YouTuber
     explaining something important. Hands stay folded and resting on the desk, only small natural
     hand movements. Natural blinking, subtle head nods and tilts, relaxed shoulders, realistic skin
@@ -46,8 +47,8 @@ jobs:
           export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
           mkdir -p saida
           modal run gpu/kenji_longcat.py --imagem "$IMAGEM" --audio bases/fala-base.wav \
-            --saida saida/base-hiroshi-mesa.mp4 --resolucao "$RESOLUCAO" --prompt "$PROMPT"
+            --saida saida/$NOME.mp4 --resolucao "$RESOLUCAO" --prompt "$PROMPT"
       - uses: actions/upload-artifact@v4
         with:
           name: base-hiroshi-${{ github.run_number }}
-          path: saida/base-hiroshi-mesa.mp4
+          path: saida/*.mp4
