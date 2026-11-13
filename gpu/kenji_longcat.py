@@ -67,7 +67,7 @@ def _sem_progresso(*_a, **_k):
     return None
 
 
-@app.cls(gpu=GPU, image=image, volumes={"/pesos": pesos}, memory=40960, timeout=3600, scaledown_window=60)
+@app.cls(gpu=GPU, image=image, volumes={"/pesos": pesos}, memory=40960, timeout=7200, scaledown_window=60)
 class Avatar:
     @modal.enter()
     def carregar(self):

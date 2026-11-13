@@ -8,7 +8,18 @@ on:
   workflow_dispatch:
   push:
     branches: [claude/project-thread-f10yr5]
-    paths: [bases/fala-base.wav, gpu/kenji_longcat.py]
+    paths: [bases/fala-base.wav, avatares/hiroshi-mesa.png]
+
+env:
+  # Hiroshi sentado à mesa, 16:9, como o canal de referência (avatar quase parado, mãos na mesa)
+  IMAGEM: avatares/hiroshi-mesa.png
+  RESOLUCAO: 720p
+  PROMPT: >-
+    A real elderly Japanese man in his sixties sitting at a wooden desk in his home study, filmed
+    in a wide horizontal medium shot, talking calmly and warmly to the camera like a YouTuber
+    explaining something important. Hands stay folded and resting on the desk, only small natural
+    hand movements. Natural blinking, subtle head nods and tilts, relaxed shoulders, realistic skin
+    texture, soft natural window light, static camera, documentary realism.
 
 permissions:
   contents: read
@@ -16,7 +27,7 @@ permissions:
 jobs:
   base:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,9 +43,9 @@ jobs:
           export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
           export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
           mkdir -p saida
-          modal run gpu/kenji_longcat.py --imagem avatares/rosto-japones.png --audio bases/fala-base.wav \
-            --saida saida/base-hiroshi.mp4
+          modal run gpu/kenji_longcat.py --imagem "$IMAGEM" --audio bases/fala-base.wav \
+            --saida saida/base-hiroshi-mesa.mp4 --resolucao "$RESOLUCAO" --prompt "$PROMPT"
       - uses: actions/upload-artifact@v4
         with:
           name: base-hiroshi-${{ github.run_number }}
-          path: saida/base-hiroshi.mp4
+          path: saida/base-hiroshi-mesa.mp4
