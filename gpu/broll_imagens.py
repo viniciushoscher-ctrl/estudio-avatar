@@ -31,7 +31,7 @@ def instrucoes(roteiro):
     for i, l in enumerate(linhas):
         m = re.match(r"^\s*\[(broll|split)\s*:\s*([^\]]+)\]", l, re.I)
         if m:
-            saida.append((i, m.group(1).lower(), m.group(2).strip()))
+            saida.append((i, m.group(1).lower(), m.group(2).split("|")[0].strip()))
     return saida
 
 

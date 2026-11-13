@@ -1,5 +1,5 @@
 name: Vídeo longo do Hiroshi
-run-name: Vídeo longo ${{ github.run_number }} (${{ inputs.roteiro || 'roteiros/amostra-mesa.txt' }})
+run-name: Vídeo longo ${{ github.run_number }} (${{ inputs.roteiro || 'roteiros/produzir.txt' }})
 
 # Vídeo de 20 a 30 min do Hiroshi no formato dos canais de avatar (Hiroshi + tela dividida + b-roll).
 # 1) voz: o roteiro é dividido em partes e cada máquina fala a sua (Qwen3-TTS, voz fixa do Hiroshi)
@@ -30,22 +30,22 @@ on:
         default: longcat
   push:
     branches: [claude/project-thread-f10yr5]
-    paths: [roteiros/amostra-mesa.txt]
+    paths: [roteiros/produzir.txt]
 
 permissions:
   contents: read
 
 env:
-  ROTEIRO: ${{ inputs.roteiro || 'roteiros/amostra-mesa.txt' }}
+  ROTEIRO: ${{ inputs.roteiro || 'roteiros/produzir.txt' }}
   BASE: ${{ inputs.base || 'bases/base-hiroshi-mesa.mp4' }}
   MOTOR: ${{ inputs.motor || 'longcat' }}
-  IMAGEM: avatares/hiroshi-mesa.png
+  IMAGEM: avatares/hiroshi-perto.png
   PROMPT: >-
-    A real elderly Japanese man in his sixties sitting at a wooden desk in his home study, filmed
-    in a wide horizontal medium shot, talking calmly and warmly to the camera like a YouTuber
-    explaining something important. Hands stay folded and resting on the desk, only small natural
-    hand movements. Natural blinking, subtle head nods and tilts, relaxed shoulders, realistic skin
-    texture, soft natural window light, static camera, documentary realism.
+    A real elderly Japanese man in his sixties in his calm traditional Japanese home, filmed in a
+    horizontal medium close-up from the chest up, talking calmly and warmly to the camera like a
+    YouTuber explaining something important. Natural blinking, subtle head nods and tilts, relaxed
+    shoulders, realistic skin texture and natural teeth, soft natural window light, static camera,
+    documentary realism.
   MUSETALK: ${{ github.workspace }}/musetalk
   MUSETALK_COMMIT: 0a89dec
   PARTES_VOZ: 8
@@ -123,26 +123,45 @@ jobs:
             tempos.json
 
   broll:
+    needs: audio
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Imagens de b-roll (Qwen-Image, Apache-2.0, GPU da Modal)
+      - uses: actions/download-artifact@v4
+        with:
+          name: fala
+      - name: Vídeos reais do Pexels (até 4K, uso comercial grátis)
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          mkdir -p broll && echo ok > broll/.vazio
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          python3 motor/broll_videos.py "$ROTEIRO" tempos.json broll || echo "::warning::Pexels falhou"
+      - name: Imagens de IA só nas linhas sem vídeo (Qwen-Image, GPU da Modal)
         env:
           MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
           MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
         run: |
-          mkdir -p broll && echo ok > broll/.vazio
           set +e  # sem imagens o vídeo sai só com o Hiroshi, mas sai
-          if grep -qiE '^\s*\[(broll|split)' "$ROTEIRO"; then
+          python3 - <<'PY'
+          import os, re, glob
+          from pathlib import Path
+          linhas = [l for l in Path(os.environ["ROTEIRO"]).read_text(encoding="utf-8").splitlines() if l.strip()]
+          com_video = {int(re.findall(r"linha-(\d+)-", f)[0]) for f in glob.glob("broll/linha-*-*.mp4")}
+          out = [re.sub(r"^\s*\[(broll|split)\s*:[^\]]*\]\s*", "", l) if i in com_video else l for i, l in enumerate(linhas)]
+          Path("faltam.txt").write_text("\n".join(out) + "\n", encoding="utf-8")
+          print(len(com_video), "linhas com vídeo")
+          PY
+          if grep -qiE '^\s*\[(broll|split)' faltam.txt; then
             pip install -q modal
             TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
             export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
             export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
-            timeout 35m modal run gpu/broll_imagens.py --roteiro "$ROTEIRO" --saida broll || echo "::warning::b-roll falhou"
+            timeout 35m modal run gpu/broll_imagens.py --roteiro faltam.txt --saida broll || echo "::warning::imagens falharam"
           fi
           exit 0
       - uses: actions/upload-artifact@v4

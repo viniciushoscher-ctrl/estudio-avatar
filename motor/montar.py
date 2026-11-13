@@ -56,6 +56,41 @@ def zoom(img, quadros, w, h, sentido):
             f"setsar=1")
 
 
+def duracao(p):
+    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(p)],
+                       capture_output=True, text=True)
+    try:
+        return float(r.stdout)
+    except ValueError:
+        return 0.0
+
+
+def video_broll(clipes, n, seg, enc_extra):
+    """Preenche n quadros com vídeos reais: cortes de até 8 s de cada clipe, em sequência (repete se faltar)."""
+    tmp = Path(seg).with_suffix("")
+    tmp.mkdir(exist_ok=True)
+    durs = [(c, duracao(c)) for c in clipes]
+    durs = [(c, d) for c, d in durs if d > 0.5]
+    if not durs:
+        return False
+    partes, falta, i = [], n, 0
+    while falta > 0:
+        c, d = durs[i % len(durs)]
+        q = min(falta, max(1, int(min(d - 0.4, 8.0) * FPS)))
+        p = tmp / f"p{i:03d}.mp4"
+        ini = 0.3 if d > 2 else 0.0
+        ff("-ss", f"{ini:.2f}", "-i", str(c), "-vf",
+           f"fps={FPS},scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,crop={W}:{H},setsar=1,"
+           "tpad=stop_mode=clone:stop=100", "-frames:v", str(q), "-an", "-c:v", "libx264", "-crf", "18",
+           "-preset", "fast", "-pix_fmt", "yuv420p", str(p))
+        partes.append(p)
+        falta -= q
+        i += 1
+    (tmp / "l.txt").write_text("".join(f"file '{p}'\n" for p in partes))
+    ff("-f", "concat", "-safe", "0", "-i", str(tmp / "l.txt"), "-c", "copy", str(seg))
+    return True
+
+
 def montar(roteiro, tempos, avatar, audio, broll, saida, clipes=None):
     tempos = json.loads(Path(tempos).read_text())
     tmp = Path(tempfile.mkdtemp())
@@ -69,6 +104,11 @@ def montar(roteiro, tempos, avatar, audio, broll, saida, clipes=None):
         img = Path(broll, f"linha-{t['linha']:03d}.jpg")
         clipe = Path(clipes, f"linha-{t['linha']:03d}.mp4") if clipes else None
         fonte, ini_fonte = (str(clipe), 0.0) if clipe and clipe.exists() else (avatar, ini)
+        videos = sorted(Path(broll).glob(f"linha-{t['linha']:03d}-*.mp4"))
+        if t["tipo"] in ("broll", "split") and videos and video_broll(videos, n, seg, None):
+            lista.append(seg)
+            print(f"[montar] video  {ini:7.2f}s +{dur:5.2f}s ({len(videos)} clipe(s))", flush=True)
+            continue
         tipo = t["tipo"] if img.exists() or t["tipo"] == "avatar" else "avatar"
         enc = ["-frames:v", str(n), "-r", str(FPS), "-an", "-c:v", "libx264", "-crf", "18", "-preset", "fast",
                "-pix_fmt", "yuv420p", str(seg)]
