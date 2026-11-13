@@ -68,7 +68,8 @@ def montar(roteiro, tempos, avatar, audio, broll, saida):
         enc = ["-frames:v", str(n), "-r", str(FPS), "-an", "-c:v", "libx264", "-crf", "18", "-preset", "fast",
                "-pix_fmt", "yuv420p", str(seg)]
         if tipo == "avatar":
-            ff("-ss", f"{ini:.3f}", "-i", avatar, "-vf", f"scale={W}:{H}:flags=lanczos,setsar=1", *enc)
+            ff("-ss", f"{ini:.3f}", "-i", avatar, "-vf",
+               f"scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,crop={W}:{H},setsar=1", *enc)
         elif tipo == "broll":
             ff("-loop", "1", "-i", str(img), "-vf", zoom(img, n, W, H, k % 2 == 0), *enc)
         else:  # split: Hiroshi à esquerda (recorte central), imagem à direita
