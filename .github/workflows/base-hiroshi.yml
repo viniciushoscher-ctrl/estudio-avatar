@@ -14,6 +14,8 @@ env:
   # Hiroshi sentado à mesa, 16:9, como o canal de referência (avatar quase parado, mãos na mesa)
   IMAGEM: avatares/hiroshi-mesa.png
   RESOLUCAO: 720p
+  # 720p não cabe na L40S (48 GB) na continuação; H100 (80 GB) cabe e é ~2x mais rápida
+  AVATAR_GPU: H100
   PROMPT: >-
     A real elderly Japanese man in his sixties sitting at a wooden desk in his home study, filmed
     in a wide horizontal medium shot, talking calmly and warmly to the camera like a YouTuber

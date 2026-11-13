@@ -49,7 +49,8 @@ image = (
         f"GIT_LFS_SKIP_SMUDGE=1 git clone {SPACE} /longcat",
         f"cd /longcat && git checkout {SPACE_COMMIT} && rm -rf assets",
     )
-    .env({"WEIGHTS_DIR": "/pesos", "HF_HUB_ENABLE_HF_TRANSFER": "1"})
+    .env({"WEIGHTS_DIR": "/pesos", "HF_HUB_ENABLE_HF_TRANSFER": "1",
+          "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"})
 )
 
 FPS = 25
