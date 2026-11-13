@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   push:
     branches: [claude/project-thread-f10yr5]
-    paths: [bases/fala-base.wav]
+    paths: [bases/fala-base.wav, gpu/kenji_longcat.py]
 
 permissions:
   contents: read
