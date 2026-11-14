@@ -1,0 +1,60 @@
+name: Âncora trechos
+run-name: Âncora trechos ${{ github.run_number }} (${{ inputs.pasta || 'push' }})
+
+# RyanRoverMoney: o âncora fala trechos da narração JÁ PRONTA do vídeo (voz 9), sem TTS.
+# Entrada: trechos/<id>/*.wav (+ opcional trechos/<id>/avatar.txt com o nome do avatar; padrão ancora65).
+# Saída: artefato "ancora-<id>" com um .mp4 por .wav (LongCat 720p + cor da boca).
+on:
+  workflow_dispatch:
+    inputs:
+      pasta:
+        description: "trechos/<id>"
+        required: true
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [trechos/*/pronto.txt]
+
+permissions:
+  contents: read
+
+jobs:
+  ancora:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - id: p
+        run: |
+          P="${{ inputs.pasta }}"
+          [ -z "$P" ] && P=$(dirname "$(git diff --name-only HEAD~1 HEAD -- 'trechos/*/pronto.txt' | tail -n1)")
+          echo "pasta=$P" >> "$GITHUB_OUTPUT"; echo "id=$(basename "$P")" >> "$GITHUB_OUTPUT"; echo "Pasta: $P"
+      - name: Âncora falando cada trecho (LongCat 720p, GPU da Modal)
+        env:
+          AVATAR_GPU: H100,A100-80GB
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          PASTA: ${{ steps.p.outputs.pasta }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          pip install -q modal
+          TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
+          export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          AV=$(cat "$PASTA/avatar.txt" 2>/dev/null | tr -d '[:space:]'); AV=${AV:-ancora65}
+          PROMPT=$(cat avatares/$AV-prompt.txt)
+          modal run gpu/kenji_longcat.py::main --imagem avatares/$AV-mesa.png --audio "$PASTA" --saida clipes \
+            --resolucao 720p --prompt "$PROMPT"
+      - name: Cor da boca
+        run: |
+          pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -q face-alignment opencv-python-headless numpy
+          python motor/boca_cor.py clipes clipes || echo "::warning::correção de cor falhou, segue sem"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ancora-${{ steps.p.outputs.id }}
+          path: clipes/

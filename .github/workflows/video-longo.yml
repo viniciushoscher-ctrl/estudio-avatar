@@ -1,0 +1,351 @@
+name: Vídeo longo do Hiroshi
+run-name: Vídeo longo ${{ github.run_number }} (${{ inputs.roteiro || 'roteiros/produzir.txt' }})
+
+# Vídeo de 20 a 30 min do Hiroshi no formato dos canais de avatar (Hiroshi + tela dividida + b-roll).
+# 1) voz: o roteiro é dividido em partes e cada máquina fala a sua (Qwen3-TTS, voz fixa do Hiroshi)
+# 2) avatar (padrão): cada trecho em que o Hiroshi aparece é gerado pelo LongCat na GPU da Modal com o
+#    áudio daquele trecho (boca, cabeça, mãos e expressão nascem da fala). ~US$ 1,5 por 37 s de Hiroshi.
+#    motor=musetalk: alternativa 100% grátis na CPU (qualidade bem menor: base em laço + boca MuseTalk)
+# 3) b-roll: imagens de IA (Qwen-Image) para as linhas [broll:] e [split:]
+# 4) montagem final em 1080p com a fala completa
+# Roteiro: um parágrafo por linha; [broll: ...] e [split: ...] no começo da linha.
+
+on:
+  workflow_dispatch:
+    inputs:
+      roteiro:
+        description: "Arquivo do roteiro (um parágrafo por linha)"
+        default: roteiros/amostra-mesa.txt
+      base:
+        description: "Vídeo-base do Hiroshi"
+        default: bases/base-hiroshi-mesa.mp4
+      partes:
+        description: "Máquinas em paralelo para a boca (1 a 20)"
+        default: "20"
+      realce:
+        description: "Boca nítida com GFPGAN 1.4 (sim/nao) - só motor musetalk"
+        default: "sim"
+      motor:
+        description: "longcat (qualidade, GPU da Modal) ou musetalk (grátis, CPU)"
+        default: longcat
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [roteiros/produzir.txt, roteiros/produzir-avatar.txt]
+
+permissions:
+  contents: read
+
+env:
+  ROTEIRO: ${{ inputs.roteiro || 'roteiros/produzir.txt' }}
+  BASE: ${{ inputs.base || 'bases/base-hiroshi-mesa.mp4' }}
+  MOTOR: ${{ inputs.motor || 'longcat' }}
+  IMAGEM: avatares/hiroshi-mesa.png
+  # prompt padrão do LongCat (teste de 13/11: pedir "teeth"/"close-up" no prompt deixava dentes verdes,
+  # lábios roxos e legendas inventadas)
+  PROMPT: >-
+    A real elderly Japanese man in his sixties, filmed from the chest up, talking warmly and
+    naturally to the camera like a YouTuber sharing life advice. Natural blinking, subtle head
+    nods and tilts, relaxed shoulders, occasional gentle hand gestures, realistic skin texture,
+    soft natural window light, documentary realism.
+  MUSETALK: ${{ github.workspace }}/musetalk
+  MUSETALK_COMMIT: 0a89dec
+  PARTES_VOZ: 8
+
+jobs:
+  planejar:
+    runs-on: ubuntu-latest
+    outputs:
+      voz: ${{ steps.p.outputs.voz }}
+      boca: ${{ steps.p.outputs.boca }}
+    steps:
+      - id: p
+        run: |
+          N=${{ inputs.partes || '20' }}
+          echo "voz=$(python3 -c "print(list(range($PARTES_VOZ)))")" >> "$GITHUB_OUTPUT"
+          echo "boca=$(python3 -c "print(list(range(min(20,max(1,$N)))))")" >> "$GITHUB_OUTPUT"
+
+  voz:
+    needs: planejar
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      matrix:
+        parte: ${{ fromJSON(needs.planejar.outputs.voz) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: qwen3-tts-base-v1
+      - name: Falar a parte ${{ matrix.parte }}
+        run: |
+          sudo apt-get install -y -qq sox > /dev/null
+          pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -q qwen-tts soundfile
+          export VOZ=$(cat roteiros/produzir-avatar.txt 2>/dev/null | tr -d '[:space:]'); VOZ=${VOZ:-hiroshi}
+          python motor/voz_hiroshi.py "$ROTEIRO" voz-${{ matrix.parte }}.wav --parte ${{ matrix.parte }} --partes $PARTES_VOZ
+      - uses: actions/upload-artifact@v4
+        with:
+          name: voz-${{ matrix.parte }}
+          path: |
+            voz-${{ matrix.parte }}.wav
+            voz-${{ matrix.parte }}.json
+
+  audio:
+    needs: voz
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: voz-*
+          merge-multiple: true
+      - name: Juntar a fala completa
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          ls voz-*.wav | sort -t- -k2 -n | sed "s/^/file '/; s/$/'/" > lista.txt
+          ffmpeg -loglevel error -f concat -safe 0 -i lista.txt -ar 24000 -ac 1 fala.wav
+          echo "Fala completa: $(ffprobe -v error -show_entries format=duration -of csv=p=0 fala.wav) s"
+          python3 - <<'PY'
+          import glob, json, re
+          arqs = sorted(glob.glob("voz-*.json"), key=lambda f: int(re.findall(r"\d+", f)[0]))
+          tempos = {"sr": 24000, "amostras": []}
+          for f in arqs:
+              tempos["amostras"] += json.load(open(f))["amostras"]
+          json.dump(tempos, open("tempos.json", "w"))
+          print(len(tempos["amostras"]), "linhas")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fala
+          path: |
+            fala.wav
+            tempos.json
+
+  broll:
+    needs: audio
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@v4
+        with:
+          name: fala
+      - name: Vídeos reais do Pexels (até 4K, uso comercial grátis)
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          mkdir -p broll && echo ok > broll/.vazio
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          python3 motor/broll_videos.py "$ROTEIRO" tempos.json broll || echo "::warning::Pexels falhou"
+      - name: Imagens de IA só nas linhas sem vídeo (Qwen-Image, GPU da Modal)
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        run: |
+          set +e  # sem imagens o vídeo sai só com o Hiroshi, mas sai
+          python3 - <<'PY'
+          import os, re, glob
+          from pathlib import Path
+          linhas = [l for l in Path(os.environ["ROTEIRO"]).read_text(encoding="utf-8").splitlines() if l.strip()]
+          com_video = {int(re.findall(r"linha-(\d+)-", f)[0]) for f in glob.glob("broll/linha-*-*.mp4")}
+          out = [re.sub(r"^\s*\[(broll|split)\s*:[^\]]*\]\s*", "", l) if i in com_video else l for i, l in enumerate(linhas)]
+          Path("faltam.txt").write_text("\n".join(out) + "\n", encoding="utf-8")
+          print(len(com_video), "linhas com vídeo")
+          PY
+          if grep -qiE '^\s*\[(broll|split)' faltam.txt; then
+            pip install -q modal
+            TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
+            export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+            export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+            timeout 35m modal run gpu/broll_imagens.py --roteiro faltam.txt --saida broll || echo "::warning::imagens falharam"
+            # imagem parada vira vídeo com movimento (LTX-Video); se falhar, fica a imagem com zoom
+            timeout 40m modal run gpu/broll_animar.py --roteiro "$ROTEIRO" --tempos tempos.json --broll broll \
+              || echo "::warning::animação falhou"
+          fi
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: broll
+          path: broll/
+          include-hidden-files: true
+
+  avatar:
+    needs: audio
+    if: ${{ (inputs.motor || 'longcat') == 'longcat' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@v4
+        with:
+          name: fala
+      - name: Hiroshi falando cada trecho (LongCat 720p, GPU da Modal)
+        env:
+          AVATAR_GPU: H100,A100-80GB
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          python motor/cortar_falas.py --roteiro "$ROTEIRO" --tempos tempos.json --audio fala.wav --saida falas
+          pip install -q modal
+          TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
+          export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          AV=$(cat roteiros/produzir-avatar.txt 2>/dev/null | tr -d '[:space:]'); AV=${AV:-hiroshi}
+          IMAGEM=avatares/$AV-mesa.png
+          [ -f avatares/$AV-prompt.txt ] && PROMPT=$(cat avatares/$AV-prompt.txt)
+          echo "Avatar: $AV ($IMAGEM)"
+          modal run gpu/kenji_longcat.py::main --imagem "$IMAGEM" --audio falas --saida clipes --resolucao 720p \
+            --prompt "$PROMPT"
+      - name: Cor da boca (dentes brancos, lábios naturais; só cor, sem redesenhar)
+        run: |
+          sudo apt-get install -y -qq ffmpeg > /dev/null 2>&1 || true
+          pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -q face-alignment opencv-python-headless numpy
+          python motor/boca_cor.py clipes clipes || echo "::warning::correção de cor falhou, segue sem"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clipes
+          path: clipes/
+
+  base:
+    if: ${{ inputs.motor == 'musetalk' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - &python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - &musetalk
+        name: Instalar o MuseTalk
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          git clone -q https://github.com/TMElyralab/MuseTalk "$MUSETALK" && git -C "$MUSETALK" checkout -q "$MUSETALK_COMMIT"
+          pip install -q torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q diffusers==0.30.2 accelerate==0.28.0 "numpy<2" opencv-python-headless==4.9.0.80 soundfile \
+            librosa==0.11.0 einops omegaconf transformers==4.39.2 "huggingface_hub==0.30.2" face-alignment setuptools
+      - &pesos
+        uses: actions/cache@v4
+        with:
+          path: musetalk/models
+          key: musetalk-pesos-v15
+      - &baixar
+        name: Baixar os pesos
+        run: |
+          cd "$MUSETALK" && python - <<'PY'
+          import os
+          from huggingface_hub import hf_hub_download as d
+          for repo, files, dest in [
+              ("TMElyralab/MuseTalk", ["musetalkV15/musetalk.json", "musetalkV15/unet.pth"], "models"),
+              ("stabilityai/sd-vae-ft-mse", ["config.json", "diffusion_pytorch_model.bin"], "models/sd-vae"),
+              ("openai/whisper-tiny", ["config.json", "pytorch_model.bin", "preprocessor_config.json"], "models/whisper"),
+              ("ManyOtherFunctions/face-parse-bisent", ["79999_iter.pth", "resnet18-5c106cde.pth"], "models/face-parse-bisent")]:
+              for f in files:
+                  if not os.path.exists(os.path.join(dest, f)):
+                      d(repo, f, local_dir=dest)
+          PY
+      - name: Chave do cache da base
+        run: echo "BASE_HASH=$(sha256sum "$BASE" | cut -c1-16)" >> "$GITHUB_ENV"
+      - id: cache
+        uses: actions/cache@v4
+        with:
+          path: cache_base
+          key: base-${{ env.BASE_HASH }}-v1
+      - name: Preparar a base (só quando a base muda)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: python motor/boca_longa.py preparar --base "$GITHUB_WORKSPACE/$BASE" --cache "$GITHUB_WORKSPACE/cache_base"
+
+  boca:
+    needs: [planejar, audio, base]
+    if: ${{ inputs.motor == 'musetalk' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        parte: ${{ fromJSON(needs.planejar.outputs.boca) }}
+    steps:
+      - uses: actions/checkout@v4
+      - *python
+      - *musetalk
+      - *pesos
+      - *baixar
+      - name: Chave do cache da base
+        run: echo "BASE_HASH=$(sha256sum "$BASE" | cut -c1-16)" >> "$GITHUB_ENV"
+      - uses: actions/cache/restore@v4
+        with:
+          path: cache_base
+          key: base-${{ env.BASE_HASH }}-v1
+          fail-on-cache-miss: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: fala
+      - name: Instalar o realce da boca (GFPGAN 1.4, Apache-2.0)
+        if: ${{ (inputs.realce || 'sim') == 'sim' }}
+        run: |
+          pip install -q --no-build-isolation basicsr facexlib gfpgan "numpy<2" opencv-python-headless==4.9.0.80
+          mkdir -p pesos && curl -sSL -o pesos/GFPGANv1.4.pth \
+            https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.4.pth
+          echo "REALCE=--realce $GITHUB_WORKSPACE/pesos/GFPGANv1.4.pth" >> "$GITHUB_ENV"
+      - name: Boca da parte ${{ matrix.parte }}
+        run: |
+          python motor/boca_longa.py $REALCE falar --cache "$GITHUB_WORKSPACE/cache_base" --audio "$GITHUB_WORKSPACE/fala.wav" \
+            --saida "$GITHUB_WORKSPACE/parte-$(printf %02d ${{ matrix.parte }}).mp4" \
+            --parte ${{ matrix.parte }} --partes ${{ strategy.job-total }} \
+            --roteiro "$GITHUB_WORKSPACE/$ROTEIRO" --tempos "$GITHUB_WORKSPACE/tempos.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: parte-${{ matrix.parte }}
+          path: parte-*.mp4
+
+  juntar:
+    needs: [boca, avatar, broll]
+    if: ${{ !cancelled() && (needs.boca.result == 'success' || needs.avatar.result == 'success') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        if: ${{ needs.boca.result == 'success' }}
+        with:
+          pattern: parte-*
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: fala
+      - uses: actions/download-artifact@v4
+        with:
+          name: broll
+          path: broll
+      - uses: actions/download-artifact@v4
+        if: ${{ needs.avatar.result == 'success' }}
+        with:
+          name: clipes
+          path: clipes
+      - name: Juntar e editar o vídeo (avatar, tela dividida e b-roll)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          if ls parte-*.mp4 >/dev/null 2>&1; then
+            ls parte-*.mp4 | sort | sed "s/^/file '/; s/$/'/" > lista.txt
+            ffmpeg -loglevel error -f concat -safe 0 -i lista.txt -c copy avatar.mp4
+            FONTE="--avatar avatar.mp4"
+          else
+            FONTE="--clipes clipes"
+          fi
+          python3 motor/montar.py --roteiro "$ROTEIRO" --tempos tempos.json $FONTE \
+            --audio fala.wav --broll broll --saida hiroshi-longo-${{ github.run_number }}.mp4
+          ffprobe -v error -show_entries format=duration -of csv=p=0 hiroshi-longo-*.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hiroshi-longo-${{ github.run_number }}
+          path: hiroshi-longo-*.mp4

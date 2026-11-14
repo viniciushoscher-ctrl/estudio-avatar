@@ -1,0 +1,42 @@
+name: Cena do Hiroshi
+run-name: Cena do Hiroshi ${{ github.run_number }}
+
+# Novas cenas do Hiroshi (ex.: sentado à mesa, horizontal 16:9) com o mesmo rosto. Qwen-Image-Edit (Apache-2.0).
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: "Descrição da cena em inglês (vazio = sentado à mesa, 16:9)"
+        default: ""
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [gpu/hiroshi_cena.py, .github/workflows/cena-hiroshi.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  cena:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Gerar as cenas na GPU
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          PROMPT: ${{ inputs.prompt }}
+        run: |
+          pip install -q modal
+          TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
+          export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          modal run gpu/hiroshi_cena.py --imagem avatares/hiroshi-mesa.png --saida cenas --prompt "$PROMPT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cenas-${{ github.run_number }}
+          path: cenas/
