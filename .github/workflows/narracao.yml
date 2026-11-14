@@ -36,7 +36,7 @@ jobs:
         run: |
           R="${{ inputs.roteiro }}"
           if [ -z "$R" ]; then R=$(git diff --name-only HEAD~1 HEAD -- 'roteiros/narrar/*.txt' | grep -v voz.txt | head -1); fi
-          V="${{ inputs.voz }}"; [ -z "$V" ] && V=$(tr -d '[:space:]' < roteiros/narrar/voz.txt 2>/dev/null); V=${V:-ancora65}
+          V="${{ inputs.voz }}"; [ -z "$V" ] && V=$(cat roteiros/narrar/voz.txt 2>/dev/null | tr -d "[:space:]" || true); V=${V:-ancora65}
           echo "roteiro=$R" >> "$GITHUB_OUTPUT"; echo "voz=$V" >> "$GITHUB_OUTPUT"; echo "$R / $V"
 
   voz:
