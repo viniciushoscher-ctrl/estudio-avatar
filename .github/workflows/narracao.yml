@@ -1,0 +1,90 @@
+name: Narração completa
+run-name: Narração ${{ github.run_number }}
+
+# Só a voz: um roteiro (um parágrafo por linha) -> fala.wav completa na voz de vozes/<VOZ>.wav
+# Disparo: push de roteiros/narrar/*.txt (a voz vem de roteiros/narrar/voz.txt, padrão ancora65)
+
+on:
+  workflow_dispatch:
+    inputs:
+      roteiro:
+        description: "Arquivo do roteiro"
+        required: true
+      voz:
+        default: ancora65
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [roteiros/narrar/*.txt]
+
+permissions:
+  contents: read
+
+env:
+  PARTES_VOZ: 12
+
+jobs:
+  planejar:
+    runs-on: ubuntu-latest
+    outputs:
+      roteiro: ${{ steps.p.outputs.roteiro }}
+      voz: ${{ steps.p.outputs.voz }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: p
+        run: |
+          R="${{ inputs.roteiro }}"
+          if [ -z "$R" ]; then R=$(git diff --name-only HEAD~1 HEAD -- 'roteiros/narrar/*.txt' | grep -v voz.txt | head -1); fi
+          V="${{ inputs.voz }}"; [ -z "$V" ] && V=$(tr -d '[:space:]' < roteiros/narrar/voz.txt 2>/dev/null); V=${V:-ancora65}
+          echo "roteiro=$R" >> "$GITHUB_OUTPUT"; echo "voz=$V" >> "$GITHUB_OUTPUT"; echo "$R / $V"
+
+  voz:
+    needs: planejar
+    if: needs.planejar.outputs.roteiro != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      matrix:
+        parte: [0,1,2,3,4,5,6,7,8,9,10,11]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: qwen3-tts-base-v1
+      - name: Falar a parte ${{ matrix.parte }}
+        run: |
+          sudo apt-get install -y -qq sox > /dev/null
+          pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -q qwen-tts soundfile
+          export VOZ=${{ needs.planejar.outputs.voz }}
+          python motor/voz_hiroshi.py "${{ needs.planejar.outputs.roteiro }}" voz-${{ matrix.parte }}.wav --parte ${{ matrix.parte }} --partes $PARTES_VOZ
+      - uses: actions/upload-artifact@v4
+        with:
+          name: voz-${{ matrix.parte }}
+          path: |
+            voz-${{ matrix.parte }}.wav
+            voz-${{ matrix.parte }}.json
+
+  audio:
+    needs: [planejar, voz]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: voz-*
+          merge-multiple: true
+      - name: Juntar a fala completa
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          ls voz-*.wav | sort -t- -k2 -n | sed "s/^/file '/; s/$/'/" > lista.txt
+          ffmpeg -loglevel error -f concat -safe 0 -i lista.txt -ar 24000 -ac 1 fala.wav
+          echo "Fala completa: $(ffprobe -v error -show_entries format=duration -of csv=p=0 fala.wav) s"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: narracao-${{ github.run_number }}
+          path: fala.wav
