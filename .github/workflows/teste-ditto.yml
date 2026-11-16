@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        inicio: [0, 14]
+        inicio: [0, 18]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -38,7 +38,7 @@ jobs:
           # trecho do vídeo-base (corpo e mãos se mexendo), do tamanho da fala + 1 s
           ffmpeg -loglevel error -y -ss ${{ matrix.inicio }} -t 9 -i bases/base-hiroshi-mesa.mp4 -an \
             -c:v libx264 -crf 14 -pix_fmt yuv420p base.mp4
-          bash motor/ditto_cpu.sh bases/teste-8s.wav base.mp4 saida/ditto-base-${{ matrix.inicio }}s.mp4
+          DITTO_RELATIVO=0 bash motor/ditto_cpu.sh bases/teste-8s.wav base.mp4 saida/ditto-base-${{ matrix.inicio }}s.mp4
           echo "::notice::pronto"
       - name: Cor da boca (a base tinha lábios roxos)
         run: |
