@@ -29,6 +29,7 @@ jobs:
           git -C ditto checkout -q c3e47eee2e626500017a0556b470d6d4182f85e8
           # tudo na CPU
           grep -rl '"cuda"' ditto/core ditto/inference.py | xargs sed -i 's/"cuda"/"cpu"/g'
+          sed -i "s/device='cuda'/device='cpu'/" ditto/core/models/modules/LMDM.py
           pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
           pip install -q "numpy<2" librosa tqdm filetype imageio imageio-ffmpeg opencv-python-headless scikit-image \
             cython einops onnxruntime==1.20.1 mediapipe==0.10.14 scipy huggingface_hub
@@ -36,6 +37,16 @@ jobs:
           from huggingface_hub import snapshot_download
           snapshot_download("digital-avatar/ditto-talkinghead", local_dir="ditto/checkpoints",
                             allow_patterns=["ditto_pytorch/*", "ditto_pytorch/**", "ditto_cfg/*"])
+          # a configuração do modelo também pede "cuda": troca por "cpu"
+          import pickle
+          p = "ditto/checkpoints/ditto_cfg/v0.4_hubert_cfg_pytorch.pkl"
+          def cpu(x):
+              if isinstance(x, dict): return {k: cpu(v) for k, v in x.items()}
+              if isinstance(x, list): return [cpu(v) for v in x]
+              if isinstance(x, tuple): return tuple(cpu(v) for v in x)
+              return "cpu" if isinstance(x, str) and x.startswith("cuda") else x
+          d = cpu(pickle.load(open(p, "rb")))
+          pickle.dump(d, open(p, "wb"))
           PY
           find ditto/checkpoints -maxdepth 3 | head -40
       - name: Hiroshi falando (CPU)
