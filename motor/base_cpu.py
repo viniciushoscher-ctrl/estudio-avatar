@@ -39,18 +39,22 @@ a = ap.parse_args()
 torch.set_num_threads(max(1, torch.get_num_threads()))
 t0 = time.time()
 
+# 1º só o texto (T5 em bfloat16), depois solta tudo: T5 + vídeo juntos não cabem nos 16 GB da máquina grátis
+from transformers import AutoTokenizer  # noqa: E402
+tok = AutoTokenizer.from_pretrained(MODELO, subfolder="tokenizer")
+t5 = T5EncoderModel.from_pretrained(MODELO, subfolder="text_encoder", torch_dtype=torch.bfloat16, low_cpu_mem_usage=True)
+with torch.no_grad():
+    ids = tok(a.prompt, padding="max_length", max_length=256, truncation=True, add_special_tokens=True,
+              return_tensors="pt")
+    pm = ids.attention_mask.bool()
+    pe = t5(ids.input_ids, attention_mask=pm)[0].float()
+del t5
+gc.collect()
+print(f"[base] texto pronto em {time.time() - t0:.0f} s", flush=True)
 transformer = LTXVideoTransformer3DModel.from_single_file(PESOS, torch_dtype=torch.float32)
 vae = AutoencoderKLLTXVideo.from_single_file(PESOS, torch_dtype=torch.float32)
 pipe = LTXConditionPipeline.from_pretrained(MODELO, transformer=transformer, vae=vae, text_encoder=None,
-                                            torch_dtype=torch.float32)
-# o T5 em float32 não cabe nos 16 GB da máquina grátis: carrega em bfloat16 só para ler o texto e solta
-pipe.text_encoder = T5EncoderModel.from_pretrained(MODELO, subfolder="text_encoder", torch_dtype=torch.bfloat16)
-with torch.no_grad():
-    pe, pm, _, _ = pipe.encode_prompt(a.prompt, None, do_classifier_free_guidance=False, device="cpu")
-pipe.text_encoder = None
-gc.collect()
-pe = pe.float()
-print(f"[base] texto pronto em {time.time() - t0:.0f} s", flush=True)
+                                            tokenizer=None, torch_dtype=torch.float32)
 
 pipe.vae.enable_tiling()
 img = ImageOps.fit(Image.open(a.imagem).convert("RGB"), (a.largura, a.altura), Image.LANCZOS)
