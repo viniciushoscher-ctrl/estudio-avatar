@@ -1,0 +1,46 @@
+name: Teddy cena (ComfyUI)
+run-name: Teddy cena ${{ github.run_number }} (${{ github.event.head_commit.message }})
+
+# Cena do Teddy Vlog feita no ComfyUI (+ ComfyArt) na GPU da Modal.
+# teddy/rodar.txt diz o que fazer: "chave" (imagem inicial, Qwen-Image) ou "video" (LongCat Avatar 15 s).
+on:
+  push:
+    branches: [claude/project-thread-uqiylo]
+    paths: [teddy/rodar.txt]
+
+permissions:
+  contents: read
+
+jobs:
+  cena:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: ComfyUI na GPU da Modal
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          pip install -q modal
+          TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
+          export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          MODO=$(head -n1 teddy/rodar.txt | tr -d '[:space:]')
+          modal run gpu/teddy_comfy.py --modo baixar
+          if [ "$MODO" = "chave" ]; then
+            modal run gpu/teddy_comfy.py --modo chave --prompt-arquivo teddy/cena01-chave.txt \
+              --negativo-arquivo teddy/cena01-negativo.txt --saida saida
+          else
+            modal run gpu/teddy_comfy.py --modo video --imagem teddy/cena01.png --audio teddy/cena01.wav \
+              --prompt-arquivo teddy/cena01-longcat.txt --saida saida
+          fi
+          ls -la saida
+      - uses: actions/upload-artifact@v4
+        with:
+          name: teddy-saida
+          path: saida/
