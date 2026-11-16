@@ -1,8 +1,9 @@
 name: Teste Ditto na CPU
 run-name: Teste Ditto na CPU ${{ github.run_number }}
 
-# Avatar falando 100% grátis: Ditto (Ant Group, Apache-2.0) na CPU do GitHub, sem Modal e sem GPU.
-# Anima rosto, boca, olhos e cabeça a partir do áudio, em cima da imagem do avatar.
+# Avatar falando 100% grátis na CPU do GitHub (sem Modal, sem GPU), no método do HeyGen:
+# o corpo, as mãos e a cabeça vêm de um VÍDEO-BASE do avatar (já pronto no repo) e o Ditto
+# (Ant Group, Apache-2.0) refaz só a boca e a expressão a partir do áudio novo.
 
 on:
   workflow_dispatch:
@@ -16,7 +17,11 @@ permissions:
 jobs:
   ditto:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        inicio: [0, 14]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -25,49 +30,22 @@ jobs:
       - name: Instalar Ditto (CPU)
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
-          git clone -q https://github.com/antgroup/ditto-talkinghead ditto
-          git -C ditto checkout -q c3e47eee2e626500017a0556b470d6d4182f85e8
-          # tudo na CPU
-          grep -rl '"cuda"' ditto/core ditto/inference.py | xargs sed -i 's/"cuda"/"cpu"/g'
-          sed -i "s/device='cuda'/device='cpu'/" ditto/core/models/modules/LMDM.py
-          # float16 na CPU dá NaN (rosto saía branco): na CPU roda em float32
-          sed -i 's/dtype=torch.float16, enabled=True/dtype=torch.float16, enabled=self.device.startswith("cuda")/' \
-            ditto/core/models/*.py
-          pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
-          pip install -q "numpy<2" librosa tqdm filetype imageio imageio-ffmpeg opencv-python-headless scikit-image \
-            cython einops onnxruntime==1.20.1 mediapipe==0.10.14 scipy huggingface_hub
-          python - <<'PY'
-          from huggingface_hub import snapshot_download
-          snapshot_download("digital-avatar/ditto-talkinghead", local_dir="ditto/checkpoints",
-                            allow_patterns=["ditto_pytorch/*", "ditto_pytorch/**", "ditto_cfg/*"])
-          # a configuração do modelo também pede "cuda": troca por "cpu"
-          import pickle
-          p = "ditto/checkpoints/ditto_cfg/v0.4_hubert_cfg_pytorch.pkl"
-          def cpu(x):
-              if isinstance(x, dict): return {k: cpu(v) for k, v in x.items()}
-              if isinstance(x, list): return [cpu(v) for v in x]
-              if isinstance(x, tuple): return tuple(cpu(v) for v in x)
-              return "cpu" if isinstance(x, str) and x.startswith("cuda") else x
-          d = cpu(pickle.load(open(p, "rb")))
-          pickle.dump(d, open(p, "wb"))
-          PY
-          find ditto/checkpoints -maxdepth 3 | head -40
-      - name: Hiroshi falando (CPU)
+          bash motor/ditto_cpu.sh
+      - name: Hiroshi falando sobre o vídeo-base (CPU)
         run: |
           set -o pipefail
           mkdir -p saida
-          cd ditto
-          for img in hiroshi-mesa rosto-japones; do
-            T0=$(date +%s)
-            python inference.py --data_root ./checkpoints/ditto_pytorch \
-              --cfg_pkl ./checkpoints/ditto_cfg/v0.4_hubert_cfg_pytorch.pkl \
-              --audio_path ../bases/teste-8s.wav --source_path ../avatares/$img.png \
-              --output_path ../saida/ditto-$img.mp4 2>&1 | grep -v Warning | tail -15
-            echo "::notice::$img: $(( $(date +%s) - T0 )) s"
-          done
-          ls -la ../saida
+          # trecho do vídeo-base (corpo e mãos se mexendo), do tamanho da fala + 1 s
+          ffmpeg -loglevel error -y -ss ${{ matrix.inicio }} -t 9 -i bases/base-hiroshi-mesa.mp4 -an \
+            -c:v libx264 -crf 14 -pix_fmt yuv420p base.mp4
+          bash motor/ditto_cpu.sh bases/teste-8s.wav base.mp4 saida/ditto-base-${{ matrix.inicio }}s.mp4
+          echo "::notice::pronto"
+      - name: Cor da boca (a base tinha lábios roxos)
+        run: |
+          pip install -q face-alignment
+          python motor/boca_cor.py saida saida || echo "::warning::cor falhou"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ditto
+          name: ditto-${{ matrix.inicio }}
           path: saida/
