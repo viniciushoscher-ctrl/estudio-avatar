@@ -167,6 +167,38 @@ def candidatos(q, chave, marca=""):
     return sorted(unicos, key=lambda c: -nota(c, termos))
 
 
+def relaxados(q, chave, marca=""):
+    """Sem clipe fiel: tenta buscas menores (menos palavras) e, por último, cenas gerais do Japão."""
+    termos = [t for t in re.findall(r"[a-z]+", q.lower()) if t not in ("japan", "japanese")]
+    japao = precisa_japao(marca + " " + q)  # gente: tem que ser asiática; objeto/paisagem: qualquer um serve
+    buscas = []
+    if len(termos) >= 2:
+        buscas += [" ".join(termos[-2:]), " ".join(termos[:2]), termos[-1], termos[0]]
+    elif termos:
+        buscas += [termos[0]]
+    buscas = [b for b in dict.fromkeys(buscas) if b]
+    if japao:  # gente japonesa sem clipe fiel: pessoas asiáticas parecidas e, por último, rua do Japão
+        buscas += [f"asian {termos[-1]}" if termos else "", "asian family", "asian elderly", "japan street", "tokyo"]
+        buscas = [b for b in dict.fromkeys(buscas) if b]
+    for b in buscas:
+        bt = [t for t in b.split() if t != "japan"]
+        cands = coverr(b) + mixkit(b) + (pexels_cands(b, chave) if chave else [])
+        vistos, ok = set(), []
+        for c in cands:
+            if c["id"] in vistos:
+                continue
+            vistos.add(c["id"])
+            if bt and acertos(c, bt) < len(bt):
+                continue
+            if (japao or not bt) and not (c["palavras"] & JAPAO):
+                continue
+            ok.append(c)
+        if ok:
+            print(f"[broll] '{q}' sem clipe fiel; usando busca '{b}'", flush=True)
+            return sorted(ok, key=lambda c: -nota(c, bt or termos))
+    return []
+
+
 def duracao_arquivo(p):
     import subprocess
     r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(p)],
@@ -191,8 +223,11 @@ def main(roteiro, tempos, saida):
             continue
         precisa = (t["q1"] - t["q0"]) / 25 + 0.5
         q = busca(m.group(1))
+        cands = candidatos(q, chave, m.group(1))
+        if not [c for c in cands if c["id"] not in usados] and os.environ.get("BROLL_RELAXADO", "1") == "1":
+            cands = relaxados(q, chave, m.group(1))  # sem GPU: melhor um clipe próximo do que nenhum
         tem, k = 0.0, 0
-        for c in candidatos(q, chave, m.group(1)):
+        for c in cands:
             if c["id"] in usados:
                 continue
             destino = Path(saida, f"linha-{t['linha']:03d}-{k + 1}.mp4")

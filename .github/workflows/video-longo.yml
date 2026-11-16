@@ -136,14 +136,16 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: fala
-      - name: Vídeos reais do Pexels (até 4K, uso comercial grátis)
+      - name: Vídeos reais grátis (Coverr/Mixkit; sem GPU, sempre um clipe por linha)
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          BROLL_RELAXADO: ${{ inputs.motor == 'longcat' && '0' || '1' }}
         run: |
           mkdir -p broll && echo ok > broll/.vazio
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
           python3 motor/broll_videos.py "$ROTEIRO" tempos.json broll || echo "::warning::Pexels falhou"
-      - name: Imagens de IA só nas linhas sem vídeo (Qwen-Image, GPU da Modal)
+      - name: Imagens de IA só nas linhas sem vídeo (Qwen-Image, GPU da Modal; só com motor=longcat)
+        if: ${{ inputs.motor == 'longcat' }}
         env:
           MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
           MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
