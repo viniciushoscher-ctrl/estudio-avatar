@@ -29,7 +29,6 @@ jobs:
           git -C ditto checkout -q c3e47eee2e626500017a0556b470d6d4182f85e8
           # tudo na CPU
           grep -rl '"cuda"' ditto/core ditto/inference.py | xargs sed -i 's/"cuda"/"cpu"/g'
-          sed -i 's/torch.cuda.manual_seed/(lambda *a: None)/g' ditto/inference.py
           pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
           pip install -q "numpy<2" librosa tqdm filetype imageio imageio-ffmpeg opencv-python-headless scikit-image \
             cython einops onnxruntime==1.20.1 mediapipe==0.10.14 scipy huggingface_hub
@@ -41,6 +40,7 @@ jobs:
           find ditto/checkpoints -maxdepth 3 | head -40
       - name: Hiroshi falando (CPU)
         run: |
+          set -o pipefail
           mkdir -p saida
           cd ditto
           for img in hiroshi-mesa rosto-japones; do
