@@ -1,5 +1,5 @@
 # ancora.py — âncora de IA (avatar ancora65, aprovado 2026-11-14) falando trechos da narração do vídeo.
-# Padrão (Vinicius 14/11): ~5 s no início, ~2 s no meio, ~5 s perto do fim (+ 1 batida extra), 15-20 s no total.
+# Padrão (Vinicius 14/11): início, meio e fim, ~15 s. Desde 16/11, para gastar menos crédito da Modal: 3 trechos de ate 4.6 s (ANCORA_N=4 acrescenta o 4o).
 # Passos (rodar na pasta de trabalho do vídeo; precisa do repo viniciushoscher-ctrl/estudio-avatar clonado em $EA,
 #  branch claude/project-thread-f10yr5, onde roda o LongCat na GPU grátis da Modal):
 #   python3 ancora.py prep  words-NN.json NN-slug-narracao.mp3 <id>     -> ancora-<id>/segs.json + wavs, push p/ estudio-avatar
@@ -35,13 +35,14 @@ def prep(words, audio, vid):
     w = json.load(open(words)); D = dur(audio); S = sentences(w); used = []; segs = []
     avoid = [0.25, 0.5, 0.75]  # thumb frames
     # 1) open: from 0, whole sentences up to ~5 s (accept 3.5-7 s; else cut at the word nearest 5 s)
+    # CUSTO (16/11): o LongCat gera blocos fixos de 5 s (125 quadros): trecho > 5 s custa 2 blocos. Cada trecho (fala + folgas 0.37 s) fica <= 5.0 s.
     e = 0
     for s in S:
-        if s["e"] <= 7.0: e = s["e"]
+        if s["e"] <= 4.6: e = s["e"]
         else: break
-    if e < 3.5: e = min((x["e"] for x in w), key=lambda t: abs(t - 5.0))
+    if e < 3.2: e = min((x["e"] for x in w if x["e"] <= 4.6), key=lambda t: abs(t - 4.5))
     segs.append(dict(a=0.0, b=e)); used.append((0.0, e))
-    for target, lo, hi in [(0.45 * D, 1.6, 3.4), (D - 40, 3.5, 6.5), (0.62 * D, 2.5, 4.5)]:
+    for target, lo, hi in [(0.5 * D, 3.0, 4.6), (D - 40, 3.2, 4.6)] + ([(0.7 * D, 3.0, 4.6)] if os.environ.get("ANCORA_N") == "4" else []):
         p = pick(S, D, target, lo, hi, used, avoid)
         if p: segs.append(dict(a=p[1], b=p[2])); used.append((p[1], p[2]))
     segs.sort(key=lambda s: s["a"])
