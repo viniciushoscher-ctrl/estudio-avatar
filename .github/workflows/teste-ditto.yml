@@ -30,6 +30,9 @@ jobs:
           # tudo na CPU
           grep -rl '"cuda"' ditto/core ditto/inference.py | xargs sed -i 's/"cuda"/"cpu"/g'
           sed -i "s/device='cuda'/device='cpu'/" ditto/core/models/modules/LMDM.py
+          # float16 na CPU dá NaN (rosto saía branco): na CPU roda em float32
+          sed -i 's/dtype=torch.float16, enabled=True/dtype=torch.float16, enabled=self.device.startswith("cuda")/' \
+            ditto/core/models/*.py
           pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
           pip install -q "numpy<2" librosa tqdm filetype imageio imageio-ffmpeg opencv-python-headless scikit-image \
             cython einops onnxruntime==1.20.1 mediapipe==0.10.14 scipy huggingface_hub
