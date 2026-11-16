@@ -1,0 +1,35 @@
+name: Teddy cena (Lightning)
+run-name: Teddy Lightning ${{ github.run_number }} (${{ github.event.head_commit.message }})
+
+# Cena do Teddy Vlog no ComfyUI + ComfyArt numa GPU grátis da Lightning AI.
+# teddy/rodar-lightning.txt diz a etapa: "chave" (imagem inicial) ou "video" (cena falada de 15 s).
+on:
+  push:
+    branches: [claude/project-thread-uqiylo]
+    paths: [teddy/rodar-lightning.txt]
+
+permissions:
+  contents: read
+
+jobs:
+  cena:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: ComfyUI na GPU da Lightning AI
+        env:
+          LIGHTNING_USER_ID: ${{ secrets.LIGHTNING_USER_ID }}
+          LIGHTNING_API_KEY: ${{ secrets.LIGHTNING_API_KEY }}
+        run: |
+          pip install -q lightning-sdk
+          python lightning/teddy_lightning.py "$(head -n1 teddy/rodar-lightning.txt | tr -d '[:space:]')"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: teddy-saida
+          path: saida/
+          if-no-files-found: ignore
