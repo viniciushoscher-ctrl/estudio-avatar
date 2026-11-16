@@ -1,0 +1,35 @@
+name: Teddy voz
+run-name: Teddy voz ${{ github.run_number }}
+
+# Vozes do Theodore Roosevelt (canal Teddy Vlog) por descrição: Qwen3-TTS VoiceDesign, CPU do GitHub, grátis.
+on:
+  push:
+    branches: [claude/project-thread-uqiylo]
+    paths: [avatares/novos/teddy.json]
+
+permissions:
+  contents: read
+
+jobs:
+  voz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: qwen3-tts-voicedesign-v1
+      - name: Vozes por descrição (Qwen3-TTS VoiceDesign, CPU)
+        run: |
+          sudo apt-get install -y -qq sox > /dev/null
+          pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -q qwen-tts soundfile
+          python motor/voz_criar.py avatares/novos/teddy.json vozes-teddy
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vozes-teddy
+          path: vozes-teddy/
