@@ -26,8 +26,8 @@ on:
         description: "Boca nítida com GFPGAN 1.4 (sim/nao) - só motor musetalk"
         default: "sim"
       motor:
-        description: "longcat (qualidade, GPU da Modal) ou musetalk (grátis, CPU)"
-        default: longcat
+        description: "ditto (grátis, CPU do GitHub), longcat (GPU da Modal) ou musetalk"
+        default: ditto
   push:
     branches: [claude/project-thread-f10yr5]
     paths: [roteiros/produzir.txt, roteiros/produzir-avatar.txt]
@@ -38,7 +38,7 @@ permissions:
 env:
   ROTEIRO: ${{ inputs.roteiro || 'roteiros/produzir.txt' }}
   BASE: ${{ inputs.base || 'bases/base-hiroshi-mesa.mp4' }}
-  MOTOR: ${{ inputs.motor || 'longcat' }}
+  MOTOR: ${{ inputs.motor || 'ditto' }}
   IMAGEM: avatares/hiroshi-mesa.png
   # prompt padrão do LongCat (teste de 13/11: pedir "teeth"/"close-up" no prompt deixava dentes verdes,
   # lábios roxos e legendas inventadas)
@@ -177,7 +177,7 @@ jobs:
 
   avatar:
     needs: audio
-    if: ${{ (inputs.motor || 'longcat') == 'longcat' }}
+    if: ${{ inputs.motor == 'longcat' }}
     runs-on: ubuntu-latest
     timeout-minutes: 240
     steps:
@@ -212,6 +212,75 @@ jobs:
           pip install -q torch --index-url https://download.pytorch.org/whl/cpu
           pip install -q face-alignment opencv-python-headless numpy
           python motor/boca_cor.py clipes clipes || echo "::warning::correção de cor falhou, segue sem"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clipes
+          path: clipes/
+
+  # motor padrão: Ditto (Apache-2.0) na CPU do GitHub, grátis, uma máquina por fala do avatar
+  falas:
+    needs: audio
+    if: ${{ (inputs.motor || 'ditto') == 'ditto' }}
+    runs-on: ubuntu-latest
+    outputs:
+      lista: ${{ steps.l.outputs.lista }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: fala
+      - id: l
+        name: Cortar as falas do avatar
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          python3 motor/cortar_falas.py --roteiro "$ROTEIRO" --tempos tempos.json --audio fala.wav --saida falas
+          echo "lista=$(cd falas && ls *.wav | sed 's/\.wav$//' | python3 -c 'import sys,json;print(json.dumps(sys.stdin.read().split()))')" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: falas
+          path: falas/
+
+  ditto:
+    needs: falas
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        fala: ${{ fromJSON(needs.falas.outputs.lista) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - uses: actions/download-artifact@v4
+        with:
+          name: falas
+          path: falas
+      - uses: actions/cache@v4
+        with:
+          path: ditto
+          key: ditto-cpu-v1-${{ hashFiles('motor/ditto_cpu.sh') }}
+      - name: Avatar falando ${{ matrix.fala }} (Ditto, CPU)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          AV=$(cat roteiros/produzir-avatar.txt 2>/dev/null | tr -d '[:space:]'); AV=${AV:-hiroshi}
+          bash motor/ditto_cpu.sh falas/${{ matrix.fala }}.wav avatares/$AV-mesa.png clipes/${{ matrix.fala }}.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clipe-${{ matrix.fala }}
+          path: clipes/
+
+  ditto_clipes:
+    needs: ditto
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: clipe-*
+          merge-multiple: true
+          path: clipes
       - uses: actions/upload-artifact@v4
         with:
           name: clipes
@@ -310,8 +379,8 @@ jobs:
           path: parte-*.mp4
 
   juntar:
-    needs: [boca, avatar, broll]
-    if: ${{ !cancelled() && (needs.boca.result == 'success' || needs.avatar.result == 'success') }}
+    needs: [boca, avatar, ditto_clipes, broll]
+    if: ${{ !cancelled() && (needs.boca.result == 'success' || needs.avatar.result == 'success' || needs.ditto_clipes.result == 'success') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -328,7 +397,7 @@ jobs:
           name: broll
           path: broll
       - uses: actions/download-artifact@v4
-        if: ${{ needs.avatar.result == 'success' }}
+        if: ${{ needs.avatar.result == 'success' || needs.ditto_clipes.result == 'success' }}
         with:
           name: clipes
           path: clipes
