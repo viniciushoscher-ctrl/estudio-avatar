@@ -1,0 +1,59 @@
+name: Teste Ditto na CPU
+run-name: Teste Ditto na CPU ${{ github.run_number }}
+
+# Avatar falando 100% grátis: Ditto (Ant Group, Apache-2.0) na CPU do GitHub, sem Modal e sem GPU.
+# Anima rosto, boca, olhos e cabeça a partir do áudio, em cima da imagem do avatar.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [.github/workflows/teste-ditto.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  ditto:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Instalar Ditto (CPU)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          git clone -q https://github.com/antgroup/ditto-talkinghead ditto
+          git -C ditto checkout -q c3e47eee2e626500017a0556b470d6d4182f85e8
+          # tudo na CPU
+          grep -rl '"cuda"' ditto/core ditto/inference.py | xargs sed -i 's/"cuda"/"cpu"/g'
+          sed -i 's/torch.cuda.manual_seed/(lambda *a: None)/g' ditto/inference.py
+          pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q "numpy<2" librosa tqdm filetype imageio imageio-ffmpeg opencv-python-headless scikit-image \
+            cython einops onnxruntime==1.20.1 mediapipe==0.10.14 scipy huggingface_hub
+          python - <<'PY'
+          from huggingface_hub import snapshot_download
+          snapshot_download("digital-avatar/ditto-talkinghead", local_dir="ditto/checkpoints",
+                            allow_patterns=["ditto_pytorch/*", "ditto_pytorch/**", "ditto_cfg/*"])
+          PY
+          find ditto/checkpoints -maxdepth 3 | head -40
+      - name: Hiroshi falando (CPU)
+        run: |
+          mkdir -p saida
+          cd ditto
+          for img in hiroshi-mesa rosto-japones; do
+            T0=$(date +%s)
+            python inference.py --data_root ./checkpoints/ditto_pytorch \
+              --cfg_pkl ./checkpoints/ditto_cfg/v0.4_hubert_cfg_pytorch.pkl \
+              --audio_path ../bases/teste-8s.wav --source_path ../avatares/$img.png \
+              --output_path ../saida/ditto-$img.mp4 2>&1 | grep -v Warning | tail -15
+            echo "::notice::$img: $(( $(date +%s) - T0 )) s"
+          done
+          ls -la ../saida
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ditto
+          path: saida/
