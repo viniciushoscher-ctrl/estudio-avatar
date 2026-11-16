@@ -1,5 +1,5 @@
-name: Âncora trechos
-run-name: Âncora trechos ${{ github.run_number }} (${{ inputs.pasta || 'push' }})
+name: Âncora trechos Modal (pago)
+run-name: Modal ${{ github.run_number }} (${{ inputs.pasta || 'push' }})
 
 # RyanRoverMoney: o âncora fala trechos da narração JÁ PRONTA do vídeo (voz 9), sem TTS.
 # Entrada: trechos/<id>/*.wav (+ opcional trechos/<id>/avatar.txt com o nome do avatar; padrão ancora65).
@@ -10,9 +10,6 @@ on:
       pasta:
         description: "trechos/<id>"
         required: true
-  push:
-    branches: [claude/project-thread-f10yr5]
-    paths: [trechos/*/pronto.txt]
 
 permissions:
   contents: read
