@@ -18,7 +18,8 @@ if [ ! -f "$D/.pronto" ]; then
     "$D"/core/models/*.py
   # vídeo-base: a boca vem 100% do áudio novo (relative_d=False); cabeça, olhos e corpo vêm do vídeo-base.
   # Com relative_d=True a boca falando do vídeo-base "vaza" para o resultado.
-  sed -i 's/self.relative_d = kwargs.get("relative_d", True)/self.relative_d = kwargs.get("relative_d", __import__("os").environ.get("DITTO_RELATIVO", "1") == "1")/' \
+  # (a configuração padrão do modelo já traz relative_d=True, então a variável tem que vencer a configuração)
+  sed -i 's/self.relative_d = kwargs.get("relative_d", True)/self.relative_d = (__import__("os").environ["DITTO_RELATIVO"] == "1") if "DITTO_RELATIVO" in __import__("os").environ else kwargs.get("relative_d", True)/' \
     "$D/stream_pipeline_offline.py"
   grep -q DITTO_RELATIVO "$D/stream_pipeline_offline.py"
   touch "$D/.pronto"

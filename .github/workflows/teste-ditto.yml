@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   push:
     branches: [claude/project-thread-f10yr5]
-    paths: [.github/workflows/teste-ditto.yml]
+    paths: [.github/workflows/teste-ditto.yml, motor/ditto_cpu.sh]
 
 permissions:
   contents: read
