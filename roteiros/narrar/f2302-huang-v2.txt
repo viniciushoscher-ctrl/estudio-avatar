@@ -1,0 +1,85 @@
+Jensen Huang is the CEO of Nvidia again. On November 23, 2026, Nvidia's board announced that it had voted unanimously to reinstate him as president and chief executive, effective immediately.
+He resigned on November 12. He was gone for eleven days. When the market opened, Nvidia's stock jumped about 30 percent, according to Yahoo Finance.
+In the next minutes: why the same board that said no six days earlier changed its mind, what President Trump said about national security, and how it went for the famous founders who came back before him.
+The news came before the opening bell on November 23. According to Engadget, Nvidia's board held a series of meetings and discussions with Huang, and the board members voted unanimously to reappoint him.
+Yahoo Finance reports the board said it was satisfied with his candor and his ability to lead the company.
+Tom's Hardware reports he returns as president, CEO and a member of the board.
+Board chair Harvey Jones said, according to Yahoo Finance, "The Board believes Jensen is the right person to lead NVIDIA."
+And the board added, "We have every confidence in Jensen and look forward to working with him."
+That is a sentence nobody expected to read that month. Because less than a week earlier, the same chairman had said something very different.
+On the night of Nvidia's earnings report, November 17, Harvey Jones told investors that the board did not intend to reinstate Jensen as CEO.
+Engadget quoted those words again on November 23. The board had accepted his resignation unanimously.
+It had started a search for a new chief executive. Colette Kress, the finance chief, was running the company as interim CEO.
+Then, six days later, the same board voted the other way, again unanimously.
+What changed? The board's statement gives one clue. According to Yahoo Finance, it says the board "received input from senior levels of the United States government," and that the board "is confident that Mr.
+Huang's reinstatement poses no national security risk." That line is the heart of the story.
+And it points straight to the White House.
+President Trump posted on Truth Social after the announcement, according to Yahoo Finance.
+"The NVIDIA Board of Directors has made the correct and proper decision," he wrote.
+He added, "The United States Government has no reason to believe that Jensen's return to NVIDIA poses any risk to National Security."
+He also called Huang "a Great Patriot and National Treasure." Tom's Hardware reports Trump also said the Attorney General has no evidence that Huang broke the law.
+Treasury Secretary Scott Bessent had been the toughest voice in the administration.
+On November 15 he said the next CEO should come from outside the company.
+But on CBS on November 22, Yahoo Finance reports, Bessent backed away from calling for a dramatic shake-up.
+One day later, Huang was back. So what was Huang himself saying?
+Huang released a short statement. According to Engadget, he said, "I take this responsibility with the greatest humility and renewed commitment."
+He thanked the board's chair, Harvey Jones, for his leadership. And he said, "I can't wait to get back to work."
+Engadget notes that the week before, Huang had said he would be honored to return, after what he called an outpouring of calls from employees, investors, business partners and customers.
+The workers had made their position clear too. More than 10,000 people who said they were Nvidia employees had signed a petition to bring him back, as we reported earlier.
+For them, November 23 was a victory. For the stock market, it was something bigger.
+Nvidia shares soared 27 percent in premarket trading, according to the Yahoo Finance live blog.
+By late morning, Yahoo's market data showed the stock at about 167 dollars, up roughly 42 dollars from the November 20 close of about 125 dollars, or about 33 percent.
+Tom's Hardware reports the jump erased all the losses from Huang's time away, and its headline says the stock fell 24 percent during his eleven-day exit.
+Fortune has reported that Huang owns roughly 870 million Nvidia shares. If that is right, a 42-dollar jump adds roughly 36 billion dollars to the value of his stake on paper in a single morning.
+The whole market rose with it. Yahoo reports Dow futures were up more than 1,200 points before the open, after the S&P 500 fell into a correction on November 20 and chip stocks had their worst week since 2001.
+But a rising stock does not settle everything.
+Here is what had not changed. Yahoo Finance reports the board's independent investigation into Huang's reported ties to an executive at Megaspeed, a Singapore company, will proceed to conclusion.
+At the time of this report, no findings had been published. Megaspeed itself is under criminal investigation over alleged exports of AI chips to China, Tom's Hardware reports.
+Megaspeed has denied wrongdoing. China has called the spy claims "entirely groundless."
+Huang has not been charged with any crime. The board also has a new National Security and Export Control Committee of independent directors, and Tom's Hardware reports Nvidia is hiring a chief compliance officer who will report to the board.
+Colette Kress goes back to being chief financial officer, and the board thanked her "for her outstanding service as interim CEO."
+So the man is back, but the questions are not finished.
+Before we look at the founders who came back before him, tell us in the comments: was Nvidia's board right to bring Jensen Huang back after eleven days, or should it have waited for its own investigation to finish?
+We read every answer.
+The comeback most of you remember is Steve Jobs. In September 1985, Jobs resigned from Apple after the board sided with CEO John Sculley.
+He started a new company, NeXT. For eleven years Apple ran without him.
+In December 1996, a struggling Apple agreed to buy NeXT for 400 million dollars, and in September 1997 Jobs was named interim CEO.
+What came next was the iMac, the iPod and the iPhone. Jobs's comeback took twelve years and a company close to trouble.
+Huang's took eleven days, and Nvidia had just reported the best quarter in its history.
+That difference matters for what a return really means.
+When a board reverses itself in six days, people ask who is really in charge.
+Analyst Dan Ives told Yahoo Finance the board reversed itself because the alternative was the bigger risk to shareholders.
+Yahoo Finance writer Grace O'Donnell wrote that the board could be seen as a puppet of its founder, and that this will not be the same Jensen Huang returning as CEO.
+That is one opinion, but it captures the debate. Harvey Jones stays as chair.
+The new security committee is made up of independent directors. And Huang returns with Washington publicly on his side.
+The last time a famous founder came back to fix his company, the first months were not easy.
+Look at how fast it moved. On November 12, Huang resigned. On November 15, Treasury Secretary Bessent said the next CEO should come from outside the company and gave the board ten days to answer his questions, Fortune and Al Jazeera reported.
+On November 17, Nvidia reported a record quarter of 115.8 billion dollars in revenue, and the chairman said the board did not intend to bring Huang back.
+On November 18, Kress held her first all-hands meeting and told staff, "let's move forward," CNBC reported, while the employee petition kept growing.
+By November 20, the S&P 500 had fallen into a correction and chip stocks had their worst week since 2001, according to Yahoo Finance.
+On November 22, Bessent softened his tone on CBS. On November 23, Huang was CEO again.
+Eleven days, one record quarter, one market slide, and one very public change of heart in Washington.
+And the last famous founder who came back to fix his company had a much longer road.
+Howard Schultz built Starbucks into a national chain, then stepped down as CEO on June 1, 2000.
+On January 7, 2008, after an eight-year break and in the middle of the financial crisis, he came back.
+According to Wikipedia, the stock had fallen 75 percent from 2006 to 2008.
+Schultz fired executives, closed hundreds of stores, and once closed every U.S. location for several hours to retrain workers on making espresso.
+Over the next nine years, the company added nearly 100 billion dollars in market value.
+His lesson: a returning founder usually comes back with a list of changes.
+Huang's list had not been published at the time of this report.
+There is one comeback that looks a lot like the one in November 2026.
+In November 2023, the board of OpenAI, the company behind ChatGPT, fired its CEO, Sam Altman, on a Friday.
+According to the Associated Press, nearly all of the company's 770 employees signed a letter calling for the board to resign and for Altman to return.
+Microsoft moved to hire him. By late Tuesday, OpenAI announced Altman would return as CEO with a new board.
+Workers, investors and a giant partner forced a reversal in days. Nvidia's reversal took eleven days and came with the White House's blessing.
+The difference is that OpenAI's old board left. Nvidia's board stayed. So the next weeks will show whether this board leads Huang, or follows him.
+Here is where we are. Jensen Huang resigned on November 12. The board said on November 17 it did not intend to bring him back.
+On November 23, it voted unanimously to reinstate him, citing input from senior U.S. officials.
+The stock jumped about 30 percent. He is not charged with any crime, and the investigation continues.
+Three things to watch. First, the board's investigation, which it says will run to its conclusion.
+Second, the Senate: a hearing tied to the Nvidia story had been expected on December 3, 2026, and we will see whether senators still call for answers after the White House has spoken.
+Third, Huang's first public appearance as CEO again, and whether he announces changes to how Nvidia handles sales to China.
+Megaspeed denies wrongdoing. China calls the spy claims groundless. And the man who built Nvidia is back at his desk, with the whole market watching what he does first.
+Where it stands: Huang is back, not charged with any crime, and the board's own investigation is still open.
+If you want the stories of power and money that move your savings, subscribe.
+And watch next: Jensen Huang Won't Return, Nvidia Board Says After $116B.
