@@ -43,7 +43,16 @@ jobs:
           pip install -q qwen-tts soundfile librosa
           for r in walt/falas-roteiro/*.txt; do
             n=$(basename $r .txt); true
-            VOZ=${{ matrix.voz.base }} VOZ_MISTURA=${{ matrix.voz.mistura }} VOZ_TOM=${{ matrix.voz.tom }} python motor/voz_hiroshi.py "$r" "saida/${{ matrix.voz.nome }}/$n"
+            VOZ=${{ matrix.voz.base }} VOZ_MISTURA=${{ matrix.voz.mistura }} python motor/voz_hiroshi.py "$r" "saida/${{ matrix.voz.nome }}/$n"
+          done
+      - name: Tom, ritmo e volume (ffmpeg rubberband, formantes preservados; -16 LUFS)
+        run: |
+          sudo apt-get install -y -qq ffmpeg > /dev/null
+          P=$(python3 -c "print(2**(float('${{ matrix.voz.tom }}' or 0)/12))")
+          T="${{ matrix.voz.ritmo }}"; T=${T:-1}
+          for f in $(find saida -name '*.wav'); do
+            ffmpeg -loglevel error -y -i "$f" -af "rubberband=pitch=$P:tempo=$T:formant=preserved:pitchq=quality:window=standard,loudnorm=I=-16:TP=-1.5:LRA=11" -ar 24000 "$f.tmp.wav"
+            mv "$f.tmp.wav" "$f"
           done
       - uses: actions/upload-artifact@v4
         with:
