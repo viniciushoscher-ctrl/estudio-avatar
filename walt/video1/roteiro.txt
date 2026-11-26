@@ -1,0 +1,99 @@
+[w] If you're over sixty and you own an iPhone, grab it right now.
+[a: home] [p: Grab your iPhone] The day you bought that phone, a handful of settings were switched on for you.
+Nobody asked you. Some of them quietly share your information.
+Some of them drain your battery. And one of them lets strangers call you all day long.
+[w] Hi friends, I'm Walt. Today we'll fix seven of them, together.
+[a: home] [p: 7 settings + 1 bonus] One tap at a time, nice and slow. Keep a pen nearby if you like taking notes.
+[w] First, let me show you the most important button on your phone.
+[a: go settings] [p: Your Back button] Open Settings. That's the gray gear icon.
+[a: go privacy] Now tap on anything. Any screen at all.
+[a: hl back] [p: Top left corner = Back] Look at the top left corner. See that little arrow pointing left? That's your Back button.
+[a: back] Tap it, and you go one screen back. Tap it again, another screen back.
+You can't break anything by tapping Back. If something looks unfamiliar, just tap Back until you see the main Settings screen.
+[w] Okay? Let's start with number one.
+[a: scroll Privacy & Security] [p: #1  Share iPhone Analytics → OFF] Number one. In Settings, scroll down until you see Privacy and Security.
+[a: go privacy] Tap it.
+[a: go analytics] Now scroll all the way to the bottom and tap Analytics and Improvements.
+[a: hl Share iPhone Analytics] See the first switch, Share iPhone Analytics? When it's green, your phone sends Apple a report about how you use it. Every single day.
+You don't get paid for that, and it doesn't make your phone work any better for you.
+[a: off Share iPhone Analytics] Tap the switch. It turns gray. That's off.
+[a: off Share iCloud Analytics] If you see Share iCloud Analytics just below, turn that one off too.
+[w] Done. See? Not so bad.
+[a: card qr] [p: Printable guide] Quick thing before number two. If you'd like all of this on paper, point your phone camera at the screen.
+Hold it there for a second, and a link pops up. That's my printable guide, a workbook you print at home.
+Take your time. I'll wait.
+[w] Okay. Number two surprises everybody.
+[a: back] [p: #2  Significant Locations → OFF] Tap Back at the top left, until you're on Privacy and Security again.
+[a: go location] Tap Location Services.
+[a: go sysservices] Scroll to the very bottom and tap System Services.
+[a: go siglocs] Now find Significant Locations and tap it. Your phone may ask for your passcode or your face. That's normal.
+[a: hl Significant Locations] What you're looking at is a list of the places you go most. Your home, your doctor, your pharmacy, your church. With dates.
+Most people have no idea it's there.
+[a: off Significant Locations] Turn the switch off.
+[a: tap Clear History] And then tap Clear History, to erase what's already there.
+Your maps and your weather will still work exactly the same. This list was never helping you. It was only being kept.
+[w] Number three is quick. You'll like this one.
+[a: back3] [p: #3  Personalized Ads → OFF] Go back to Privacy and Security one more time.
+[a: go ads] Near the bottom, tap Apple Advertising.
+[a: off Personalized Ads] Turn off Personalized Ads.
+Now, let me be honest with you. You will still see ads.
+But they won't be built from what Apple knows about you. What you read, what you download, where you are. Less tracking, same phone.
+[w] Number four stops those annoying pop-ups for good.
+[a: back] [p: #4  Tracking → OFF] Still in Privacy and Security, tap Tracking. It's near the top.
+[a: go tracking] You know those pop-ups that ask, allow this app to track your activity across other companies' apps and websites?
+[a: off Allow Apps to Request to Track] Turn off Allow Apps to Request to Track.
+After this, every app gets an automatic no, and you never see that question again. If you see apps listed below the switch, turn those off too.
+[w] Quick pause before the big one.
+[a: card guide] [p: The Phone Security Guide] A lot of you watch these with a pen in your hand, pausing every ten seconds. So I put everything I teach into one place.
+It's called The Phone Security Guide. A workbook you print at home. Thirty-eight pages, forty-five methods, in big print.
+Every step has a little box to check off, and lines to write your notes.
+There's a page that shows where each setting lives on newer and older iPhones, Samsung and Pixel phones. So if your screen looks different from mine, you're covered.
+There's a six-step plan to stop spam calls and texts, and a checklist to run after every update, because updates love to turn things back on.
+The link is in the first comment and at the top of the description.
+[w] Alright, back to your phone. Pay attention to this next one.
+[a: root] [p: #5  Unknown Callers → Silence] Number five is the one people are most glad they changed. Go back to the main Settings screen.
+[a: go apps] Scroll down and tap Apps.
+[a: go phone] Find Phone, and tap it.
+[a: go screencallers] Now scroll to Screen Unknown Callers and tap it. On older iPhones, it's a switch called Silence Unknown Callers.
+[a: check Silence] Choose Silence. On older iPhones, just turn that switch on.
+From now on, calls from numbers that aren't in your contacts go straight to voicemail. Your phone doesn't ring. The scammer gets nothing.
+[w] But first, save the people who matter in your contacts.
+[a: hl Silence] [p: Save your doctor & family in Contacts] Your doctor, your pharmacy, your family. They still ring through, and everyone else waits for voicemail.
+If a real person needs you, they'll leave a message.
+[w] Number six protects your private messages.
+[a: root] [p: #6  Show Previews → When Unlocked] Go back to Settings and tap Notifications.
+[a: go notifications] At the top, tap Show Previews.
+[a: go previews] And choose When Unlocked.
+[a: check When Unlocked] Here's why. Right now, anybody who picks up your phone from the table can read your messages on the lock screen.
+Including those six-digit codes your bank texts you.
+After this change, the message still arrives, but the words only show up after your phone recognizes you.
+[w] That's the way it should have been from the start.
+[a: root] [p: #7  Background App Refresh → Wi-Fi] Number seven is for your battery. Settings, then General.
+[a: go general] Then Background App Refresh.
+[a: go bgrefresh] Tap it at the top again.
+[a: go bgopts] And choose Wi-Fi, or turn it off completely.
+[a: check Wi-Fi] Then look at the list and turn off the apps you rarely use.
+[a: back] Your apps still work the moment you open them. They just stop working behind your back, and that's where a lot of your battery goes.
+[w] And because you stayed with me this long, here's a bonus.
+[a: root] [p: Bonus  Unknown Senders → Screen] Scam text messages. The fake package delivery, the fake bank alert, the you owe a toll text.
+[a: go apps] Go to Settings, tap Apps.
+[a: go messages] Then Messages.
+[a: scroll Screen Unknown Senders] Scroll down to Unknown Senders.
+[a: on Screen Unknown Senders] And turn on Screen Unknown Senders. On older iPhones, it's called Filter Unknown Senders.
+Now texts from people who aren't in your contacts go into a separate list, instead of your main inbox.
+You can still read them whenever you want, but they don't buzz your phone, and you won't tap a bad link by accident.
+[w] Here's my simple rule for every text you get.
+[a: card rule] [p: Walt's rule] If a text asks you to click a link or call a number, and you weren't expecting it, don't.
+Call the company yourself, from the number on your card or your bill.
+[w] Let's go over what we did today.
+[a: card summary] [p: What we changed] One. Analytics, off. Two. Significant Locations, off and cleared.
+Three. Personalized Ads, off. Four. Tracking, off.
+Five. Unknown callers, silenced. Six. Show Previews, only when unlocked.
+Seven. Background App Refresh, Wi-Fi only. And the bonus. Unknown texts, screened.
+[w] Your phone is now safer, quieter, and easier on the battery.
+[a: card guide] [p: The Phone Security Guide] If this helped, The Phone Security Guide picks up where this video ends.
+All seven settings from today are in it, plus the full plan against spam calls and texts, and the After Every Update checklist.
+The link is in the first comment.
+[w] Which of these was already on in your phone? Tell me below.
+[a: card end] [p: See you next time] Everything I teach is in The Phone Security Guide, a workbook you print at home.
+[w] I'm Walt. See you in the next one.

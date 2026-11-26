@@ -46,7 +46,7 @@ if _mix:
     prompt[0].ref_spk_embedding = _e * (_a.norm() / _e.norm())
     print(f"[voz] timbre misturado: {VOZ} {1 - _w:.0%} + {_outra} {_w:.0%}", flush=True)
 # "[broll: ...]" / "[split: ...]" / "[avatar]" no começo da linha são instruções de edição (motor/montar.py)
-falas = [re.sub(r"^\s*\[[^\]]*\]\s*", "", l).strip()
+falas = [re.sub(r"^\s*(\[[^\]]*\]\s*)+", "", l).strip()
          for l in Path(a.roteiro).read_text(encoding="utf-8").splitlines() if l.strip()]
 
 
@@ -55,13 +55,18 @@ def dizer(texto):
     return wavs[0].astype(np.float32), sr
 
 
-if a.parte is None:
+if a.parte is None or __import__("os").environ.get("CLIPES"):
+    # CLIPES=1 com --parte: um wav por linha, numerado pela posição no roteiro inteiro (vídeo longo em paralelo)
     pasta = Path(a.saida); pasta.mkdir(parents=True, exist_ok=True)
-    for i, fala in enumerate(falas, 1):
+    idx = list(range(1, len(falas) + 1))
+    if a.parte is not None:
+        idx = [int(i) for i in np.array_split(np.array(idx), a.partes)[a.parte]]
+    for i in idx:
+        fala = falas[i - 1]
         w, sr = dizer(fala)
         p = np.zeros(int(sr * 0.25), dtype=np.float32)
-        sf.write(pasta / f"fala-{i:02d}.wav", np.concatenate([p, w, p]), sr)
-        print(f"fala-{i:02d}.wav: {(len(w) / sr) + 0.5:.1f}s", flush=True)
+        sf.write(pasta / f"fala-{i:03d}.wav", np.concatenate([p, w, p]), sr)
+        print(f"fala-{i:03d}.wav: {(len(w) / sr) + 0.5:.1f}s", flush=True)
 else:
     minhas = np.array_split(np.array(falas, dtype=object), a.partes)[a.parte]
     partes, sr, tempos = [], 24000, []
