@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       config: ${{ steps.c.outputs.config }}
+      so_voz: ${{ steps.c.outputs.so_voz }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,9 +34,11 @@ jobs:
           C="${{ inputs.config }}"
           [ -z "$C" ] && C=$(git diff --name-only HEAD~1 HEAD -- 'avatares/novos/*.json' | tail -n1)
           echo "config=$C" >> "$GITHUB_OUTPUT"; echo "Config: $C"
+          echo "so_voz=$(python3 -c "import json;print(str(json.load(open('$C')).get('so_voz',False)).lower())")" >> "$GITHUB_OUTPUT"
 
   cena:
     needs: planejar
+    if: needs.planejar.outputs.so_voz != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:

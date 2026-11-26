@@ -3,11 +3,12 @@
  "rosto": "avatares/walt-rosto.png",
  "cena": "Show this exact same man, same face, same white hair, same glasses, same age and same navy work jacket with the WALT name patch and grey t-shirt, sitting at the same wooden workbench in the same phone repair workshop. Wide horizontal 16:9 medium shot from the waist up, centered, both hands resting folded on the desk in front of him, looking straight at the camera with a kind gentle expression, mouth closed. Clean desk with no tools in front of his hands. Photorealistic, soft window daylight, natural skin texture, 35mm documentary photo.",
  "idioma": "English",
- "frase": "Hi friends, it's Walt. Every time your phone updates, a few settings quietly switch back on. Grab a pen, and let's check them together, nice and slow.",
+ "frase": "Hi, I'm Walt. I've worked my whole life, and now I'd like to help more people. YouTube lets me do that. So I'm here to help you have a better life with your phone.",
  "vozes": [
-  "A 70-year-old American man from the Midwest, warm friendly grandfatherly voice, General American accent, slightly raspy with natural age texture, speaks slowly and clearly with gentle pauses, patient like a kind neighbor teaching someone to use a phone.",
-  "An American man around 68, retired small-town phone repair shop owner, soft mid-low baritone, calm reassuring tone, unhurried slow pace, clear diction, a hint of a smile in the voice.",
-  "An elderly American gentleman in his early seventies, deep warm voice with a little gravel, General American accent, very calm and patient, speaks slowly with clear pauses between steps, trustworthy and kind.",
-  "A 65-year-old American man, mature clear baritone, friendly and plain-spoken, Midwestern accent, steady slow pace like a patient teacher, warm and encouraging, never rushed."
- ]
+  "A real 72-year-old man from South Boston, Massachusetts, thick working-class Boston accent, drops his R's (car sounds like 'cah'), slightly hoarse warm voice, talks slowly and casually like chatting with a neighbor on the porch, natural breaths, small hesitations and uneven rhythm like an unscripted real person, not a narrator, not polished.",
+  "A real 74-year-old man from the mountains of East Tennessee, strong Appalachian Southern drawl with long stretched vowels, gravelly low voice with natural age crackle, very slow gentle storytelling pace, kind and folksy, audible breaths and soft chuckles, sounds like a real grandfather talking at the kitchen table, not a voice actor.",
+  "A real 69-year-old man from rural northern Minnesota, strong Upper Midwest Minnesota accent with rounded long O vowels, light friendly slightly nasal tenor voice, cheerful and polite, unhurried pace with little pauses and 'well' feeling, natural imperfect delivery like a home video, not a broadcaster.",
+  "A real 71-year-old rancher from West Texas, deep slow Texas twang, low dusty baritone with a bit of rasp, relaxed laid-back drawl, takes his time between words, warm and plain-spoken, natural breathing and slight unevenness like a real man talking, not a commercial voiceover."
+ ],
+ "so_voz": true
 }
