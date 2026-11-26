@@ -1,7 +1,8 @@
-"""Montagem final do vídeo do Walt em 4K.
+"""Montagem final do vídeo do Walt em 4K, por pedaços (pouca memória).
 
-Entradas (pasta de trabalho): linha.json, narracao.wav, palco.mp4 (telas 3840x2160) e walt.mp4 (LongCat, já com
-a cor da boca corrigida). Cada aparição do Walt é o trecho [off, off+dur] do walt.mp4 colocado em [ini, fim].
+Entradas (pasta de trabalho): linha.json, narracao.wav, palco.mp4 (telas 3840x2160, 30 fps) e walt.mp4 (LongCat, já com
+a cor da boca corrigida). Cada aparição do Walt é o trecho [off, off+dur] do walt.mp4 colocado em [ini, fim]; entre
+elas entra o palco. Todos os pedaços saem com o mesmo codificador e são emendados sem recodificar.
 Uso: python montar.py pasta saida.mp4
 """
 import json, subprocess, sys
@@ -9,21 +10,35 @@ from pathlib import Path
 
 d = Path(sys.argv[1]); out = sys.argv[2]
 L = json.load(open(d / "linha.json"))
-W = L["walt"]
-# Walt sobe para 4K: lanczos + nitidez leve, preenchendo 16:9
-pre = "scale=3840:2160:force_original_aspect_ratio=increase:flags=lanczos,crop=3840:2160,unsharp=5:5:0.6:5:5:0.0,setsar=1,fps=30"
-fc = [f"[1:v]{pre},split={len(W)}" + "".join(f"[w{i}]" for i in range(len(W)))]
-base = "[0:v]"
-for i, w in enumerate(W):
-    a0 = max(0, w["off"] - 0.10); a1 = w["off"] + (w["fim"] - w["ini"]) + 0.15
-    t0 = max(0, w["ini"] - 0.10)
-    fc.append(f"[w{i}]trim=start={a0:.3f}:end={a1:.3f},setpts=PTS-STARTPTS+{t0:.3f}/TB[s{i}]")
-    nxt = f"[v{i}]" if i < len(W) - 1 else "[vout]"
-    fc.append(f"{base}[s{i}]overlay=eof_action=pass:enable='between(t,{t0:.3f},{t0 + a1 - a0:.3f})'{nxt}")
-    base = f"[v{i}]"
-cmd = ["ffmpeg", "-y", "-loglevel", "error", "-stats", "-i", str(d / "palco.mp4"), "-i", str(d / "walt.mp4"), "-i", str(d / "narracao.wav"),
-       "-filter_complex", ";".join(fc), "-map", "[vout]", "-map", "2:a",
-       "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p", "-r", "30",
-       "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-t", f"{L['duracao']:.3f}", "-movflags", "+faststart", out]
-subprocess.run(cmd, check=True)
+FPS = 30
+q = lambda t: round(t * FPS) / FPS
+tmp = d / "pedacos"; tmp.mkdir(exist_ok=True)
+ENC = ["-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p", "-r", str(FPS),
+       "-profile:v", "high", "-video_track_timescale", "15360"]
+PRE = "scale=3840:2160:force_original_aspect_ratio=increase:flags=lanczos,crop=3840:2160,unsharp=5:5:0.6:5:5:0.0,setsar=1"
+pecas, t = [], 0.0
+total = q(L["duracao"])
+for i, w in enumerate(L["walt"]):
+    ini = q(max(0, w["ini"] - 0.10)); fim = q(w["fim"] + 0.15)
+    if ini > t:
+        pecas.append(("palco", t, ini - t, None))
+    pecas.append(("walt", ini, fim - ini, q(max(0, w["off"] - 0.10))))
+    t = fim
+if t < total:
+    pecas.append(("palco", t, total - t, None))
+lista = []
+for k, (tipo, ini, dur, off) in enumerate(pecas):
+    f = tmp / f"{k:03d}.mp4"; lista.append(f)
+    if tipo == "palco":
+        cmd = ["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{ini:.4f}", "-i", str(d / "palco.mp4"), "-t", f"{dur:.4f}",
+               "-vf", f"fps={FPS},setsar=1"] + ENC + [str(f)]
+    else:
+        cmd = ["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{off:.4f}", "-i", str(d / "walt.mp4"), "-t", f"{dur:.4f}",
+               "-vf", f"{PRE},fps={FPS},tpad=stop_mode=clone:stop_duration=1"] + ENC + ["-frames:v", str(round(dur * FPS)), str(f)]
+    subprocess.run(cmd, check=True)
+    print(f"{k:02d} {tipo} {ini:7.2f} +{dur:5.2f}", flush=True)
+(tmp / "lista.txt").write_text("".join(f"file '{p.name}'\n" for p in lista))
+subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(tmp / "lista.txt"),
+                "-i", str(d / "narracao.wav"), "-map", "0:v", "-map", "1:a", "-c:v", "copy",
+                "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-t", f"{total:.3f}", "-movflags", "+faststart", out], check=True)
 print("ok", out)
