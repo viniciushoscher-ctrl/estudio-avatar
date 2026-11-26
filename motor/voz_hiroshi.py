@@ -33,6 +33,19 @@ m = Qwen3TTSModel.from_pretrained("Qwen/Qwen3-TTS-12Hz-1.7B-Base", dtype=torch.f
 VOZ = __import__("os").environ.get("VOZ", "hiroshi").strip() or "hiroshi"  # vozes/<VOZ>.wav + .txt
 prompt = m.create_voice_clone_prompt(ref_audio=str(AQUI / "vozes" / f"{VOZ}.wav"),
                                      ref_text=(AQUI / "vozes" / f"{VOZ}.txt").read_text(encoding="utf-8").strip())
+# VOZ_MISTURA="walt-b:0.4": mistura o timbre (vetor do falante) da voz base com o de outra voz,
+# mantendo o sotaque/ritmo da base (referência ICL). Deixa a voz única. VOZ_TOM=-0.7 baixa 0,7 semitom.
+_mix = __import__("os").environ.get("VOZ_MISTURA", "").strip()
+if _mix:
+    _outra, _peso = _mix.split(":")
+    _o = m.create_voice_clone_prompt(ref_audio=str(AQUI / "vozes" / f"{_outra}.wav"),
+                                     ref_text=(AQUI / "vozes" / f"{_outra}.txt").read_text(encoding="utf-8").strip())
+    _a, _b = prompt[0].ref_spk_embedding, _o[0].ref_spk_embedding
+    _w = float(_peso)
+    _e = (1 - _w) * _a + _w * _b
+    prompt[0].ref_spk_embedding = _e * (_a.norm() / _e.norm())
+    print(f"[voz] timbre misturado: {VOZ} {1 - _w:.0%} + {_outra} {_w:.0%}", flush=True)
+TOM = float(__import__("os").environ.get("VOZ_TOM", "0") or 0)
 # "[broll: ...]" / "[split: ...]" / "[avatar]" no começo da linha são instruções de edição (motor/montar.py)
 falas = [re.sub(r"^\s*\[[^\]]*\]\s*", "", l).strip()
          for l in Path(a.roteiro).read_text(encoding="utf-8").splitlines() if l.strip()]
@@ -40,7 +53,11 @@ falas = [re.sub(r"^\s*\[[^\]]*\]\s*", "", l).strip()
 
 def dizer(texto):
     wavs, sr = m.generate_voice_clone(text=texto, language="English", voice_clone_prompt=prompt)
-    return wavs[0].astype(np.float32), sr
+    w = wavs[0].astype(np.float32)
+    if TOM:
+        import librosa
+        w = librosa.effects.pitch_shift(w, sr=sr, n_steps=TOM).astype(np.float32)
+    return w, sr
 
 
 if a.parte is None:

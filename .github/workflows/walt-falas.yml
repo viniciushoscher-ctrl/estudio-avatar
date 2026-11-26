@@ -2,12 +2,12 @@ name: Walt falas
 run-name: Walt falas ${{ github.run_number }}
 
 # Um wav por linha (clipes de 8 s do Walt) na voz clonada (Qwen3-TTS Base, CPU do GitHub, grátis).
-# Gera em cada voz listada em walt/falas-roteiro/vozes.txt (ex.: walt-b walt-c).
+# Gera em cada voz listada em walt/vozes.json (base, mistura de timbre opcional, tom).
 on:
   workflow_dispatch:
   push:
     branches: [claude/project-thread-f10yr5]
-    paths: [walt/falas-roteiro/*.txt]
+    paths: [walt/falas-roteiro/*.txt, walt/vozes.json]
 
 permissions:
   contents: read
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: p
-        run: echo "vozes=$(python3 -c "import json;print(json.dumps(open('walt/falas-roteiro/vozes.txt').read().split()))")" >> "$GITHUB_OUTPUT"
+        run: echo "vozes=$(python3 -c "import json;print(json.dumps(json.load(open('walt/vozes.json'))))")" >> "$GITHUB_OUTPUT"
   falas:
     needs: planejar
     runs-on: ubuntu-latest
@@ -40,12 +40,12 @@ jobs:
       - run: |
           sudo apt-get install -y -qq sox > /dev/null
           pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
-          pip install -q qwen-tts soundfile
+          pip install -q qwen-tts soundfile librosa
           for r in walt/falas-roteiro/*.txt; do
-            n=$(basename $r .txt); [ "$n" = vozes ] && continue
-            VOZ=${{ matrix.voz }} python motor/voz_hiroshi.py "$r" "saida/${{ matrix.voz }}/$n"
+            n=$(basename $r .txt); true
+            VOZ=${{ matrix.voz.base }} VOZ_MISTURA=${{ matrix.voz.mistura }} VOZ_TOM=${{ matrix.voz.tom }} python motor/voz_hiroshi.py "$r" "saida/${{ matrix.voz.nome }}/$n"
           done
       - uses: actions/upload-artifact@v4
         with:
-          name: falas-${{ matrix.voz }}
+          name: falas-${{ matrix.voz.nome }}
           path: saida/

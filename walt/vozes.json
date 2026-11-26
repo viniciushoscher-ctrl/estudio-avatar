@@ -1,0 +1,26 @@
+[
+ {
+  "nome": "C-tennessee",
+  "base": "walt-c",
+  "mistura": "",
+  "tom": "0"
+ },
+ {
+  "nome": "C-mix-B40",
+  "base": "walt-c",
+  "mistura": "walt-b:0.4",
+  "tom": "0"
+ },
+ {
+  "nome": "C-mix-B50-grave",
+  "base": "walt-c",
+  "mistura": "walt-b:0.5",
+  "tom": "-0.7"
+ },
+ {
+  "nome": "B-boston",
+  "base": "walt-b",
+  "mistura": "",
+  "tom": "0"
+ }
+]
