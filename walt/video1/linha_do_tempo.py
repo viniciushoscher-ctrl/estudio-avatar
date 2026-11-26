@@ -28,10 +28,22 @@ def tags(l):
         l = l[m.end():]
     return t, l
 
+import subprocess, tempfile
+TMP = Path(tempfile.mkdtemp())
+MAX_PPM = 172  # fala calma: linha acima de 172 palavras/min é desacelerada (rubberband, formantes preservados)
 itens = []
 for i, l in enumerate(linhas, 1):
     t, txt = tags(l)
-    w, sr = sf.read(pasta / f"fala-{i:03d}.wav", dtype="float32")
+    arq = pasta / f"fala-{i:03d}.wav"
+    d0 = sf.info(arq).duration - 0.57
+    ppm = len(txt.split()) / max(d0, 0.5) * 60
+    if ppm > MAX_PPM:
+        tempo = max(0.82, MAX_PPM / ppm)
+        novo = TMP / arq.name
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(arq), "-af",
+                        f"rubberband=tempo={tempo:.4f}:formant=preserved:pitchq=quality:window=standard", str(novo)], check=True)
+        arq = novo
+    w, sr = sf.read(arq, dtype="float32")
     if w.ndim > 1: w = w.mean(1)
     if sr != SR:
         import librosa; w = librosa.resample(w, orig_sr=sr, target_sr=SR)
