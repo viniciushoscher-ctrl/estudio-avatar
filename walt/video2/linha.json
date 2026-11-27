@@ -1,0 +1,753 @@
+{
+ "duracao": 612.83,
+ "acoes": [
+  {
+   "t": 0.75,
+   "a": "home",
+   "p": "Gmail on your iPhone?",
+   "d": 7.31
+  },
+  {
+   "t": 14.772,
+   "a": "tap Gmail",
+   "p": null,
+   "d": 11.93
+  },
+  {
+   "t": 29.891,
+   "a": "hl search",
+   "p": "1 switch + 4 more settings",
+   "d": 7.02
+  },
+  {
+   "t": 47.802,
+   "a": "hl menu",
+   "p": "The three lines = Menu",
+   "d": 7.91
+  },
+  {
+   "t": 59.979,
+   "a": "menu",
+   "p": null,
+   "d": 6.48
+  },
+  {
+   "t": 68.706,
+   "a": "close",
+   "p": null,
+   "d": 9.02
+  },
+  {
+   "t": 80.287,
+   "a": "",
+   "p": "#1  Smart features → OFF"
+  },
+  {
+   "t": 83.399,
+   "a": "menu",
+   "p": null,
+   "d": 5.75
+  },
+  {
+   "t": 88.041,
+   "a": "go settings",
+   "p": null,
+   "d": 2.2
+  },
+  {
+   "t": 91.954,
+   "a": "go dataprivacy",
+   "p": null,
+   "d": 3.75
+  },
+  {
+   "t": 94.641,
+   "a": "hl Smart features",
+   "p": null,
+   "d": 5.21
+  },
+  {
+   "t": 117.457,
+   "a": "off Smart features",
+   "p": null,
+   "d": 5.02
+  },
+  {
+   "t": 142.73,
+   "a": "card qr",
+   "p": "Printable guide",
+   "d": 7.25
+  },
+  {
+   "t": 162.798,
+   "a": "",
+   "p": "#2  Two more switches → OFF"
+  },
+  {
+   "t": 168.16,
+   "a": "go workspace",
+   "p": null,
+   "d": 9.84
+  },
+  {
+   "t": 173.589,
+   "a": "hl Smart features in Google Workspace",
+   "p": null,
+   "d": 10.3
+  },
+  {
+   "t": 185.228,
+   "a": "off Smart features in Google Workspace",
+   "p": null,
+   "d": 1.64
+  },
+  {
+   "t": 187.228,
+   "a": "hl Smart features in other Google products",
+   "p": null,
+   "d": 9.84
+  },
+  {
+   "t": 200.583,
+   "a": "off Smart features in other Google products",
+   "p": null,
+   "d": 5.12
+  },
+  {
+   "t": 207.247,
+   "a": "tap Done",
+   "p": null,
+   "d": 6.39
+  },
+  {
+   "t": 217.651,
+   "a": "",
+   "p": "#3  Images → Ask first"
+  },
+  {
+   "t": 221.864,
+   "a": "root",
+   "p": null,
+   "d": 7.75
+  },
+  {
+   "t": 228.114,
+   "a": "go emailprefs",
+   "p": null,
+   "d": 3.48
+  },
+  {
+   "t": 231.733,
+   "a": "go images",
+   "p": null,
+   "d": 2.2
+  },
+  {
+   "t": 235.796,
+   "a": "check Ask before displaying external images",
+   "p": null,
+   "d": 4.02
+  },
+  {
+   "t": 262.786,
+   "a": "mail images",
+   "p": null,
+   "d": 7.58
+  },
+  {
+   "t": 277.851,
+   "a": "card guide",
+   "p": "The Phone Security Guide",
+   "d": 8.35
+  },
+  {
+   "t": 342.89,
+   "a": "card desk1",
+   "p": "#4  Undo Send → 30 seconds",
+   "d": 9.2
+  },
+  {
+   "t": 367.462,
+   "a": "card desk2",
+   "p": null,
+   "d": 10.02
+  },
+  {
+   "t": 384.471,
+   "a": "mail undo",
+   "p": null,
+   "d": 7.96
+  },
+  {
+   "t": 413.851,
+   "a": "safari",
+   "p": "#5  Old connections → Remove",
+   "d": 8.2
+  },
+  {
+   "t": 429.283,
+   "a": "go security",
+   "p": null,
+   "d": 2.11
+  },
+  {
+   "t": 431.283,
+   "a": "scroll Your connections to third-party apps & services",
+   "p": null,
+   "d": 4.93
+  },
+  {
+   "t": 442.778,
+   "a": "go connections",
+   "p": null,
+   "d": 10.66
+  },
+  {
+   "t": 450.187,
+   "a": "go coupon",
+   "p": null,
+   "d": 3.2
+  },
+  {
+   "t": 454.291,
+   "a": "tap Remove access",
+   "p": null,
+   "d": 3.3
+  },
+  {
+   "t": 470.747,
+   "a": "",
+   "p": "+ 2-Step Verification → On"
+  },
+  {
+   "t": 473.109,
+   "a": "back2",
+   "p": null,
+   "d": 4.39
+  },
+  {
+   "t": 476.083,
+   "a": "hl 2-Step Verification",
+   "p": null,
+   "d": 9.7
+  },
+  {
+   "t": 492.466,
+   "a": "mail phish",
+   "p": "Bonus  Spot a fake email",
+   "d": 6.85
+  },
+  {
+   "t": 500.166,
+   "a": "sign 1",
+   "p": null,
+   "d": 10.75
+  },
+  {
+   "t": 511.766,
+   "a": "sign 2",
+   "p": null,
+   "d": 7.93
+  },
+  {
+   "t": 520.548,
+   "a": "sign 3",
+   "p": null,
+   "d": 7.57
+  },
+  {
+   "t": 528.966,
+   "a": "dots",
+   "p": null,
+   "d": 8.64
+  },
+  {
+   "t": 544.951,
+   "a": "card summary",
+   "p": "Today's Gmail checkup",
+   "d": 7.75
+  },
+  {
+   "t": 553.001,
+   "a": "reveal 4",
+   "p": null,
+   "d": 6.57
+  },
+  {
+   "t": 559.869,
+   "a": "reveal 6",
+   "p": null,
+   "d": 8.48
+  },
+  {
+   "t": 577.197,
+   "a": "card guide",
+   "p": "The Phone Security Guide",
+   "d": 11.06
+  },
+  {
+   "t": 605.13,
+   "a": "card end",
+   "p": null
+  }
+ ],
+ "walt": [
+  {
+   "ini": 21.241,
+   "fim": 28.841,
+   "src": 1.4,
+   "id": "A01",
+   "qr": false
+  },
+  {
+   "ini": 73.867,
+   "fim": 79.337,
+   "src": 35.3,
+   "id": "M10",
+   "qr": false
+  },
+  {
+   "ini": 132.23,
+   "fim": 134.25,
+   "src": 58.41,
+   "id": "R02",
+   "qr": false
+  },
+  {
+   "ini": 134.8,
+   "fim": 141.68,
+   "src": 62.56,
+   "id": "Q03",
+   "qr": true
+  },
+  {
+   "ini": 211.221,
+   "fim": 216.701,
+   "src": 43.22,
+   "id": "M14",
+   "qr": false
+  },
+  {
+   "ini": 271.311,
+   "fim": 276.801,
+   "src": 27.54,
+   "id": "M03",
+   "qr": false
+  },
+  {
+   "ini": 335.3,
+   "fim": 341.84,
+   "src": 71.95,
+   "id": "Q13",
+   "qr": true
+  },
+  {
+   "ini": 407.211,
+   "fim": 412.801,
+   "src": 50.92,
+   "id": "M22",
+   "qr": false
+  },
+  {
+   "ini": 467.587,
+   "fim": 469.797,
+   "src": 114.16,
+   "id": "R08",
+   "qr": false
+  },
+  {
+   "ini": 598.28,
+   "fim": 604.78,
+   "src": 105.45,
+   "id": "E16",
+   "qr": false
+  }
+ ],
+ "legendas": [
+  {
+   "ini": 0.85,
+   "fim": 7.659,
+   "txt": "If you read your email in the Gmail app, there's a switch inside it that you've probably never seen."
+  },
+  {
+   "ini": 8.459,
+   "fim": 19.891,
+   "txt": "It came turned on. And while it's on, Google's automated systems read through your email. Every receipt, every bank notice, every note from your doctor."
+  },
+  {
+   "ini": 21.361,
+   "fim": 28.721,
+   "txt": "Hello there, and welcome in. I'm Walter Harper, but please, just call me Walt. Let's make your phone easier today."
+  },
+  {
+   "ini": 29.991,
+   "fim": 36.514,
+   "txt": "Today I'll show you exactly where that switch hides, and four more Gmail settings worth changing."
+  },
+  {
+   "ini": 37.864,
+   "fim": 46.752,
+   "txt": "Stay for number four. It lets you take back an email after you've sent it, and that beats one of the oldest tricks scammers use."
+  },
+  {
+   "ini": 47.902,
+   "fim": 55.317,
+   "txt": "One thing first. In the Gmail app, everything starts with these three short lines at the top left. That's the menu."
+  },
+  {
+   "ini": 56.667,
+   "fim": 62.644,
+   "txt": "Tap them, and a list slides out from the left. Settings sits near the very bottom."
+  },
+  {
+   "ini": 63.994,
+   "fim": 72.517,
+   "txt": "To close the list, tap anywhere on the right side, and you're back in your inbox. Nothing you tap in there deletes your email."
+  },
+  {
+   "ini": 73.987,
+   "fim": 79.217,
+   "txt": "This one only takes a moment, but it can make a real difference. Watch closely now."
+  },
+  {
+   "ini": 80.487,
+   "fim": 85.737,
+   "txt": "Number one, the big one. Tap the three lines, and scroll down to Settings."
+  },
+  {
+   "ini": 87.087,
+   "fim": 88.791,
+   "txt": "Tap Settings."
+  },
+  {
+   "ini": 90.141,
+   "fim": 93.391,
+   "txt": "Under General, tap Data privacy."
+  },
+  {
+   "ini": 94.741,
+   "fim": 99.453,
+   "txt": "See the switch called Smart features? That's the one I told you about."
+  },
+  {
+   "ini": 100.803,
+   "fim": 114.144,
+   "txt": "While it's on, Google's systems go through what's inside your messages. That's how Gmail sorts your mail into tabs, suggests replies, and pulls a flight or a package out of an email you barely looked at."
+  },
+  {
+   "ini": 114.944,
+   "fim": 119.467,
+   "txt": "Tap the switch, so it's no longer blue. That's off."
+  },
+  {
+   "ini": 120.817,
+   "fim": 131.43,
+   "txt": "Your email still arrives. You can read it, write it and search it like always. You only lose a few conveniences, like the automatic tabs and the suggested replies."
+  },
+  {
+   "ini": 132.35,
+   "fim": 134.13,
+   "txt": "There you go. Easy, right?"
+  },
+  {
+   "ini": 134.92,
+   "fim": 141.56,
+   "txt": "See that square code on your screen? Open your camera, aim it at the code, and my printable guide will come up."
+  },
+  {
+   "ini": 142.83,
+   "fim": 149.579,
+   "txt": "When you aim your camera at it, a little yellow button shows up near the code. Tap that button."
+  },
+  {
+   "ini": 153.379,
+   "fim": 161.848,
+   "txt": "Everything from today's lesson is written out in that guide, step by step. No rush. The code stays up for a few more seconds."
+  },
+  {
+   "ini": 162.998,
+   "fim": 172.339,
+   "txt": "Number two is on the very same screen, and hardly anyone notices it. Right under that switch, tap Google Workspace smart features."
+  },
+  {
+   "ini": 173.689,
+   "fim": 183.484,
+   "txt": "You'll find two more switches. The first is Smart features in Google Workspace. That lets your email show up in places like your calendar and Google Drive."
+  },
+  {
+   "ini": 184.834,
+   "fim": 185.978,
+   "txt": "Turn it off."
+  },
+  {
+   "ini": 187.328,
+   "fim": 196.669,
+   "txt": "The second is Smart features in other Google products. That lets what's in your email travel over to Maps, to Wallet, and to Google's assistant."
+  },
+  {
+   "ini": 198.019,
+   "fim": 202.635,
+   "txt": "If you'd rather your inbox kept to itself, turn this one off too."
+  },
+  {
+   "ini": 203.985,
+   "fim": 209.871,
+   "txt": "Then tap Done, at the top right. Your email keeps working exactly the same."
+  },
+  {
+   "ini": 211.341,
+   "fim": 216.581,
+   "txt": "Now, here's where it gets interesting. Stay with me, because this part really matters."
+  },
+  {
+   "ini": 217.851,
+   "fim": 225.101,
+   "txt": "Number three is about something sneaky. Who finds out that you opened an email. Head back to Settings."
+  },
+  {
+   "ini": 226.451,
+   "fim": 229.428,
+   "txt": "Under Inbox, tap Email preferences."
+  },
+  {
+   "ini": 230.778,
+   "fim": 232.483,
+   "txt": "Then tap Images."
+  },
+  {
+   "ini": 233.833,
+   "fim": 237.356,
+   "txt": "And choose Ask before displaying external images."
+  },
+  {
+   "ini": 238.706,
+   "fim": 247.41,
+   "txt": "Here's why it matters. Lots of advertising emails, and plenty of scam emails, carry a tiny picture you can't even see."
+  },
+  {
+   "ini": 248.21,
+   "fim": 256.325,
+   "txt": "The moment your phone loads that picture, the sender learns you opened the message, what time it was, and roughly where you were."
+  },
+  {
+   "ini": 257.125,
+   "fim": 262.086,
+   "txt": "And a scammer who knows you open his messages will keep on sending more."
+  },
+  {
+   "ini": 262.886,
+   "fim": 269.961,
+   "txt": "Now the pictures wait for you. When a message comes from someone you know and trust, just tap Display images."
+  },
+  {
+   "ini": 271.431,
+   "fim": 276.681,
+   "txt": "You're doing just fine. Learning something new at any age is something to be proud of."
+  },
+  {
+   "ini": 277.951,
+   "fim": 285.804,
+   "txt": "Let me pause here for a moment. Some of you have asked me to put these lessons on paper. So I did."
+  },
+  {
+   "ini": 286.604,
+   "fim": 296.49,
+   "txt": "It's called The Phone Security Guide. You print it at home, and it covers forty-five fixes, in letters big enough to read without your glasses."
+  },
+  {
+   "ini": 297.29,
+   "fim": 303.749,
+   "txt": "Each fix has a box you tick when it's done, and room to jot down what you changed."
+  },
+  {
+   "ini": 304.549,
+   "fim": 313.795,
+   "txt": "If your phone is older, newer, or not an iPhone at all, one page tells you where to look on a Samsung or a Pixel too."
+  },
+  {
+   "ini": 314.595,
+   "fim": 326.55,
+   "txt": "It also walks you through cutting down spam calls and spam texts, and gives you a short list to go over each time your phone updates. Updates have a habit of switching things back."
+  },
+  {
+   "ini": 327.35,
+   "fim": 334.5,
+   "txt": "You'll find the link on my channel page, under About. Or just use the square code from a minute ago."
+  },
+  {
+   "ini": 335.42,
+   "fim": 341.72,
+   "txt": "Videos are great, but paper never needs a battery. Scan the code on screen for my printable guide."
+  },
+  {
+   "ini": 342.99,
+   "fim": 351.695,
+   "txt": "Now, number four, the one I promised. It protects you from your own fingers, and from scammers who try to rush you."
+  },
+  {
+   "ini": 352.495,
+   "fim": 358.909,
+   "txt": "The Gmail app on your phone doesn't have this setting, so you'll do it once, on a computer."
+  },
+  {
+   "ini": 359.709,
+   "fim": 366.762,
+   "txt": "Go to gmail dot com and sign in. Click the little gear at the top right, then See all settings."
+  },
+  {
+   "ini": 367.562,
+   "fim": 377.084,
+   "txt": "On the General tab, find Undo Send. Next to Send cancellation period, pick thirty seconds. That's the longest it goes."
+  },
+  {
+   "ini": 377.884,
+   "fim": 383.771,
+   "txt": "Then scroll to the very bottom and click Save Changes. Don't skip that part."
+  },
+  {
+   "ini": 384.571,
+   "fim": 392.034,
+   "txt": "Now, right after you send something from your phone, a little bar shows up at the bottom with the word Undo."
+  },
+  {
+   "ini": 393.384,
+   "fim": 398.816,
+   "txt": "Scammers count on hurry. Reply right now. Send your account number today."
+  },
+  {
+   "ini": 399.616,
+   "fim": 406.411,
+   "txt": "If you ever hit send and get that sinking feeling in your stomach, tap Undo. The email never leaves."
+  },
+  {
+   "ini": 407.331,
+   "fim": 412.681,
+   "txt": "I know these menus can feel like a maze. Just follow along with me, and you'll be fine."
+  },
+  {
+   "ini": 413.951,
+   "fim": 421.656,
+   "txt": "Number five. For this one, open Safari, the blue compass, because it's about your Google account itself."
+  },
+  {
+   "ini": 423.006,
+   "fim": 427.62,
+   "txt": "Type myaccount dot google dot com, and sign in with your Gmail address."
+  },
+  {
+   "ini": 428.42,
+   "fim": 430.033,
+   "txt": "Tap Security."
+  },
+  {
+   "ini": 431.383,
+   "fim": 435.815,
+   "txt": "Then scroll down to Your connections to third-party apps and services."
+  },
+  {
+   "ini": 437.165,
+   "fim": 447.324,
+   "txt": "Here you'll see every app and website you ever let into your Google account. An old game, a coupon site you tried once, something the grandkids set up."
+  },
+  {
+   "ini": 448.674,
+   "fim": 451.379,
+   "txt": "If you don't recognize one, tap it."
+  },
+  {
+   "ini": 452.729,
+   "fim": 455.524,
+   "txt": "Then remove its access, and confirm."
+  },
+  {
+   "ini": 456.874,
+   "fim": 466.787,
+   "txt": "Each one you take off is one less door into your email. And if you ever use that app again, it'll simply ask your permission one more time."
+  },
+  {
+   "ini": 467.707,
+   "fim": 469.677,
+   "txt": "Perfect. That's the way to do it."
+  },
+  {
+   "ini": 470.947,
+   "fim": 474.833,
+   "txt": "While you're on the Security page, look for 2-Step Verification."
+  },
+  {
+   "ini": 476.183,
+   "fim": 485.385,
+   "txt": "If it says off, tap it and follow the steps. Then a stolen password alone can't get anyone into your email. They'd need your phone too."
+  },
+  {
+   "ini": 486.735,
+   "fim": 491.416,
+   "txt": "If it already says on, good. Leave it just the way it is."
+  },
+  {
+   "ini": 492.566,
+   "fim": 498.916,
+   "txt": "And here's a bonus, for staying with me. Three quick checks for any email that makes you uneasy."
+  },
+  {
+   "ini": 500.266,
+   "fim": 510.516,
+   "txt": "First, tap the sender's name. If it says your bank, but the address underneath ends in a jumble of numbers, or a website you've never heard of, it's fake."
+  },
+  {
+   "ini": 511.866,
+   "fim": 519.298,
+   "txt": "Second, the greeting. Your real bank knows your name. Dear valued customer is a red flag."
+  },
+  {
+   "ini": 520.648,
+   "fim": 527.716,
+   "txt": "Third, the hurry. Your account will be locked in twenty-four hours. Real companies don't talk like that."
+  },
+  {
+   "ini": 529.066,
+   "fim": 537.21,
+   "txt": "If you spot even one of those, don't tap any link. Tap the three dots at the top right, and choose Report spam."
+  },
+  {
+   "ini": 538.56,
+   "fim": 543.901,
+   "txt": "Then phone the company directly, using the number printed on the back of your card."
+  },
+  {
+   "ini": 545.051,
+   "fim": 552.301,
+   "txt": "So, here's today's checkup. One, Smart features, off. Two, the other smart features, off."
+  },
+  {
+   "ini": 553.101,
+   "fim": 559.169,
+   "txt": "Three, images, ask first. Four, Undo Send, thirty seconds."
+  },
+  {
+   "ini": 559.969,
+   "fim": 567.947,
+   "txt": "Five, old app connections removed, and 2-Step Verification on. And the bonus, three checks for a fake email."
+  },
+  {
+   "ini": 568.747,
+   "fim": 576.147,
+   "txt": "Your Gmail works just like it did this morning. It simply tells Google, and strangers, a whole lot less about you."
+  },
+  {
+   "ini": 577.297,
+   "fim": 587.858,
+   "txt": "If today helped, there's a whole Gmail section in The Phone Security Guide, with those three checks printed out, and a plan to cut down spam calls and junk texts."
+  },
+  {
+   "ini": 588.658,
+   "fim": 597.48,
+   "txt": "The link is on my channel page, under About. And let me know in the comments. Was that Smart features switch on in your phone?"
+  },
+  {
+   "ini": 598.4,
+   "fim": 604.66,
+   "txt": "Thank you kindly for watching. If you'd like more lessons like this one, subscribe to Walter Harper Tips."
+  }
+ ]
+}
