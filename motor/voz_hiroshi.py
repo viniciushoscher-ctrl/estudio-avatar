@@ -68,6 +68,18 @@ if a.parte is None or __import__("os").environ.get("CLIPES"):
         from faster_whisper import WhisperModel
         asr = WhisperModel("base.en", device="cpu", compute_type="int8")
         norm = lambda x: re.sub(r"[^a-z0-9 ]", "", re.sub(r"[-/]", " ", x.lower())).split()
+        # SIM_REF=arquivo.wav: mede a semelhança de locutor (ECAPA, speechbrain) de cada take com a voz aprovada
+        # e só aceita take parecida (SIM_MIN). Evita que uma linha saia com "outra pessoa".
+        SIM_REF = __import__("os").environ.get("SIM_REF", "").strip()
+        SIM_MIN = float(__import__("os").environ.get("SIM_MIN", "0.72"))
+        if SIM_REF:
+            from speechbrain.inference.speaker import EncoderClassifier
+            _ecapa = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb", savedir="/tmp/ecapa", run_opts={"device": "cpu"})
+            def _emb(y16):
+                with torch.no_grad():
+                    e = _ecapa.encode_batch(torch.tensor(y16, dtype=torch.float32)[None]).squeeze().numpy()
+                return e / np.linalg.norm(e)
+            _R = _emb(librosa.load(str(AQUI / SIM_REF), sr=16000)[0])
 
         def nota(w, sr, texto):
             """Quanto menor, melhor: palavras erradas, tom fora do alvo, buracos e ritmo estranho."""
@@ -88,7 +100,12 @@ if a.parte is None or __import__("os").environ.get("CLIPES"):
                 buraco = float(np.diff(on).max() * 320 / 16000)
             cps = len(texto) / max(len(w) / sr, 0.1)  # letras por segundo (normal ~13-17)
             ritmo = max(0.0, abs(cps - 15) - 3) / 3
-            return erro * 20 + abs(st) + max(0.0, buraco - 0.7) * 4 + ritmo, st, erro, buraco, cps
+            sim = float(_emb(y) @ _R) if SIM_REF else 1.0
+            # frases curtas (< 5 palavras) dão medida de locutor instável: exige menos delas
+            smin = SIM_MIN if len(certo) >= 5 else SIM_MIN - 0.2
+            pen_sim = max(0.0, smin - sim) * 30
+            nota.ultima_sim = sim; nota.smin = smin
+            return erro * 20 + abs(st) + max(0.0, buraco - 0.7) * 4 + ritmo + pen_sim, st, erro, buraco, cps
     for i in idx:
         fala = falas[i - 1]
         if TAKES > 1:
@@ -97,14 +114,15 @@ if a.parte is None or __import__("os").environ.get("CLIPES"):
                 torch.manual_seed(1000 * i + k)
                 w, sr = dizer(fala)
                 n, st, erro, buraco, cps = nota(w, sr, fala)
-                print(f"  fala {i} take {k}: nota {n:.2f} (tom {st:+.1f} st, erro {erro:.2f}, buraco {buraco:.1f}s, {cps:.0f} l/s)", flush=True)
+                print(f"  fala {i} take {k}: nota {n:.2f} (tom {st:+.1f} st, erro {erro:.2f}, buraco {buraco:.1f}s, {cps:.0f} l/s, locutor {getattr(nota, 'ultima_sim', 1):.3f})", flush=True)
                 if melhor is None or n < melhor[0]:
                     melhor = (n, w, sr, st)
-                if n < 0.8:  # take boa: não gasta mais tempo
+                if n < 0.8 and getattr(nota, "ultima_sim", 1) >= getattr(nota, "smin", 0) + 0.04:  # take boa: não gasta mais tempo
                     break
             _, w, sr, st = melhor
             # corrige o resto do tom no pós-processo (rubberband), no máximo 2 semitons
             (pasta / f"fala-{i:03d}.st").write_text(f"{-max(-2.0, min(2.0, st)):.2f}")
+            print(f"fala-{i:03d}: escolhida nota {melhor[0]:.2f}", flush=True)
         else:
             w, sr = dizer(fala)
         p = np.zeros(int(sr * 0.25), dtype=np.float32)

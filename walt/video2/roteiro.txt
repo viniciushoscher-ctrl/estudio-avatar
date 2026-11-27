@@ -1,8 +1,7 @@
-[a: home] [p: Gmail on your iPhone?] If you read your email in the Gmail app, there's a switch inside it that you've probably never seen.
-[a: tap Gmail] It came turned on. And while it's on, Google's automated systems read through your email. Every receipt, every bank notice, every note from your doctor.
+[w: GANCHO] Gancho do Walt para a câmera (clipe do HeyGen com gancho.txt).
 [w: A01] Hello there, and welcome in. I'm Walter Harper, but please, just call me Walt. Let's make your phone easier today.
-[a: hl search] [p: 1 switch + 4 more settings] Today I'll show you exactly where that switch hides, and four more Gmail settings worth changing.
-Stay for number four. It lets you take back an email after you've sent it, and that beats one of the oldest tricks scammers use.
+[a: tap Gmail] [p: 5 Gmail settings to change] Let's open Gmail together, on your iPhone.
+[a: hl search] Stay for number four. It lets you take back an email after you've sent it, and that beats one of the oldest tricks scammers use.
 [a: hl menu] [p: The three lines = Menu] One thing first. In the Gmail app, everything starts with these three short lines at the top left. That's the menu.
 [a: menu] Tap them, and a list slides out from the left. Settings sits near the very bottom.
 [a: close] To close the list, tap anywhere on the right side, and you're back in your inbox. Nothing you tap in there deletes your email.

@@ -1,8 +1,5 @@
-[a: home] [p: Gmail on your iPhone?] If you read your email in the Gmail app, there's a switch inside it that you've probably never seen.
-[a: tap Gmail] It came turned on. And while it's on, Google's automated systems read through your email. Every receipt, every bank notice, every note from your doctor.
-[a: hl search] [p: 1 switch + 4 more settings] Today I'll show you exactly where that switch hides, and four more Gmail settings worth changing.
-Stay for number four. It lets you take back an email after you've sent it, and that beats one of the oldest tricks scammers use.
-Later on, I'll also show you how to keep every step on paper, right next to your chair.
+[a: tap Gmail] [p: 5 Gmail settings to change] Let's open Gmail together, on your iPhone.
+[a: hl search] Stay for number four. It lets you take back an email after you've sent it, and that beats one of the oldest tricks scammers use.
 [a: hl menu] [p: The three lines = Menu] One thing first. In the Gmail app, everything starts with these three short lines at the top left. That's the menu.
 [a: menu] Tap them, and a list slides out from the left. Settings sits near the very bottom.
 [a: close] To close the list, tap anywhere on the right side, and you're back in your inbox. Nothing you tap in there deletes your email.
@@ -13,10 +10,9 @@ Later on, I'll also show you how to keep every step on paper, right next to your
 While it's on, Google's systems go through what's inside your messages. That's how Gmail sorts your mail into tabs, suggests replies, and pulls a flight or a package out of an email you barely looked at.
 [a: off Smart features] Tap the switch, so it's no longer blue. That's off.
 Your email still arrives. You can read it, write it and search it like always. You only lose a few conveniences, like the automatic tabs and the suggested replies.
-If you ever miss them, this switch stays right here. You can turn it back on any day you like.
 [a: card qr] [p: Printable guide] When you aim your camera at it, a little yellow button shows up near the code. Tap that button.
 [pausa: 3] Everything from today's lesson is written out in that guide, step by step. No rush. The code stays up for a few more seconds.
-[a: go workspace] [p: #2  The other smart features → OFF] Number two is on the very same screen, and hardly anyone notices it. Right under that switch, tap Google Workspace smart features.
+[a: go workspace] [p: #2  Two more switches → OFF] Number two is on the very same screen, and hardly anyone notices it. Right under that switch, tap Google Workspace smart features.
 [a: hl Smart features in Google Workspace] You'll find two more switches. The first is Smart features in Google Workspace. That lets your email show up in places like your calendar and Google Drive.
 [a: off Smart features in Google Workspace] Turn it off.
 [a: hl Smart features in other Google products] The second is Smart features in other Google products. That lets what's in your email travel over to Maps, to Wallet, and to Google's assistant.
@@ -44,7 +40,7 @@ Then scroll to the very bottom and click Save Changes. Don't skip that part.
 [a: mail undo] Now, right after you send something from your phone, a little bar shows up at the bottom with the word Undo.
 Scammers count on hurry. Reply right now. Send your account number today.
 If you ever hit send and get that sinking feeling in your stomach, tap Undo. The email never leaves.
-[a: safari] [p: #5  Old app connections → Remove] Number five. For this one, open Safari, the blue compass, because it's about your Google account itself.
+[a: safari] [p: #5  Old connections → Remove] Number five. For this one, open Safari, the blue compass, because it's about your Google account itself.
 Type myaccount dot google dot com, and sign in with your Gmail address.
 [a: go security] Tap Security.
 [a: scroll Your connections to third-party apps & services] Then scroll down to Your connections to third-party apps and services.
