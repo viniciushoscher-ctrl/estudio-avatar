@@ -3,7 +3,9 @@
 roteiro.txt: linhas "[w: ID]" são falas do Walt na tela, tiradas do clipe (clipe.json); as outras são narração.
 Tags: [a: ação do palco] [p: painel] [pausa: s] (pausa extra antes da linha) [qr] (Walt + QR na tela) [end].
 Saídas: narracao.wav (trilha inteira 48 kHz), linha.json {duracao, acoes, walt:[{ini,fim,src,id,qr}], legendas}.
-Uso: python linha_do_tempo.py roteiro.txt pasta_wavs clipe.wav saida/
+Uso: python linha_do_tempo.py roteiro.txt pasta_wavs clipe.wav saida/ [gancho.wav]
+"[w: GANCHO]" = gancho do Walt para a câmera: o áudio é o próprio gancho.wav (o mesmo enviado ao HeyGen),
+o vídeo vem do clipe do gancho renderizado no HeyGen (montar.py alinha pelo áudio).
 """
 import json, re, subprocess, sys, tempfile
 from pathlib import Path
@@ -35,6 +37,14 @@ NARR = [tags(l.strip())[1] for l in Path(rot).with_name("narracao.txt").read_tex
 itens = []
 for l in [l.strip() for l in Path(rot).read_text(encoding="utf-8").splitlines() if l.strip()]:
     t, txt = tags(l)
+    if t.get("w") == "GANCHO":
+        g, gsr = sf.read(sys.argv[5], dtype="float32")
+        if g.ndim > 1: g = g.mean(1)
+        if gsr != SR:
+            import librosa; g = librosa.resample(g, orig_sr=gsr, target_sr=SR)
+        txt = " ".join(l.strip() for l in Path(rot).with_name("gancho.txt").read_text(encoding="utf-8").splitlines() if l.strip())
+        itens.append(dict(tags=t, txt=txt, audio=g, dur=len(g) / SR, walt=dict(id="GANCHO", src=0.0)))
+        continue
     if "w" in t:
         a, b = CL[t["w"]]; a -= 0.12; b += 0.25
         w = cw[int(a * SR): int(b * SR)] * GANHO_CLIPE
@@ -65,7 +75,7 @@ def pausa(it, prox):
 
 trilha = np.zeros(int(1200 * SR), np.float32)
 acoes, walt, legendas = [], [], []
-t = 0.6
+t = 0.0 if itens[0]["tags"].get("w") == "GANCHO" else 0.6
 for n, it in enumerate(itens):
     prox = itens[n + 1] if n + 1 < len(itens) else None
     s = int(t * SR); trilha[s:s + len(it["audio"])] += it["audio"]

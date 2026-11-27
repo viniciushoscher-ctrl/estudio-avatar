@@ -3,7 +3,9 @@
 Entradas (pasta de trabalho): linha.json, narracao.wav, palco.mp4 (telas 3840x2160, 30 fps) e o clipe HeyGen (720p).
 Cada fala do Walt é o trecho [src, src+dur] do clipe colocado em [ini, fim]. Falas com "qr": cartão do QR em tela
 cheia e o Walt num quadro à direita (ele fala do código que está na tela). Entre as falas entra o palco.
-Uso: python montar.py pasta clipe.mp4 saida.mp4
+Fala "GANCHO": vem do clipe do gancho (HeyGen, renderizado com o gancho.wav), alinhado pelo áudio.
+Sem esse clipe a montagem para: o gancho nunca vira foto parada.
+Uso: python montar.py pasta clipe.mp4 saida.mp4 [gancho.mp4]
 """
 import json, subprocess, sys
 from pathlib import Path
@@ -22,12 +24,31 @@ UP = "scale=3840:2160:flags=lanczos,unsharp=5:5:0.6:5:5:0.0,setsar=1"
 # logo: 75% do tamanho do PNG, 70 px da borda direita e 56 px de baixo
 LOGO_F = "[1:v]scale=iw*0.75:-1:flags=lanczos[lg];[v][lg]overlay=W-w-70:H-h-56:format=auto,format=yuv420p"
 
+GANCHO = next((a for a in sys.argv[4:] if not a.startswith("--")), None)
+
+def atraso_gancho(mp4, wav):
+    """Onde o áudio do gancho.wav começa dentro do clipe do HeyGen (correlação cruzada)."""
+    import numpy as np, soundfile as sf, tempfile
+    tmpw = tempfile.mktemp(suffix=".wav")
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", mp4, "-ac", "1", "-ar", "8000", tmpw], check=True)
+    a, _ = sf.read(tmpw, dtype="float32")
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", wav, "-ac", "1", "-ar", "8000", tmpw], check=True)
+    b, _ = sf.read(tmpw, dtype="float32")
+    n = 1 << int(np.ceil(np.log2(len(a) + len(b))))
+    c = np.fft.irfft(np.fft.rfft(a, n) * np.conj(np.fft.rfft(b, n)), n)
+    k = int(np.argmax(c[: len(a)])); return k / 8000
+
 pecas, t = [], 0.0
 total = q(L["duracao"])
 for w in L["walt"]:
     ini, fim = q(w["ini"]), q(w["fim"])
     if ini > t: pecas.append(("palco", t, ini - t, None, False))
-    pecas.append(("walt", ini, fim - ini, w["src"], w.get("qr", False)))
+    if w["id"] == "GANCHO":
+        assert GANCHO, "falta o clipe do gancho do HeyGen (não usar foto parada)"
+        off = atraso_gancho(GANCHO, str(d / "gancho.wav")); print(f"gancho: áudio começa em {off:.3f}s do clipe")
+        pecas.append(("gancho", ini, fim - ini, off, False))
+    else:
+        pecas.append(("walt", ini, fim - ini, w["src"], w.get("qr", False)))
     t = fim
 if t < total: pecas.append(("palco", t, total - t, None, False))
 
@@ -40,6 +61,11 @@ for k, (tipo, ini, dur, src, qr) in enumerate(pecas):
     if tipo == "palco":
         cmd = ["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{ini:.4f}", "-i", str(d / "palco.mp4"), "-i", LOGO,
                "-filter_complex", f"[0:v]fps={FPS},setsar=1[v];{LOGO_F}", "-frames:v", str(n)] + ENC + [str(f)]
+    elif tipo == "gancho":
+        cmd = ["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{src:.4f}", "-i", GANCHO, "-i", LOGO, "-filter_complex",
+               f"[0:v]scale=3840:2160:force_original_aspect_ratio=increase:flags=lanczos,crop=3840:2160,"
+               f"unsharp=5:5:0.6:5:5:0.0,setsar=1,fps={FPS},tpad=stop_mode=clone:stop_duration=1[v];{LOGO_F}",
+               "-frames:v", str(n)] + ENC + [str(f)]
     elif not qr:
         cmd = ["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{src:.4f}", "-i", clipe, "-i", LOGO,
                "-filter_complex", f"[0:v]{UP},fps={FPS},tpad=stop_mode=clone:stop_duration=1[v];{LOGO_F}",

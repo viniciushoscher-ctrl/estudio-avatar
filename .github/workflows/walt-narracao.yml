@@ -67,25 +67,33 @@ jobs:
         parte: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     steps:
       - uses: actions/download-artifact@v4
+        id: baixa
+        continue-on-error: true  # roteiro curto: parte sem falas não tem artefato
         with:
           name: bruto-${{ matrix.parte }}
           path: bruto
+      - if: steps.baixa.outcome != 'success'
+        run: echo "parte sem falas" && exit 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-      - uses: actions/cache@v4
+      - if: steps.baixa.outcome == 'success'
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/torch
             ~/.cache/huggingface
           key: resemble-enhance-v1
-      - run: |
+      - if: steps.baixa.outcome == 'success'
+        run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
           pip install -q torch==2.1.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cpu
           DS_BUILD_OPS=0 pip install -q resemble-enhance
-      - name: Resemble Enhance (CPU)
+      - if: steps.baixa.outcome == 'success'
+        name: Resemble Enhance (CPU)
         run: resemble-enhance bruto realcado --device cpu
-      - name: EQ leve, 48 kHz, -16 LUFS
+      - if: steps.baixa.outcome == 'success'
+        name: EQ leve, 48 kHz, -16 LUFS
         run: |
           mkdir -p hd
           for f in bruto/*.wav; do
@@ -93,7 +101,8 @@ jobs:
             ffmpeg -loglevel error -y -i "$src" -af "highpass=f=70,equalizer=f=3200:t=q:w=1.2:g=1.5,loudnorm=I=-16:TP=-1.5:LRA=11" -ar 48000 -ac 1 "hd/$n"
           done
           ls hd | wc -l
-      - uses: actions/upload-artifact@v4
+      - if: steps.baixa.outcome == 'success'
+        uses: actions/upload-artifact@v4
         with:
           name: hd-${{ matrix.parte }}
           path: hd/
