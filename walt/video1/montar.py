@@ -20,16 +20,34 @@ pecas, t = [], 0.0
 total = q(L["duracao"])
 for i, w in enumerate(L["walt"]):
     ini = q(max(0, w["ini"] - 0.10)); fim = q(w["fim"] + 0.15)
+    off0 = q(max(0, w["off"] - 0.10))
     if ini > t:
         pecas.append(("palco", t, ini - t, None))
-    pecas.append(("walt", ini, fim - ini, q(max(0, w["off"] - 0.10))))
+    # "cobrir": janelas [a, b, tp] (tempo do vídeo) em que o Walt sai e entra um quadro congelado do palco (tempo tp do
+    # palco.mp4: cartão do número certo) para esconder um gesto errado. "seguir": [ate, tp] mantém o quadro até o palco
+    # mostrar o mesmo cartão sozinho (sem pulo).
+    cur = ini
+    for a, b, tp in sorted(w.get("cobrir", [])):
+        a, b = q(max(a, ini)), q(min(b, fim))
+        if b <= a: continue
+        if a > cur: pecas.append(("walt", cur, a - cur, q(off0 + cur - ini)))
+        pecas.append(("congela", a, b - a, tp)); cur = b
+    if fim > cur: pecas.append(("walt", cur, fim - cur, q(off0 + cur - ini)))
     t = fim
+    if "seguir" in w:
+        ate, tp = w["seguir"]; ate = q(ate)
+        if ate > fim: pecas.append(("congela", fim, ate - fim, tp)); t = ate
 if t < total:
     pecas.append(("palco", t, total - t, None))
 lista = []
 for k, (tipo, ini, dur, off) in enumerate(pecas):
     f = tmp / f"{k:03d}.mp4"; lista.append(f)
-    if tipo == "palco":
+    if tipo == "congela":
+        png = tmp / f"{k:03d}.png"
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{off:.4f}", "-i", str(d / "palco.mp4"), "-frames:v", "1", str(png)], check=True)
+        cmd = ["ffmpeg", "-loglevel", "error", "-y", "-loop", "1", "-framerate", str(FPS), "-i", str(png), "-t", f"{dur:.4f}",
+               "-vf", f"fps={FPS},setsar=1,format=yuv420p"] + ENC + [str(f)]
+    elif tipo == "palco":
         cmd = ["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{ini:.4f}", "-i", str(d / "palco.mp4"), "-t", f"{dur:.4f}",
                "-vf", f"fps={FPS},setsar=1"] + ENC + [str(f)]
     else:
