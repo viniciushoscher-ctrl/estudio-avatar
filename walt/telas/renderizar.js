@@ -11,7 +11,7 @@ const fs = require('fs'), path = require('path');
   fs.mkdirSync(saida, { recursive: true });
   const b = await chromium.launch();
   const pg = await b.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: esc });
-  await pg.goto('file://' + path.resolve(__dirname, 'palco.html'));
+  await pg.goto('file://' + path.resolve(__dirname, process.env.PALCO || 'palco.html'));
   await pg.evaluate(() => document.fonts.ready);
   await pg.waitForTimeout(500);
   await pg.evaluate(l => window.iniciar(l), tl.acoes);

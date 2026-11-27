@@ -1,0 +1,60 @@
+"""Montagem do vídeo 2 do Walt em 4K, por pedaços (pouca memória), com o logo do canal no canto inferior direito.
+
+Entradas (pasta de trabalho): linha.json, narracao.wav, palco.mp4 (telas 3840x2160, 30 fps) e o clipe HeyGen (720p).
+Cada fala do Walt é o trecho [src, src+dur] do clipe colocado em [ini, fim]. Falas com "qr": cartão do QR em tela
+cheia e o Walt num quadro à direita (ele fala do código que está na tela). Entre as falas entra o palco.
+Uso: python montar.py pasta clipe.mp4 saida.mp4
+"""
+import json, subprocess, sys
+from pathlib import Path
+
+d = Path(sys.argv[1]); clipe = sys.argv[2]; out = sys.argv[3]
+AQUI = Path(__file__).parent
+L = json.load(open(d / "linha.json"))
+FPS = 30
+q = lambda t: round(t * FPS) / FPS
+tmp = d / "pedacos"; tmp.mkdir(exist_ok=True)
+LOGO = str(AQUI / "logo-canal.png")
+QR = str(AQUI.parent / "telas" / "qr-card-4k.png")
+ENC = ["-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p", "-r", str(FPS),
+       "-profile:v", "high", "-video_track_timescale", "15360"]
+UP = "scale=3840:2160:flags=lanczos,unsharp=5:5:0.6:5:5:0.0,setsar=1"
+# logo: 75% do tamanho do PNG, 70 px da borda direita e 56 px de baixo
+LOGO_F = "[1:v]scale=iw*0.75:-1:flags=lanczos[lg];[v][lg]overlay=W-w-70:H-h-56:format=auto,format=yuv420p"
+
+pecas, t = [], 0.0
+total = q(L["duracao"])
+for w in L["walt"]:
+    ini, fim = q(w["ini"]), q(w["fim"])
+    if ini > t: pecas.append(("palco", t, ini - t, None, False))
+    pecas.append(("walt", ini, fim - ini, w["src"], w.get("qr", False)))
+    t = fim
+if t < total: pecas.append(("palco", t, total - t, None, False))
+
+lista = []
+for k, (tipo, ini, dur, src, qr) in enumerate(pecas):
+    f = tmp / f"{k:03d}.mp4"; lista.append(f)
+    if f.exists() and f.stat().st_size > 1000 and "--refazer" not in sys.argv:
+        continue
+    n = round(dur * FPS)
+    if tipo == "palco":
+        cmd = ["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{ini:.4f}", "-i", str(d / "palco.mp4"), "-i", LOGO,
+               "-filter_complex", f"[0:v]fps={FPS},setsar=1[v];{LOGO_F}", "-frames:v", str(n)] + ENC + [str(f)]
+    elif not qr:
+        cmd = ["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{src:.4f}", "-i", clipe, "-i", LOGO,
+               "-filter_complex", f"[0:v]{UP},fps={FPS},tpad=stop_mode=clone:stop_duration=1[v];{LOGO_F}",
+               "-frames:v", str(n)] + ENC + [str(f)]
+    else:
+        # QR à esquerda (como no cartão), Walt num quadro com borda creme sobre a parte de baixo do texto
+        cmd = ["ffmpeg", "-loglevel", "error", "-y", "-loop", "1", "-framerate", str(FPS), "-i", QR, "-i", LOGO,
+               "-ss", f"{src:.4f}", "-i", clipe, "-filter_complex",
+               f"[2:v]scale=1600:900:flags=lanczos,unsharp=5:5:0.5:5:5:0.0,pad=1624:924:12:12:color=0xF6F0E4,fps={FPS},"
+               f"tpad=stop_mode=clone:stop_duration=1[w];[0:v]scale=3840:2160,setsar=1[bg];[bg][w]overlay=2140:1150[v];{LOGO_F}",
+               "-frames:v", str(n)] + ENC + [str(f)]
+    subprocess.run(cmd, check=True)
+    print(f"{k:02d} {tipo}{' +QR' if qr else ''} {ini:7.2f} +{dur:5.2f}", flush=True)
+(tmp / "lista.txt").write_text("".join(f"file '{p.name}'\n" for p in lista))
+subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(tmp / "lista.txt"),
+                "-i", str(d / "narracao.wav"), "-map", "0:v", "-map", "1:a", "-c:v", "copy",
+                "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-t", f"{total:.3f}", "-movflags", "+faststart", out], check=True)
+print("ok", out)
