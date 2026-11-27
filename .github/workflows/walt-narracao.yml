@@ -1,5 +1,5 @@
 name: Walt narração
-run-name: Walt narração ${{ github.run_number }} (${{ inputs.roteiro || 'walt/video1/roteiro.txt' }})
+run-name: Walt narração ${{ github.run_number }} (${{ inputs.roteiro || github.ref_name }})
 
 # Narração inteira de um vídeo do Walt: um wav por linha do roteiro, na voz 3 aprovada
 # (Qwen3-TTS clonando walt-c + 50% walt-b, tom -0,7, ritmo 0,88), em 8 máquinas de CPU grátis.
@@ -11,14 +11,14 @@ on:
         description: roteiro (uma linha por fala)
         default: walt/video1/roteiro.txt
   push:
-    branches: [claude/project-thread-1gotel]
-    paths: [walt/video1/roteiro.txt]
+    branches: [claude/project-thread-1gotel, claude/project-thread-cgj203]
+    paths: [walt/video1/roteiro.txt, walt/video2/narracao.txt]
 
 permissions:
   contents: read
 
 env:
-  ROTEIRO: ${{ inputs.roteiro || 'walt/video1/roteiro.txt' }}
+  ROTEIRO: ${{ inputs.roteiro || (github.ref_name == 'claude/project-thread-cgj203' && 'walt/video2/narracao.txt') || 'walt/video1/roteiro.txt' }}
 
 jobs:
   voz:
