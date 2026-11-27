@@ -1,0 +1,54 @@
+name: Base do Hiroshi
+run-name: Base do Hiroshi ${{ github.run_number }}
+
+# Gera UMA vez o vídeo-base longo do Hiroshi (LongCat na GPU da Modal) a partir de bases/fala-base.wav.
+# Esse vídeo vira a base dos vídeos longos feitos de graça na CPU (motor/boca_longa.py).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [bases/fala-base.wav, avatares/hiroshi-mesa.png, avatares/hiroshi-podcast.png, .github/workflows/base-hiroshi.yml]
+
+env:
+  # Hiroshi gravando podcast (microfone ao lado, boca livre), 16:9 - base do formato "avatar o tempo todo"
+  IMAGEM: avatares/hiroshi-podcast.png
+  NOME: base-hiroshi-podcast
+  # 480p: 720p deixou a boca roxa/verde
+  RESOLUCAO: 480p
+  AVATAR_GPU: L40S
+  PROMPT: >-
+    A real elderly Japanese man in his sixties sitting at a wooden desk recording a podcast in a calm Japanese room, a microphone on a boom arm beside him, filmed
+    in a wide horizontal medium shot, talking calmly and warmly to the camera like a YouTuber
+    explaining something important. Hands stay folded and resting on the desk, only small natural
+    hand movements. Natural blinking, subtle head nods and tilts, relaxed shoulders, realistic skin
+    texture, soft natural window light, static camera, documentary realism.
+
+permissions:
+  contents: read
+
+jobs:
+  base:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Gerar a base na GPU
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        run: |
+          pip install -q modal
+          TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
+          export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          mkdir -p saida
+          modal run gpu/kenji_longcat.py::main --imagem "$IMAGEM" --audio bases/fala-base.wav \
+            --saida saida/$NOME.mp4 --resolucao "$RESOLUCAO" --prompt "$PROMPT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: base-hiroshi-${{ github.run_number }}
+          path: saida/*.mp4

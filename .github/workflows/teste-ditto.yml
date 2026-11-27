@@ -1,0 +1,51 @@
+name: Teste Ditto na CPU
+run-name: Teste Ditto na CPU ${{ github.run_number }}
+
+# Avatar falando 100% grátis na CPU do GitHub (sem Modal, sem GPU), no método do HeyGen:
+# o corpo, as mãos e a cabeça vêm de um VÍDEO-BASE do avatar (já pronto no repo) e o Ditto
+# (Ant Group, Apache-2.0) refaz só a boca e a expressão a partir do áudio novo.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [.github/workflows/teste-ditto.yml, motor/ditto_cpu.sh]
+
+permissions:
+  contents: read
+
+jobs:
+  ditto:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        inicio: [0, 18]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Instalar Ditto (CPU)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          bash motor/ditto_cpu.sh
+      - name: Hiroshi falando sobre o vídeo-base (CPU)
+        run: |
+          set -o pipefail
+          mkdir -p saida
+          # trecho do vídeo-base (corpo e mãos se mexendo), do tamanho da fala + 1 s
+          ffmpeg -loglevel error -y -ss ${{ matrix.inicio }} -t 9 -i bases/base-hiroshi-mesa.mp4 -an \
+            -c:v libx264 -crf 14 -pix_fmt yuv420p base.mp4
+          DITTO_RELATIVO=0 bash motor/ditto_cpu.sh bases/teste-8s.wav base.mp4 saida/ditto-base-${{ matrix.inicio }}s.mp4
+          echo "::notice::pronto"
+      - name: Cor da boca (a base tinha lábios roxos)
+        run: |
+          pip install -q face-alignment
+          python motor/boca_cor.py saida saida || echo "::warning::cor falhou"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ditto-${{ matrix.inicio }}
+          path: saida/

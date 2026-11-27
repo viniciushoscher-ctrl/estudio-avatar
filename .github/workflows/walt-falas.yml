@@ -1,0 +1,60 @@
+name: Walt falas
+run-name: Walt falas ${{ github.run_number }}
+
+# Um wav por linha (clipes de 8 s do Walt) na voz clonada (Qwen3-TTS Base, CPU do GitHub, grátis).
+# Gera em cada voz listada em walt/vozes.json (base, mistura de timbre opcional, tom).
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [walt/falas-roteiro/*.txt, walt/vozes.json]
+
+permissions:
+  contents: read
+
+jobs:
+  planejar:
+    runs-on: ubuntu-latest
+    outputs:
+      vozes: ${{ steps.p.outputs.vozes }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: p
+        run: echo "vozes=$(python3 -c "import json;print(json.dumps(json.load(open('walt/vozes.json'))))")" >> "$GITHUB_OUTPUT"
+  falas:
+    needs: planejar
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        voz: ${{ fromJson(needs.planejar.outputs.vozes) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: qwen3-tts-base-v1
+      - run: |
+          sudo apt-get install -y -qq sox > /dev/null
+          pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -q qwen-tts soundfile librosa
+          for r in walt/falas-roteiro/*.txt; do
+            n=$(basename $r .txt); true
+            VOZ=${{ matrix.voz.base }} VOZ_MISTURA=${{ matrix.voz.mistura }} python motor/voz_hiroshi.py "$r" "saida/${{ matrix.voz.nome }}/$n"
+          done
+      - name: Tom, ritmo e volume (ffmpeg rubberband, formantes preservados; -16 LUFS)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          P=$(python3 -c "print(2**(float('${{ matrix.voz.tom }}' or 0)/12))")
+          T="${{ matrix.voz.ritmo }}"; T=${T:-1}
+          for f in $(find saida -name '*.wav'); do
+            ffmpeg -loglevel error -y -i "$f" -af "rubberband=pitch=$P:tempo=$T:formant=preserved:pitchq=quality:window=standard,loudnorm=I=-16:TP=-1.5:LRA=11" -ar 24000 "$f.tmp.wav"
+            mv "$f.tmp.wav" "$f"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: falas-${{ matrix.voz.nome }}
+          path: saida/

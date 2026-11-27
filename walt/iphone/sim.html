@@ -1,0 +1,101 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#0B1F3A;font-family:Inter,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;transform-origin:0 0;background:radial-gradient(1200px 900px at 30% 40%,#16345e 0%,#0B1F3A 60%,#07152a 100%)}
+#brand{position:absolute;left:60px;top:44px;color:#F6F0E4;font:700 30px 'Inter';letter-spacing:.5px;opacity:.9}
+#brand b{color:#B8862B}
+/* phone */
+#phone{position:absolute;left:300px;top:40px;width:470px;height:1000px;border-radius:72px;background:#111;padding:14px;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 3px #2a2f38 inset}
+#screen{position:relative;width:442px;height:972px;border-radius:58px;overflow:hidden;background:#F2F2F7}
+#island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:124px;height:36px;border-radius:20px;background:#000;z-index:50}
+#status{position:absolute;top:0;left:0;right:0;height:58px;z-index:40;display:flex;justify-content:space-between;align-items:center;padding:8px 38px 0 46px;font:600 17px Inter;color:#000}
+#status .r{display:flex;gap:6px;align-items:center;font-size:14px}
+.batt{width:26px;height:12px;border:1.5px solid #000;border-radius:4px;position:relative}
+.batt:after{content:"";position:absolute;left:1.5px;top:1.5px;width:17px;height:6px;background:#000;border-radius:1.5px}
+.view{position:absolute;inset:0;background:#F2F2F7;will-change:transform}
+.nav{position:absolute;top:58px;left:0;right:0;height:44px;z-index:5;background:#F2F2F7}
+.back{position:absolute;left:10px;top:9px;color:#007AFF;font:400 17px Inter;display:flex;align-items:center;gap:2px}
+.back svg{width:13px;height:21px}
+.navtitle{position:absolute;left:0;right:0;top:11px;text-align:center;font:600 17px Inter;color:#000}
+.content{position:absolute;top:102px;left:0;right:0;will-change:transform}
+.big{font:700 34px Inter;color:#000;padding:2px 20px 10px;letter-spacing:.2px}
+.search{margin:0 16px 14px;height:36px;border-radius:10px;background:#E3E3E8;color:#8A8A8E;font:400 17px Inter;display:flex;align-items:center;padding-left:10px;gap:6px}
+.ghdr{font:400 13px Inter;color:#6D6D72;text-transform:uppercase;padding:14px 36px 6px}
+.group{margin:0 16px 22px;background:#fff;border-radius:12px;overflow:hidden}
+.foot{font:400 13px Inter;color:#6D6D72;padding:-10px 36px 0;margin:-14px 36px 22px;line-height:1.35}
+.row{position:relative;display:flex;align-items:center;min-height:46px;padding:0 14px 0 16px;font:400 17px Inter;color:#000}
+.row+.row:before{content:"";position:absolute;top:0;right:0;left:58px;border-top:.5px solid #C6C6C8}
+.row.noicon+.row.noicon:before,.group.plain .row+.row:before{left:16px}
+.ic{width:30px;height:30px;border-radius:7px;margin-right:13px;display:flex;align-items:center;justify-content:center;color:#fff;font:600 16px Inter;flex:none}
+.lbl{flex:1;padding:11px 0}
+.lbl small{display:block;font-size:13px;color:#8A8A8E;margin-top:2px}
+.val{color:#8A8A8E;margin-right:6px}
+.chev{width:9px;height:15px;flex:none}
+.tog{width:51px;height:31px;border-radius:16px;background:#E9E9EA;position:relative;flex:none}
+.tog i{position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15),0 1px 1px rgba(0,0,0,.16)}
+.check{color:#007AFF;font-weight:600}
+.blue{color:#007AFF}
+.prof{display:flex;align-items:center;padding:10px 16px;gap:14px}
+.avatar{width:62px;height:62px;border-radius:50%;background:linear-gradient(#a7b1c2,#7c879b);color:#fff;font:600 26px Inter;display:flex;align-items:center;justify-content:center}
+.prof b{font:600 21px Inter;display:block}
+.prof span{font:400 14px Inter;color:#000}
+.bar{height:6px;border-radius:3px;background:#E3E3E8;overflow:hidden;margin:8px 0 4px}
+.bar i{display:block;height:100%;background:#007AFF}
+/* welcome screen */
+.welcome{position:absolute;inset:0;background:#fff;display:flex;flex-direction:column;align-items:center;padding:150px 34px 40px;text-align:center}
+.welcome h1{font:700 30px Inter;margin:26px 0 14px}
+.welcome p{font:400 17px Inter;color:#3c3c43;line-height:1.4}
+.welcome .bigbtn{margin-top:auto;width:100%;height:52px;border-radius:14px;background:#007AFF;color:#fff;font:600 17px Inter;display:flex;align-items:center;justify-content:center}
+.welcome .later{margin-top:18px;color:#007AFF;font:400 17px Inter}
+/* sheet */
+.sheet{position:absolute;left:10px;right:10px;bottom:10px;background:rgba(250,250,250,.97);border-radius:16px;padding:18px 16px 10px;text-align:center;box-shadow:0 -4px 30px rgba(0,0,0,.2)}
+.sheet p{font:400 14px Inter;color:#555;margin-bottom:12px}
+.sheet .opt{border-top:.5px solid #ccc;padding:14px;font:400 19px Inter;color:#FF3B30}
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.3)}
+/* overlays */
+#ring{position:absolute;border:5px solid #E8262E;border-radius:14px;box-shadow:0 0 0 4px rgba(232,38,46,.25);pointer-events:none;z-index:60;opacity:0}
+#tap{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(120,120,128,.45);border:3px solid rgba(255,255,255,.9);z-index:61;opacity:0;pointer-events:none}
+#side{position:absolute;left:860px;top:120px;width:1000px;color:#F6F0E4}
+#side .step{font:700 40px Inter;color:#B8862B;letter-spacing:1px;text-transform:uppercase;margin-bottom:26px}
+#side .title{font:800 72px 'Inter Display',Inter;line-height:1.05;margin-bottom:40px}
+#crumbs{display:flex;flex-direction:column;gap:14px}
+#crumbs div{font:600 46px Inter;color:rgba(246,240,228,.45);display:flex;align-items:center;gap:20px;transition:none}
+#crumbs div.on{color:#fff}
+#crumbs div.cur{color:#fff}
+#crumbs div.cur:before{background:#E8262E}
+#crumbs div:before{content:"";width:18px;height:18px;border-radius:50%;background:rgba(246,240,228,.25);flex:none}
+#crumbs div.on:before{background:#3CB371}
+#note{position:absolute;left:860px;bottom:90px;width:980px;font:500 38px Inter;color:#F6F0E4;line-height:1.3}
+#pause{position:absolute;inset:0;background:rgba(7,21,42,.93);z-index:100;opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#F6F0E4}
+#pause .pbadge{font:700 40px Inter;color:#0B1F3A;background:#B8862B;padding:12px 34px;border-radius:40px;margin-bottom:46px}
+#pause .ppath{font:700 64px Inter;text-align:center;line-height:1.35;max-width:1600px}
+#pause .ppath span{color:#B8862B}
+#pause .psub{font:500 36px Inter;margin-top:44px;color:rgba(246,240,228,.75)}
+#pause .pbar{width:900px;height:10px;border-radius:5px;background:rgba(255,255,255,.15);margin-top:50px;overflow:hidden}
+#pause .pbar i{display:block;height:100%;background:#B8862B}
+#recap{position:absolute;inset:0;background:#0B1F3A;z-index:90;opacity:0;padding:110px 170px;color:#F6F0E4}
+#recap h2{font:800 66px 'Inter Display',Inter;margin-bottom:50px}
+#recap li{list-style:none;font:600 48px Inter;margin:0 0 26px;display:flex;gap:30px;align-items:center;opacity:0}
+#recap li b{width:70px;height:70px;border-radius:50%;background:#B8862B;color:#0B1F3A;display:flex;align-items:center;justify-content:center;flex:none}
+#recap li em{font-style:normal;margin-left:auto;padding:8px 26px;border-radius:30px;font-size:38px}
+.off{background:#3a4658;color:#fff}.onb{background:#34C759;color:#062}
+</style></head><body>
+<div id="stage">
+ <div id="brand">WALTER HARPER <b>TIPS</b></div>
+ <div id="phone"><div id="screen">
+  <div id="island"></div>
+  <div id="status"><span>9:41</span><span class="r">●●●● 5G <span class="batt"></span></span></div>
+  <div id="views"></div>
+  <div id="tap"></div>
+ </div></div>
+ <div id="ring"></div>
+ <div id="side"><div class="step" id="stepn"></div><div class="title" id="stitle"></div><div id="crumbs"></div></div>
+ <div id="note"></div>
+</div>
+<div id="pause"><div class="pbadge">⏸ PAUSE HERE · WRITE IT DOWN</div><div class="ppath" id="ppath"></div><div class="psub" id="psub"></div><div class="pbar"><i id="pbar"></i></div></div>
+<div id="recap"><h2 id="rtitle"></h2><ul id="rlist"></ul></div>
+<script src="screens.js"></script>
+<script src="engine.js"></script>
+</body></html>

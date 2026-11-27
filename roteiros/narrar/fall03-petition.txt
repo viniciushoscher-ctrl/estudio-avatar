@@ -1,0 +1,87 @@
+Nearly 100,000 people have signed a petition to bring Jensen Huang back as Nvidia's CEO, Business Insider reported on November 14, 2026.
+Organizers say more than 5,100 of them are current Nvidia employees, and Elon Musk says he is signing too.
+In the next minutes: what Huang still stands to lose, what Musk says Nvidia loses without him, and how it ended for two famous CEOs who were pushed out and then came back.
+The campaign calls itself "Stand with Jensen." It asks Nvidia's board to put Huang back in charge while the investigation continues.
+It grew fast. On the evening of November 13 it had about 36,000 names, and by 1 a.m. Eastern the next day, 55,078, 24/7 Wall St. reported.
+By the morning of November 14 it had about 97,000 names, Business Insider reported.
+Organizers say more than 51,000 are shareholders, more than 5,100 are current Nvidia employees and nearly 900 are former employees.
+Some names are clearly fake. Business Insider found a "Tim Cruise, Hollywood actor" and a misspelled "Xi Jingping." Organizers say they are "actively working" to remove them.
+So who signed for real?
+Elon Musk promoted the petition on X. "A petition is underway to reinstate Jensen and I'm signing it too," he wrote on November 13, ANI reported.
+Replit CEO Amjad Masad promoted it too. Boom Supersonic CEO Blake Scholl and Y Combinator CEO Garry Tan signed it, Business Insider reported.
+Musk had already said hiring Huang himself "would be an honor."
+But the next day, Musk went further, with a warning about money.
+Musk said Nvidia would lose "critical" deals without Huang, Reuters reported.
+He said Huang ran the supply chain "brilliantly," and that "many of those deals were a handshake with Jensen, not a written contract."
+"Without Jensen, at least some of those critical deals will be lost," Musk wrote, ANI reported.
+Musk did not name a single supplier or deal, and Nvidia did not answer his comments.
+So what do the people inside Nvidia say?
+Posts leaked from Nvidia's internal messaging system show a fight after Huang's departure, Reuters reported.
+Most of the comments urged the board to reinstate him immediately, under the slogan "Bring Back the Boss."
+Reuters called it a developing story, and Nvidia has not commented on the posts.
+Not everything online is real. A separate letter threatening mass resignations circulated on X and was reported to be fake, 24/7 Wall St. noted.
+Inside the company, the job now belongs to the chief financial officer, Colette Kress, who is interim CEO. The board says it will consider internal and external candidates.
+And the petition has a list of three demands for that board. What are they?
+The organizers' open letter says the board pushed Huang out without an investigation or "meaningful due process," Business Insider reported.
+It says they have seen no evidence supporting the espionage allegation.
+It makes three demands: disclose the investigation's scope and timeline, give Huang a chance to respond, and give an evidence-based explanation for any removal.
+Neither Nvidia nor Huang has endorsed the petition, 24/7 Wall St. reported.
+But on November 13, two of Nvidia's best-known investors sent the board a letter of their own.
+The letter came from Brad Gerstner of Altimeter Capital and Gavin Baker of Atreides Management, 24/7 Wall St. and The New York Sun reported.
+They asked the board to skip a rushed pick and run "a slow, measured process that keeps every option open, including Huang's return."
+Gerstner called it the "minimum standards it owes shareholders."
+Altimeter held 9,413,589 Nvidia shares as of June 30, worth about 1.53 billion dollars at the November 13 close. Atreides held 1,249,291 shares, about 203 million dollars.
+Together, about 1.74 billion dollars, yet only about 0.04% of Nvidia's shares. The letter does not demand reinstatement, a vote or new directors.
+On November 13, the board said it was still choosing a search firm, has not formally approached candidates, and called speculation premature.
+What is the board actually investigating?
+On November 8, the board opened an independent investigation into whether Huang was the "target of a foreign intelligence effort," TechCrunch and Business Insider reported.
+That came after he admitted an affair with Alice Huang, a former executive at Singapore-based Megaspeed. U.S. officials reportedly said she may be a Chinese spy.
+China's foreign ministry called the allegations groundless on November 10.
+And the Justice Department had not concluded whether she is a spy, Attorney General Todd Blanche said.
+Huang has not been accused of any crime.
+Beijing denies she is a spy.
+So the board must weigh its own investigation against nearly 100,000 signatures. So what does Huang lose if he stays out?
+By quitting, Huang forfeits about 108 million dollars in unvested Nvidia stock awards, by Bloomberg's count.
+That includes about 346,000 restricted stock units and about 310,000 performance shares.
+He still owns about 3.5% of Nvidia, roughly 97% of his fortune, Bloomberg reported.
+And he is off the board. Nvidia's November 12 filing says he resigned as president, CEO and director, 24/7 Wall St. reported.
+Severance and any clawback have not been disclosed.
+A return would not automatically restore those awards. The board would have to grant new ones, and nobody has said it will.
+So has a board ever brought back a CEO it pushed out?
+Nvidia's stock closed on November 13 at 162.85 dollars, down 2%, for a market value of 3.93 trillion dollars, 24/7 Wall St. reported.
+It lost about 573 billion dollars in market value in the week ending November 13, and it is down 26% in a month.
+The business itself is still growing. Revenue last quarter was 96.2 billion dollars, up about 106%, and Kress has said growth of about 70% next fiscal year is limited only by supply.
+That is the company the petition wants Huang to run again.
+Governments across Asia reacted on November 13, TechCrunch reported.
+South Korea said Nvidia reaffirmed its plan to supply 260,000 advanced GPUs, and the country's AI strategy council held an emergency meeting.
+Taipei said Nvidia's planned overseas headquarters there remains on track. Japan said it will closely monitor the company.
+Reuters found more than 3 billion dollars in Chinese AI computing projects that rely on Nvidia's restricted processors.
+That is the pressure on the board now. Has that kind of pressure ever brought a CEO back?
+On November 17, 2023, the board of OpenAI fired its CEO, Sam Altman, saying it "no longer has confidence in his ability to continue leading OpenAI."
+Within days, more than 700 of the company's roughly 770 employees signed a letter threatening to quit, The New York Times reported.
+Microsoft stock fell nearly 3% after the firing, then rose to an all-time high when Microsoft said it would hire him.
+About five days after he was fired, Altman was back as CEO. The board that fired him was largely replaced.
+Sound familiar? A petition, the employees, and a billionaire ally.
+But there is one big difference with Nvidia.
+OpenAI's board gave a vague reason. Nvidia's board is investigating a national security question, with a Senate hearing ahead.
+Senate Banking Chair Tim Scott asked Huang to testify by December 3, 2026, Newsweek reported.
+And OpenAI's employee letter had more than 700 names out of about 770, nearly the whole company. Nvidia's petition claims 5,100 employees, out of a company many times larger.
+So a five-day comeback would be harder here. Would the petition still matter?
+Should Nvidia's board bring Huang back before the investigation ends? Yes or no? Tell us in the comments.
+There is also a slower kind of comeback. How slow?
+About 97,000 names, more than 5,100 claimed Nvidia employees and Elon Musk want Huang back, while he forfeits about 108 million dollars by staying out.
+In September 1985, Steve Jobs left Apple after a power struggle with the board and CEO John Sculley.
+He started a new company, NeXT, with 7 million dollars.
+In December 1996, Apple agreed to buy NeXT for 400 million dollars, and Jobs came with it.
+In July 1997, Apple's CEO was ousted, and in September 1997, Jobs was named interim CEO of a company on the verge of bankruptcy.
+The iMac came in 1998, the iPod in 2001, and the iPhone in 2007.
+That comeback took 12 years. Huang's case began in November 2026. So what comes first for him?
+Nvidia was set to report quarterly earnings on November 17, 2026, after the close, its first without Huang as CEO. Its guidance is 108 billion dollars in revenue, plus or minus 2%.
+Kress was set to hold a company-wide meeting on November 18.
+Tim Scott's deadline for Huang's Senate testimony is December 3.
+And the board's investigation has no announced end date. The petition asks for exactly that: a timeline.
+Will the board answer before the earnings call, or after?
+Where it stands: about 97,000 people, including Elon Musk, want Jensen Huang back, he forfeits about 108 million dollars by staying out, he is not accused of any crime, and Nvidia's board has not answered the petition.
+The next date is November 17, Nvidia's earnings.
+Next, watch "Jensen Huang Loses $108 Million. How It Ended for CEOs Before Him," right here on this channel.
+If you want to know whether the board brings him back, tap subscribe.

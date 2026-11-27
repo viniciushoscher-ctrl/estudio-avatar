@@ -1,0 +1,90 @@
+Nvidia just reported the biggest quarter in its history, 115.8 billion dollars in sales, and on the same night its board shut the door on Jensen Huang.
+On the earnings call, board chair Harvey Jones said, "The Nvidia board unanimously accepted his resignation and does not intend to reinstate Jensen as CEO."
+CBS News, citing a source directly familiar with the board's thinking, reported the same thing.
+Huang co-founded Nvidia in 1993. He left as CEO on November 12.
+He still owns about 870 million shares. And he has said he would come back if the board wanted him.
+On November 17, the board said it does not. In the next minutes: what Huang loses with the door closed, the 217 million dollar check he may still collect in December, and how it ended for two other founders whose boards said no.
+Harvey Jones became Nvidia's first board chair only days earlier. That day he spoke before the numbers.
+According to Constellation Research, Jones said the board does not intend to reinstate Huang as CEO.
+He said the board had acted deliberately and is strengthening its oversight.
+Then he said the board would not take questions about Huang on the call.
+That was it. No debate. Huang had posted on X, Constellation reports, that he "did not live up to the standards" expected at Nvidia, that he made serious personal mistakes, and that he will cooperate with the board's independent investigation.
+He also said he would return as CEO if the board decided that was in shareholders' interest.
+The answer was no. The question is what that "no" costs the man who built the company, and the numbers on the same call made it sting more.
+Here is what Nvidia earned in its first quarter without Huang in charge.
+Sales were 115.8 billion dollars, up 103 percent from a year ago, the company said.
+Profit was 65.3 billion dollars, more than double the 31.9 billion of a year ago, CBS reports.
+Data center sales alone were 107.6 billion dollars. Wall Street expected about 108.7 billion in sales, according to Constellation Research.
+Nvidia beat that by roughly 7 billion. Earnings were 2.70 dollars a share, against about 2.47 expected.
+Interim CEO Colette Kress said, "Our momentum is real." Shares rose nearly 3 percent after hours, to about 159.60 dollars, CBS reports.
+For Huang's allies, who argued the company could not run without him, this quarter is a problem.
+The quarter mostly ended before he left, but the board has a record to point to.
+And the next number is even bigger.
+Start with the chair. Huang ran Nvidia for 33 years. On that call the board said, in public, it does not plan to give it back.
+That ends the comeback plan his allies have pushed for a week.
+Next, the shares. Huang owns about 870 million Nvidia shares, roughly 3.5 percent of the company, Fortune reported.
+At about 159.60 dollars after hours, that is close to 139 billion dollars on paper.
+Every one-dollar move in the stock moves his fortune by about 870 million dollars.
+And the stock is down about 28 percent in the past month, Constellation reports.
+Then there is power. Forbes reported his shares carry no special voting rights, unlike some founders in Silicon Valley.
+So he cannot outvote the board. He keeps the money. He loses the room.
+But the board also promised Wall Street something on that call that Huang would not get to deliver.
+Nvidia told investors to expect 130 billion dollars in sales next quarter, plus or minus 3 percent.
+Analysts had modeled about 124.9 billion, according to Constellation Research. That forecast assumes zero data center sales to China.
+Gross margins are expected at 71 to 72 percent, down from 74.8 percent this quarter.
+The company expected about 75 percent growth next fiscal year, up from 70 percent.
+Kress credited Nvidia's newest chip system, Vera Rubin, with adding nearly 20 billion dollars in sales from one quarter to the next.
+That is the forecast of a company planning a future without its founder.
+And there was one more line in the release that tells you the investigation is far from over.
+Nvidia shipped 2.4 billion dollars of older Hopper data center chips to China in the quarter, according to Constellation Research.
+Next quarter's forecast assumes none. On November 16, CBS reports, the Commerce Department's Bureau of Industry and Security issued an interim rule limiting other countries' access to advanced AI chips.
+On November 17, Nvidia's board formed a new committee to make sure the company follows U.S. export controls.
+The company's own release mentions the leadership change, the search for a new CEO, and an independent board investigation that is still going on.
+China has called the spy claims "entirely groundless." Megaspeed, the Singapore firm named in earlier reports, has denied wrongdoing.
+Huang has not been charged with any crime. But a compliance committee formed the day before earnings is not a small thing, and Kress was asked about it all night.
+Kress tried to calm the room. "From business perspective, it's business as usual," she said, according to Constellation Research.
+"Our passion to innovate will not change, and our commitment to customers, partners, and shareholders will not change."
+On partners: "They're all 100 percent behind us." On staff: "We will take care of our employees during this transition to make sure that they are safe."
+One detail stood out. Nvidia said it would file its quarterly 10-Q report with regulators "in the coming weeks," not on the same day as earnings, as it has in recent quarters.
+That filing is where the details live. Analyst Larry Dignan wrote that he expects multiple investigations and shareholder lawsuits.
+So the board said no. Founders have heard that word before, and one of them was the most famous founder America ever had.
+Before we go on, tell us in the comments: Nvidia just had the best quarter in its history without Jensen Huang.
+Should the board ever bring him back? We read every answer.
+In May 1985, Apple's CEO John Sculley moved to take the Macintosh group away from Steve Jobs, the co-founder.
+Jobs tried to push Sculley out instead. The plan leaked. The board sided with Sculley.
+On September 17, 1985, Jobs resigned from the company he had started in a garage.
+He founded NeXT with 7 million dollars, and five senior Apple people followed him.
+For eleven years, Apple ran without him. Then, in December 1996, a struggling Apple agreed to buy NeXT for 400 million dollars.
+In September 1997, Jobs was named interim CEO. Many of you remember what came after: the iMac, the iPod, the iPhone.
+So a board's "no" is not always forever. But Jobs' path back took twelve years, and it ran through a company that needed rescue.
+Nvidia, on that call, did not look like a company that needs rescue.
+And Huang's paycheck tells the same story.
+Here is something few people noticed in the earnings release. Nvidia will pay a dividend of 25 cents a share on December 23, 2026, to shareholders of record on December 2.
+If Huang still holds about 870 million shares on that date, that comes to roughly 217 million dollars.
+The board also returned 28.1 billion dollars to shareholders this quarter, 22.1 billion through buybacks and 6 billion in dividends.
+And it has about 227.3 billion dollars left to buy back stock, after adding 150 billion in September, with no expiration date.
+Buybacks help support the share price. So the man the board will not take back may be one of the biggest winners from the board's own money decisions.
+That is the strange position of a fallen founder. Another founder lived it in 2017, and he fought his board in court.
+In June 2017, Uber's co-founder Travis Kalanick took a leave after an independent report on workplace harassment at the company.
+One week later, on June 20, 2017, he resigned as CEO after five major investors, including Benchmark Capital, sent him a letter demanding it.
+He kept his seat on the board. In August 2017, Benchmark sued him for fraud, breach of contract and breach of fiduciary duty, according to Axios as cited by Wikipedia.
+The suit went to arbitration and was dropped in January 2018. Kalanick never got the CEO job back.
+He left Uber's board at the end of 2019, after selling more than 2.5 billion dollars of stock, about 90 percent of his shares.
+He walked away rich, and he walked away for good. Which road Huang takes may depend on what happens in the next two weeks.
+Huang's supporters have not gone quiet. Employees, investors and tech leaders have called for his return, CBS reports.
+A petition to bring him back passed 175,000 signatures, the BBC reported.
+The Financial Times reported that his allies built a war room to lobby the board and the White House.
+On the other side, Treasury Secretary Scott Bessent said on November 15 that he wants answers from the board within ten days, and that the next CEO should come from outside the company.
+Ten days from his interview is November 25. Constellation's Dignan wrote that Huang's statement may appeal to people who want him back, but does not help Nvidia move past this.
+On that call, the board seemed to agree with Dignan. And the next day, the company's employees got to ask their own questions.
+So here is where we are. Nvidia made 115.8 billion dollars in sales and 65.3 billion in profit.
+Its board chair says it does not intend to bring Huang back.
+Huang keeps about 870 million shares and no seat at the head of the table.
+Here are the dates. November 18: Nvidia's all-hands meeting with employees, Kress's first since the earnings.
+November 25: the end of Bessent's ten-day window. December 2: the record date for the 25-cent dividend.
+December 3: the Senate date tied to the export questions. And "in the coming weeks": the 10-Q filing, where any new costs of the investigation would show up.
+The board is still choosing a path to a permanent CEO. Huang is not charged with any crime.
+The investigation goes on. If the board ever changes its mind, it will have to explain why to the Treasury, to Congress and to Wall Street, all at once.
+Where it stands: Huang is not charged, the board says no, and the money keeps coming in.
+If you want to follow every turn of this story and the stories of the men who shaped your lifetime, subscribe.
+And watch next: Jensen Huang's Comeback Hits a Wall: Bessent Gives Nvidia 10 Days.

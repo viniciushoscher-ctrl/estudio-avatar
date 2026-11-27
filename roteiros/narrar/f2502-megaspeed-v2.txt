@@ -1,0 +1,79 @@
+The company at the center of the Nvidia storm was put on an American blacklist.
+On November 23, 2026, the Commerce Department filed a rule adding Megaspeed, a Singapore-based cloud company, and six linked firms to its Entity List.
+The rule was published in the Federal Register on November 25. It came hours after Nvidia's board brought back Jensen Huang as CEO.
+Megaspeed denies any wrongdoing. In the next minutes: the 4.8 billion dollars in Nvidia equipment at stake, what the blacklist actually does, and what happened to the last two companies Washington hit this hard.
+According to SOFX and Sulat, which cite the Federal Register filing, the Bureau of Industry and Security added seven entities.
+Three are in Singapore, including Megaspeed International and a company called Swiftdata.
+Three are listed under Malaysia. One is in Thailand. And one name surprised the market: Apex Enterprise Solutions, which Sulat, citing the Straits Times, describes as the Singapore subsidiary of the Chinese giant Alibaba.
+TNW reports investigators had worked on the case for more than a year.
+The rule was filed for public inspection on November 23, and formal publication was set for November 25.
+So what does being on this list actually do to a company?
+The Entity List is a Commerce Department list of foreign companies that American suppliers cannot sell to without a license.
+According to SOFX and Sulat, the Megaspeed rule requires a license for every item subject to U.S. export rules, and applications will be reviewed under a "presumption of denial."
+In plain English: the answer is usually no. TNW reports listed firms also struggle to get spare parts and software updates.
+Sulat reports adding a company takes a majority vote of a federal committee, while removing it takes a unanimous one.
+SOFX reports shipments already on the way can still be completed within 30 days of publication.
+And the money that was flowing before this rule was very large.
+SOFX, citing a New York Times analysis of trade records from ImportGenius, reports that Megaspeed's Malaysian affiliate bought at least 4.8 billion dollars of advanced AI equipment containing Nvidia chips between June 2024 and February 2026.
+According to SOFX, shipments of restricted Nvidia chips, including its Blackwell and H200 models, continued for months after Nvidia put Megaspeed on its own no-sell list in June 2025.
+TNW reports Nvidia says it chose to stop selling to the firm that June.
+The suspicion, as TNW puts it, is that advanced chips were funneled to China, where U.S. rules bar their sale.
+Megaspeed denies it. And the timing of this rule is what put it on every front page.
+SOFX and BigGo Finance report the filing landed hours after Nvidia's board reinstated Jensen Huang as CEO on November 23.
+Huang had resigned earlier in November, in a story tied to a former Megaspeed executive whom U.S. intelligence reportedly accused of working with Chinese intelligence.
+Beijing rejected that accusation, SOFX reports. Huang has not been charged with any crime, and the listing names companies, not him.
+Nvidia has said it found no security risk, BigGo reports, and the board's own investigation was still open at the time of this report.
+Neither we nor Sulat found an Nvidia statement on the listing itself.
+So what do Megaspeed and Alibaba say?
+Megaspeed says it runs a legitimate and lawful business that complies with U.S. export controls, according to Sulat, and SOFX reports it has hired outside lawyers to review its compliance.
+TNW reports Megaspeed says the former executive at the center of the story left the company in August 2025.
+Alibaba pushed back hard. An Alibaba spokesperson told the Straits Times, as quoted by Sulat, that adding Apex "is erroneous because Apex has never diverted advanced computing chips."
+Alibaba says it will seek all legal avenues. No charges against Megaspeed have been announced, Sulat reports, although the Justice Department is leading a criminal investigation.
+Which raises the question senators are asking.
+Sulat reports Bessent complained publicly about the delay on November 13. BigGo Finance, citing a Financial Times report from November 10, says Commerce had postponed new Entity List additions by two months.
+Treasury Secretary Scott Bessent told CNBC that several departments wanted the listing for months, "but Commerce has the pen," TNW and Townhall report.
+Republican Senator Pete Ricketts of Nebraska posted on November 23 that he had "led the push" for Commerce to crack down on Megaspeed, and that Commerce "still needs to explain to Congress why this took so long."
+Democratic Senator Maria Cantwell said the listing "does not absolve Commerce," Sulat reports.
+And Sulat reports House Democrats opened a probe into whether Nvidia influenced Commerce.
+Commerce has said a reported White House confrontation over the delay never happened, TNW reports.
+But some experts say the rule may not even work.
+Chris McGuire, a senior fellow at the Council on Foreign Relations, called the listing "zero effect," according to SOFX.
+His point: the rule leaves out what is called the foreign direct product rule, so Nvidia chips made in Taiwan are not automatically covered.
+Meanwhile, Singapore's Prime Minister Lawrence Wong said, as quoted by Sulat: "We do not enforce America's export controls, but we do not want Singapore to be used and abused as a conduit."
+Singapore's own investigation continues. Malaysia's investment agency will tell data center operators not to host or serve the seven firms.
+Washington has used this weapon before, and it nearly killed a Chinese phone giant.
+Before we look at what happened to ZTE and Huawei, tell us in the comments: should Washington punish the buyers who move American chips to China, or the companies that sold to them?
+We read every answer.
+Many of you remember the ZTE fight. According to Wikipedia, in March 2017, the Chinese telecom maker ZTE pleaded guilty to illegally exporting U.S. technology to Iran and North Korea and was fined a total of 1.19 billion dollars, described as the largest U.S. fine ever for export-control violations.
+Then, on April 16, 2018, Commerce banned American companies from selling to ZTE for seven years.
+Without U.S. parts, ZTE said it could not keep operating, and it halted major operations.
+On June 7, 2018, ZTE settled: a one-billion-dollar fine, 400 million more in escrow, and its entire senior management replaced.
+The ban was lifted on July 13, 2018. The question for Megaspeed is which part of that story it ends up in.
+The Justice Department is leading a criminal investigation into suspected export violations, according to SOFX and Sulat.
+SOFX cites a joint Justice and Commerce statement from mid-November 2026. No charges have been announced.
+Singapore's government says its own probe continues. Sulat reports Commerce opened its investigation in 2024, Nvidia added Megaspeed to its no-sell list in June 2025, and Senator Ricketts introduced a bill aimed at the firm on November 17.
+If charges come, the blacklist may turn out to be the first step, not the last.
+The biggest precedent shows how long that road can be.
+Huawei was added to the Entity List in May 2019, according to Wikipedia.
+The pressure did not stop there. In 2020, Huawei agreed to sell its Honor phone brand to a state-owned company in Shenzhen to, as Wikipedia puts it, "ensure its survival" under U.S. sanctions.
+Wikipedia reports that heavy international sanctions saw Huawei's revenue drop 32 percent in the third quarter of 2021, and in November 2022 the FCC banned the sale or import of Huawei equipment in the United States.
+Huawei survived, but smaller. Megaspeed is a far smaller company, and the difference matters.
+The blacklist lands in three countries, and two of them were already reacting.
+Malaysia's trade ministry said only two of the seven firms, Speedmatrix and MSFusion, are Malaysian, and that one company listed under Malaysia in the filing is "not an entity in Malaysia," according to Sulat, citing the Malaysian news agency Bernama.
+Malaysia's investment agency will tell data center operators not to host or serve any of the seven.
+In Singapore, Sulat reports, the government's investigation of Megaspeed and six individuals is ongoing, and Prime Minister Wong has made clear his country will not be a conduit.
+So for Megaspeed, the pressure came from Washington and from its own neighbors.
+That is a very different position from the two giants that came before it.
+ZTE and Huawei were giant manufacturers that needed American parts to build their products.
+Megaspeed, as TNW describes it, is a cloud company that buys and rents out computing power.
+That means the blacklist hits the buying, not a factory. And it means the real test is whether chips still find a way through other buyers, which is exactly the gap Chris McGuire warned about.
+Nvidia says it stopped selling to Megaspeed directly in June 2025, so the company is not losing a customer it still serves.
+For Nvidia, the stakes are about trust in Washington. For Huang, back in the CEO chair for only days, this was the first test of his second term.
+Here is where we are. Commerce has blacklisted Megaspeed and six linked firms, including Alibaba's Apex.
+Megaspeed and Alibaba deny wrongdoing. The Justice Department investigation continues, with no charges announced.
+And Jensen Huang, reinstated the same day, is not accused of any crime.
+Watch three things. The 30-day window for shipments already on the way.
+Whether Alibaba challenges the listing, as it says it will. And Congress, where a Senate hearing tied to the Nvidia story had been expected on December 3, 2026.
+Where it stands: Megaspeed is blacklisted, denies wrongdoing, and no charges have been announced.
+If you want the money and power stories that matter after 65, subscribe.
+And watch next: BREAKING: Jensen Huang Is Back as Nvidia CEO. The Stock Jumps 30%.

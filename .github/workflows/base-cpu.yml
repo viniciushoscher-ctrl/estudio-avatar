@@ -1,0 +1,88 @@
+name: Base do avatar na CPU
+run-name: Base do avatar na CPU ${{ github.run_number }}
+
+# Vídeos-base do avatar (corpo e mãos se mexendo, boca fechada), 100% grátis na CPU do GitHub:
+# LTX-Video (imagem -> vídeo) e depois o Ditto põe a fala nova em cima (teste no fim).
+
+on:
+  workflow_dispatch:
+    inputs:
+      avatar:
+        description: "nome do avatar (usa avatares/<nome>-mesa.png)"
+        default: hiroshi
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [.github/workflows/base-cpu.yml, motor/base_cpu.py]
+
+permissions:
+  contents: read
+
+env:
+  AVATAR: ${{ inputs.avatar || 'hiroshi' }}
+
+jobs:
+  base:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        semente: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Liberar disco
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          # memória extra em disco (o modelo passa dos 16 GB de RAM em alguns momentos)
+          sudo swapoff -a || true
+          sudo fallocate -l 20G /mnt/swap && sudo chmod 600 /mnt/swap && sudo mkswap /mnt/swap && sudo swapon /mnt/swap
+          free -g; df -h /
+      - name: Instalar
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          pip install -q torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q diffusers==0.34.0 "transformers==4.51.3" accelerate sentencepiece imageio imageio-ffmpeg \
+            Pillow "numpy<2" protobuf "huggingface_hub>=0.30,<1.0"
+      - name: Vídeo-base (LTX-Video na CPU)
+        run: |
+          mkdir -p bases-cpu
+          python motor/base_cpu.py avatares/$AVATAR-mesa.png bases-cpu/$AVATAR-base-${{ matrix.semente }}.mp4 \
+            --semente ${{ matrix.semente }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: base-${{ matrix.semente }}
+          path: bases-cpu/
+
+  fala:
+    needs: base
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        semente: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - uses: actions/download-artifact@v4
+        with:
+          name: base-${{ matrix.semente }}
+          path: bases-cpu
+      - name: Fala nova em cima da base (Ditto na CPU)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          mkdir -p saida
+          cp bases-cpu/*.mp4 saida/
+          # 8 s de fala: a base de 4 s vai e volta (o Ditto faz o vai-e-volta sozinho)
+          bash motor/ditto_cpu.sh bases/teste-8s.wav bases-cpu/$AVATAR-base-${{ matrix.semente }}.mp4 \
+            saida/$AVATAR-falando-${{ matrix.semente }}.mp4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: falando-${{ matrix.semente }}
+          path: saida/

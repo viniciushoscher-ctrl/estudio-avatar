@@ -1,0 +1,110 @@
+name: Hiroshi falando
+run-name: Hiroshi falando ${{ github.run_number }}
+
+# Clone open source do HeyGen (Photo Avatar): anima SÓ a imagem gerada por IA, falando o roteiro.
+# Voz: Kokoro-82M (Apache-2.0) na CPU do GitHub. Vídeo: LongCat-Video-Avatar 1.5 (MIT) na GPU
+# grátis da Modal. Cada linha do roteiro vira um clipe (até ~9 s por linha fica melhor).
+
+on:
+  workflow_dispatch:
+    inputs:
+      roteiro:
+        description: "Arquivo do roteiro (uma fala por linha = um clipe)"
+        default: roteiros/kenji-falas.txt
+      texto:
+        description: "OU escreva aqui uma fala (substitui o arquivo)"
+        default: ""
+      imagem:
+        description: "Imagem do avatar"
+        default: avatares/rosto-japones.png
+      cena:
+        description: "Como ele se mexe (em inglês; vazio = padrão)"
+        default: ""
+      voz:
+        description: "hiroshi (voz fixa do canal) ou uma voz do Kokoro (am_michael, bm_george...)"
+        default: hiroshi
+      velocidade:
+        description: "Velocidade da fala"
+        default: "0.95"
+      resolucao:
+        type: choice
+        options: ["480p", "720p"]
+        default: "480p"
+
+  # Teste automático: um push neste ramo com mudança no roteiro ou no motor gera os clipes.
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [roteiros/kenji-falas.txt]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kenji-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  falar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg espeak-ng
+          pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -q kokoro==0.9.4 qwen-tts soundfile modal \
+            "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"
+      - name: Voz (Hiroshi no Qwen3-TTS; Kokoro se voz != hiroshi)
+        env:
+          ROTEIRO: ${{ inputs.roteiro || 'roteiros/kenji-falas.txt' }}
+          TEXTO: ${{ inputs.texto }}
+          VOZ: ${{ inputs.voz || 'hiroshi' }}
+          VELOCIDADE: ${{ inputs.velocidade || '0.95' }}
+        run: |
+          if [[ -n "$TEXTO" ]]; then printf '%s\n' "$TEXTO" > /tmp/roteiro.txt; else cp "$ROTEIRO" /tmp/roteiro.txt; fi
+          if [[ "$VOZ" == hiroshi ]]; then
+            python motor/voz_hiroshi.py /tmp/roteiro.txt falas
+          else
+            python motor/voz_kokoro.py /tmp/roteiro.txt falas "$VOZ" "$VELOCIDADE"
+          fi
+      - name: Vídeo (LongCat-Video-Avatar na GPU da Modal)
+        timeout-minutes: 120
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          IMAGEM: ${{ inputs.imagem || 'avatares/rosto-japones.png' }}
+          CENA: ${{ inputs.cena }}
+          RESOLUCAO: ${{ inputs.resolucao || '480p' }}
+          RUN: ${{ github.run_number }}
+        run: |
+          # Aceita o segredo colado com espaços, trocado ou com o comando "modal token set" inteiro.
+          TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
+          ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1 || true)
+          SEC=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1 || true)
+          echo "id: ${#ID} caracteres (começa com ak-: $([[ -n $ID ]] && echo sim || echo não)) · secret: ${#SEC} caracteres (começa com as-: $([[ -n $SEC ]] && echo sim || echo não))"
+          [[ -n "$ID" && -n "$SEC" ]] || { echo "::error::Os segredos da Modal não têm um código ak-... e um as-... (veja o README)"; exit 1; }
+          export MODAL_TOKEN_ID="$ID" MODAL_TOKEN_SECRET="$SEC"
+          mkdir -p clipes
+          modal run gpu/kenji_longcat.py::main --imagem "$IMAGEM" --audio falas --saida clipes \
+            --prompt "$CENA" --resolucao "$RESOLUCAO"
+          for f in clipes/fala-*.mp4; do mv "$f" "clipes/hiroshi-$RUN-${f#clipes/fala-}"; done
+          ls -l clipes
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kenji-${{ github.run_number }}
+          path: |
+            clipes/*.mp4
+            falas/*.wav
+      - name: Guardar na Release "kenji"
+        env:
+          GH_TOKEN: ${{ secrets.DADOS_TOKEN }}
+          DADOS: ${{ github.repository_owner }}/estudio-avatar-dados
+        run: |
+          [[ -n "$GH_TOKEN" ]] || exit 0
+          gh release view kenji --repo "$DADOS" >/dev/null 2>&1 \
+            || gh release create kenji --repo "$DADOS" --title "Kenji" --notes "Clipes do avatar"
+          gh release upload kenji clipes/*.mp4 --repo "$DADOS" --clobber

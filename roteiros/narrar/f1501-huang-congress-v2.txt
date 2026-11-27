@@ -1,0 +1,92 @@
+Jensen Huang, who quit as Nvidia's CEO in November 2026, has been called before three House committees and the Senate over Nvidia chips that reached China, PC Gamer and The Washington Post reported.
+The House wants him in a closed-door interview on December 1. The Senate Banking Committee wants him in public on December 3.
+In the next minutes: the two smuggling cases behind the questions, what Huang could still lose, and how it ended for two companies whose chiefs fell over exports to America's rivals.
+The House request comes from three chairmen: Brian Mast of Foreign Affairs, John Moolenaar of the Select Committee on China, and Rick Crawford of Intelligence, PC Gamer reported.
+They asked Huang to sit for a closed-door transcribed interview on December 1, 2026, and threatened subpoenas if he does not comply.
+They also want Nvidia's general counsel, Tim Teter, on December 2.
+The BBC reported that Huang is willing to appear, according to PC Gamer. And on November 15, 2026, Moolenaar said Huang has agreed to testify, but that no date has been set yet, Bloomberg reported.
+So what exactly do they want to ask?
+The letters list four topics, PC Gamer reported.
+First, Huang's and Nvidia's relationship with Megaspeed, a company registered in Singapore.
+Second, how China got access to high-performance graphics chips.
+Third, whether anyone interfered with U.S. export control investigations.
+Fourth, chip smuggling itself, and whether Nvidia products ended up with the militaries of America's adversaries.
+Huang has not been accused of any crime, and Bloomberg reported he is not a target of U.S. law enforcement investigations.
+So why does Megaspeed matter so much?
+Megaspeed bought more than 4.8 billion dollars in Nvidia chips over two years, The New York Times reported in October 2025, according to Fortune.
+Nearly 2 billion dollars' worth was reportedly installed in data centers in Malaysia and Indonesia that were alleged to serve Chinese customers remotely.
+Megaspeed reportedly became Nvidia's largest chip buyer in Southeast Asia.
+Megaspeed is under U.S. investigation for chip diversion and denies any wrongdoing.
+And Nvidia? In October 2026, it said the diversion allegations had been "thoroughly investigated and debunked," Fortune reported.
+So why is Huang's name tied to it?
+A former top Megaspeed executive, Alice Huang, no relation, is the woman Huang admitted having an affair with.
+U.S. intelligence officials reportedly believe she was recruited by China's Ministry of State Security. China calls that groundless.
+Huang once told Bloomberg his interactions with her were "completely normal and not unusual," Fortune reported.
+On November 12, Singapore said its police and customs had opened investigations into Megaspeed and Alice Huang.
+And Singapore says it has been asking Washington for help for more than a year. Why?
+Singapore police seized Alice Huang's passport in June 2025, in a probe of possible false declarations about server purchases, TechCrunch reported.
+Investigators examined whether servers shipped from Singapore to Malaysia were later sent elsewhere without being declared.
+In February 2026, police found insufficient evidence of those offenses, but said she knowingly gave inaccurate information about her role at Megaspeed. She got a warning and was barred from re-entering Singapore.
+Singapore says it got limited help from U.S. authorities despite repeated requests, and its investigation into Megaspeed and six other people is ongoing.
+That is case number one. Case number two is bigger. How much bigger?
+In March 2026, federal prosecutors charged Supermicro co-founder Wally Liaw and two others, Fortune reported.
+They allegedly routed about 2.5 billion dollars in servers packed with Nvidia H200 and B200 chips to China through a front company in Southeast Asia.
+Prosecutors say thousands of nonworking dummy servers were staged in three warehouses to fool auditors, and contractors used hair dryers to soften serial-number labels.
+Liaw resigned his executive and board roles, pleaded not guilty, and his trial was moved to March 2027.
+A co-defendant, Willy Sun, pleaded guilty in October 2026.
+So where does Nvidia appear in that case?
+The indictment says that in December 2024, Liaw asked the front company for monthly forecasts, which he called "the only way" to get Nvidia to promise B200 allocations, Fortune reported.
+The indictment does not accuse Nvidia of wrongdoing.
+Supermicro itself has not been charged. It says it was a victim of the scheme and is cooperating.
+But it disclosed a grand jury subpoena from Manhattan prosecutors and inquiries from the SEC and the Commerce Department.
+And Supermicro's CEO, Charles Liang, has been a friend of Jensen Huang for about three decades, Fortune reported.
+So what is the Justice Department looking at now?
+Bloomberg reported the Justice Department is running several probes: one antitrust investigation of Nvidia, and two focused on Megaspeed and Supermicro.
+Manhattan prosecutors are reportedly examining whether entities linked to Alice Huang helped smuggle Supermicro hardware with Nvidia chips into China.
+Semafor reported there is no indication of criminal charges against Nvidia or Huang.
+Supermicro's stock fell 12% on November 12 when the probes were reported.
+Supermicro told Fortune that Megaspeed "is not, and has never been" its customer.
+And Reuters found more than 3 billion dollars in Chinese AI computing projects that rely on Nvidia's restricted processors, TechCrunch reported.
+So who in Washington was supposed to stop that?
+Export controls are enforced by the Commerce Department, run by Secretary Howard Lutnick.
+Lutnick has been criticized for delaying action on chip smuggling to China, and a White House official said President Trump "maintains complete confidence" in him, Axios reported, according to Just Security.
+Tim Scott invited Lutnick to the same December 3 Senate hearing, and he has reportedly accepted, PC Gamer reported.
+The House also invited Commerce Under Secretary Jeffrey Kessler, who oversees export enforcement.
+So the questions are not only for Huang. But what does Huang himself still have at stake?
+He has already lost the CEO job and his seat on the board.
+By quitting, he forfeits about 108 million dollars in unvested stock awards, by Bloomberg's count, and keeps about 3.5% of Nvidia.
+At a public Senate hearing, every answer will be on the record. Knowingly lying to Congress is a crime, even when not under oath, though it is rarely prosecuted, the AP has noted.
+And in January, Democrats take the Senate. Elizabeth Warren is expected to chair the Banking Committee, with subpoena power, Fortune reported.
+She first asked Nvidia about Supermicro in June 2026, and asked again on November 9 with Republican Senator Jim Banks.
+So has an export scandal ever brought down the men at the top?
+Yes. Between December 1982 and 1984, Toshiba Machine shipped eight advanced machine tools and control software to the Soviet Union, through a front company.
+The Pentagon said on March 19, 1987, that the tools helped the Soviets make quieter submarine propellers.
+Toshiba's chairman, Shoichi Saba, resigned, along with the president of Toshiba Machine.
+Members of Congress smashed a Toshiba radio with sledgehammers on the Capitol lawn, and Congress later banned imports from Toshiba Machine for three years.
+Two Toshiba Machine executives got suspended sentences, and the company was fined 2 million yen.
+And Supermicro has an export past of its own: in 2006, it pleaded guilty to illegally exporting computer equipment to Iran through a distributor in Dubai, Fortune reported.
+So what does Nvidia face that Toshiba did not?
+Nvidia reports quarterly earnings on November 17, its first without Huang.
+On November 13, 2026, the stock closed at 162.85 dollars, for a market value of 3.93 trillion dollars, after losing about 573 billion dollars in a week, 24/7 Wall St. reported.
+The board's outside investigation is led by former acting Manhattan U.S. Attorney Joon Kim and the law firm Wachtell, Lipton.
+The board has said it has no reason to believe national security or Nvidia secrets were compromised, and it has also said it is still choosing a search firm for a permanent CEO.
+The next export case to remember is the one where a president stepped in. Which one?
+Should Congress make Jensen Huang testify in public, under oath? Yes or no? Tell us in the comments.
+Huang has been asked to appear before the House on December 1 and the Senate on December 3 over chips that reached China, through a 2.5 billion dollar Supermicro case and 4.8 billion dollars in Megaspeed purchases; he is not charged.
+In March 2017, the Chinese phone maker ZTE pleaded guilty to shipping U.S. technology to Iran and North Korea, and paid 1.19 billion dollars, the largest U.S. export-control fine at the time.
+In April 2018, Commerce banned U.S. companies from selling to ZTE for seven years, saying it had paid bonuses to 35 people involved.
+Within weeks, ZTE halted its main operations.
+Then President Trump said he would work with Xi Jinping to reverse the ban.
+In June 2018, ZTE agreed to pay a 1 billion dollar fine, put 400 million dollars in escrow and replace its entire senior management.
+The whole top team fell. The company survived.
+So which ending is Nvidia's?
+November 17: Nvidia's earnings, after the close. The company guided to about 108 billion dollars in quarterly revenue, plus or minus 2%, 24/7 Wall St. reported.
+November 18: interim CEO Colette Kress's company-wide meeting.
+December 1: the date requested for Huang's closed-door House interview. December 2: general counsel Tim Teter.
+December 3: the public Senate Banking hearing, where Commerce Secretary Howard Lutnick has reportedly accepted an invitation too.
+And March 2027: Wally Liaw's trial in the Supermicro case.
+Will Huang answer every question, or will a subpoena come first?
+Where it stands: Jensen Huang is called to Congress over chips that reached China, he is not charged and Bloomberg says he is not a target, Nvidia says the diversion claims were debunked, and Megaspeed denies wrongdoing.
+The first date is December 1, the date requested for his closed-door House interview, though Moolenaar says no date is set yet.
+Next, watch "Jensen Huang Could Come Back. Nearly 100,000 Want Him Reinstated," right here on this channel.
+If you want to know what he tells Congress, tap subscribe.

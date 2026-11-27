@@ -1,0 +1,31 @@
+name: Teste LongCat
+run-name: Teste LongCat ${{ github.run_number }}
+on:
+  push:
+    branches: [claude/project-thread-f10yr5]
+    paths: [bases/teste-8s.wav, .github/workflows/teste-longcat.yml]
+permissions:
+  contents: read
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Mesma fala em 3 imagens
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        run: |
+          pip install -q modal
+          TUDO="$MODAL_TOKEN_ID $MODAL_TOKEN_SECRET"
+          export MODAL_TOKEN_ID=$(grep -oE 'ak-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          export MODAL_TOKEN_SECRET=$(grep -oE 'as-[A-Za-z0-9]+' <<<"$TUDO" | head -n1)
+          modal run gpu/kenji_longcat.py::teste
+      - uses: actions/upload-artifact@v4
+        with:
+          name: teste-${{ github.run_number }}
+          path: teste/
