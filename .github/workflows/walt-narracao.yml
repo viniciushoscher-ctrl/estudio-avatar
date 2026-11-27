@@ -44,6 +44,7 @@ jobs:
       - run: TAKES=8 SIM_REF=vozes/walt-aprovada.wav SIM_MIN=0.72 ALVO_HZ=145.4 CLIPES=1 VOZ=walt-c VOZ_MISTURA=walt-b:0.5 python motor/voz_hiroshi.py "$ROTEIRO" saida --parte ${{ matrix.parte }} --partes 12
       - name: Tom -0,7 e ritmo 0,88 (rubberband, formantes preservados)
         run: |
+          shopt -s nullglob
           for f in saida/*.wav; do
             C=0; [ -f "${f%.wav}.st" ] && C=$(cat "${f%.wav}.st")
             P=$(python3 -c "print(2**((-0.7+$C)/12))")
@@ -54,6 +55,7 @@ jobs:
         with:
           name: bruto-${{ matrix.parte }}
           path: saida/
+          if-no-files-found: ignore
 
   hd:
     needs: voz
