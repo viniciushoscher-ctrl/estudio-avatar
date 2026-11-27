@@ -9,7 +9,7 @@ import json, subprocess, sys, tempfile
 from pathlib import Path
 
 C = json.load(open(sys.argv[1])); out = sys.argv[2]; clipes = sys.argv[3:]
-trechos = [C["inicio_reaproveitado"]] + C["grupos"]
+trechos = ([C["inicio_reaproveitado"]] if "inicio_reaproveitado" in C else []) + C["grupos"]
 assert len(trechos) == len(clipes), (len(trechos), len(clipes))
 tmp = Path(tempfile.mkdtemp()); lista = []
 for k, ((s, e), c) in enumerate(zip(trechos, clipes)):
