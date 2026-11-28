@@ -42,7 +42,12 @@ pecas, t = [], 0.0
 total = q(L["duracao"])
 for w in L["walt"]:
     ini, fim = q(w["ini"]), q(w["fim"])
-    if ini > t: pecas.append(("palco", t, ini - t, None, False))
+    if ini > t:
+        if pecas and pecas[-1][0] in ("walt", "gancho") and ini - t < 1.2:
+            # pausa curta entre duas falas do Walt: o Walt continua na tela (sem piscar o iPhone)
+            tp, i0, d0, s0, q0 = pecas[-1]; pecas[-1] = (tp, i0, d0 + ini - t, s0, q0)
+        else:
+            pecas.append(("palco", t, ini - t, None, False))
     if w["id"] == "GANCHO":
         SEM = "--sem-gancho" in sys.argv  # prepara todos os outros pedaços enquanto o clipe do HeyGen não chega
         assert GANCHO or SEM, "falta o clipe do gancho do HeyGen (não usar foto parada)"
