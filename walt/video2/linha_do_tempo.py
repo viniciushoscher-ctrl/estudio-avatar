@@ -18,7 +18,7 @@ CL = json.load(open(Path(__file__).with_name("clipe.json")))["falas"]
 cw, csr = sf.read(clipe_wav, dtype="float32")
 if cw.ndim > 1: cw = cw.mean(1)
 assert csr == SR
-GANHO_CLIPE = 10 ** (3.2 / 20)  # clipe com EQ (clip-eq) medido no mesmo LUFS da narração
+GANHO_CLIPE = 10 ** (3.1 / 20)  # clipe com EQ (clip-eq2) medido no mesmo LUFS da narração
 
 def tags(l):
     t = {}
@@ -89,7 +89,7 @@ for n, it in enumerate(itens):
     m = 0.12 if "w" in tg else 0.25
     legendas.append(dict(ini=round(t + m, 3), fim=round(t + d - m, 3), txt=it["txt"]))
     if "w" in tg:
-        walt.append(dict(ini=round(t, 3), fim=round(t + d, 3), src=it["walt"]["src"], id=it["walt"]["id"], qr=bool(tg.get("qr"))))
+        walt.append(dict(ini=round(t, 3), fim=round(t + d, 3), src=it["walt"]["src"], id=it["walt"]["id"], qr=bool(tg.get("qr")), sub=bool(tg.get("sub"))))
     a = tg.get("a", "")
     cmd = a.split(" ")[0] if a else ""
     if "g" in tg:

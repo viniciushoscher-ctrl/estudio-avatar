@@ -8,7 +8,6 @@
 [g: 05c] [cola] [a: hl Tom (grandson)] the notes from your grandkids.
 [g: 06] [a: menu] It's buried four screens deep, so almost nobody finds it.
 [g: 07] [a: close] [p: 1 switch + 4 more settings] In the next few minutes, I'll walk you right to it, and four more settings worth changing.
-[g: 08] It's easier than you think.
 [w: A20c] [a: home] Let me show you.
 [a: tap Gmail] [p: 5 Gmail settings to change] Let's open Gmail together, on your iPhone.
 [a: hl search] Stay for number four. It lets you take back an email after you've sent it, and that beats one of the oldest tricks scammers use.
@@ -23,6 +22,7 @@
 While it's on, Google's systems go through what's inside your messages. That's how Gmail sorts your mail into tabs, suggests replies, and pulls a flight or a package out of an email you barely looked at.
 [a: off Smart features] Tap the switch, so it's no longer blue. That's off.
 Your email still arrives. You can read it, write it and search it like always. You only lose a few conveniences, like the automatic tabs and the suggested replies.
+And if you ever change your mind, you can come right back here and turn it on again. Nothing is lost.
 [w: R02] There you go. Easy, right?
 [w: Q03] [qr] See that square code on your screen? Open your camera, aim it at the code, and my printable guide will come up.
 [a: card qr] [p: Printable guide] When you aim your camera at it, a little yellow button shows up near the code. Tap that button.
@@ -42,6 +42,7 @@ The moment your phone loads that picture, the sender learns you opened the messa
 And a scammer who knows you open his messages will keep on sending more.
 [a: mail images] Now the pictures wait for you. When a message comes from someone you know and trust, just tap Display images.
 [w: M03] You're doing just fine. Learning something new at any age is something to be proud of.
+[w: E01b] [sub] If this helped, hit subscribe, and I'll be here for the next lesson.
 [a: card guide] [p: The Phone Security Guide] Let me pause here for a moment. Some of you have asked me to put these lessons on paper. So I did.
 It's called The Phone Security Guide. You print it at home, and it covers forty-five fixes, in letters big enough to read without your glasses.
 You'll find the link on my channel page, under About. Or just use the square code from a minute ago.
@@ -54,6 +55,7 @@ Then scroll to the very bottom and click Save Changes. Don't skip that part.
 [a: mail undo] Now, right after you send something from your phone, a little bar shows up at the bottom with the word Undo.
 Scammers count on hurry. Reply right now. Send your account number today.
 If you ever hit send and get that sinking feeling in your stomach, tap Undo. The email never leaves.
+Thirty seconds sounds short, but when your heart is racing, it's plenty of time to catch a mistake.
 [w: M22] I know these menus can feel like a maze. Just follow along with me, and you'll be fine.
 [a: safari] [p: #5  Old connections → Remove] Number five. For this one, open Safari, the blue compass, because it's about your Google account itself.
 Type myaccount dot google dot com, and sign in with your Gmail address.
@@ -66,6 +68,7 @@ Each one you take off is one less door into your email. And if you ever use that
 [w: R08] Perfect. That's the way to do it.
 [a: back2] [p: + 2-Step Verification → On] While you're on the Security page, look for 2-Step Verification.
 [a: hl 2-Step Verification] If it says off, tap it and follow the steps. Then a stolen password alone can't get anyone into your email. They'd need your phone too.
+From then on, if someone tries to sign in from a new place, Google asks you first. If it wasn't you, just say no.
 If it already says on, good. Leave it just the way it is.
 [a: mail phish] [p: Bonus  Spot a fake email] And here's a bonus, for staying with me. Three quick checks for any email that makes you uneasy.
 [a: sign 1] First, tap the sender's name. If it says your bank, but the address underneath ends in a jumble of numbers, or a website you've never heard of, it's fake.
@@ -73,6 +76,7 @@ If it already says on, good. Leave it just the way it is.
 [a: sign 3] Third, the hurry. Your account will be locked in twenty-four hours. Real companies don't talk like that.
 [a: dots] If you spot even one of those, don't tap any link. Tap the three dots at the top right, and choose Report spam.
 Then phone the company directly, using the number printed on the back of your card.
+And if you're ever unsure, ask a family member to take a look before you do anything. There's no shame in a second opinion.
 [a: card summary] [p: Today's Gmail checkup] So, here's today's checkup. One, Smart features, off. Two, the other smart features, off.
 [a: reveal 4] Three, images, ask first. Four, Undo Send, thirty seconds.
 [a: reveal 6] Five, old app connections removed, and 2-Step Verification on. And the bonus, three checks for a fake email.

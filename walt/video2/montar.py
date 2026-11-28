@@ -18,6 +18,7 @@ q = lambda t: round(t * FPS) / FPS
 tmp = d / "pedacos"; tmp.mkdir(exist_ok=True)
 LOGO = str(AQUI / "logo-canal.png")
 QR = str(AQUI.parent / "telas" / "qr-card-4k.png")
+SUB = str(AQUI / "botao-inscrever.png")
 ENC = ["-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p", "-r", str(FPS),
        "-profile:v", "high", "-video_track_timescale", "15360"]
 UP = "scale=3840:2160:flags=lanczos,unsharp=5:5:0.6:5:5:0.0,setsar=1"
@@ -55,7 +56,7 @@ for w in L["walt"]:
         if GANCHO: print(f"gancho: áudio começa em {off:.3f}s do clipe")
         pecas.append(("gancho", ini, fim - ini, off, False))
     else:
-        pecas.append(("walt", ini, fim - ini, w["src"], w.get("qr", False)))
+        pecas.append(("walt", ini, fim - ini, w["src"], "sub" if w.get("sub") else w.get("qr", False)))
     t = fim
 if t < total: pecas.append(("palco", t, total - t, None, False))
 
@@ -75,6 +76,11 @@ for k, (tipo, ini, dur, src, qr) in enumerate(pecas):
                f"[0:v]scale=3840:2160:force_original_aspect_ratio=increase:flags=lanczos,crop=3840:2160,"
                f"unsharp=5:5:0.6:5:5:0.0,setsar=1,fps={FPS},tpad=stop_mode=clone:stop_duration=1[v];{LOGO_F}",
                "-frames:v", str(n)] + ENC + [str(f)]
+    elif qr == "sub":
+        # pedido de inscrição no meio do vídeo: botão vermelho de inscrever no alto, à direita
+        cmd = ["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{src:.4f}", "-i", clipe, "-i", LOGO, "-loop", "1", "-i", SUB,
+               "-filter_complex", f"[0:v]{UP},fps={FPS},tpad=stop_mode=clone:stop_duration=1[w];[2:v]format=rgba,fade=in:st=0.6:d=0.3:alpha=1[b];"
+               f"[w][b]overlay=W-w-150:150:shortest=1[v];{LOGO_F}", "-frames:v", str(n)] + ENC + [str(f)]
     elif not qr:
         cmd = ["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{src:.4f}", "-i", clipe, "-i", LOGO,
                "-filter_complex", f"[0:v]{UP},fps={FPS},tpad=stop_mode=clone:stop_duration=1[v];{LOGO_F}",

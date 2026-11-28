@@ -63,3 +63,7 @@ Then phone the company directly, using the number printed on the back of your ca
 Your Gmail works just like it did this morning. It simply tells Google, and strangers, a whole lot less about you.
 [a: card guide] [p: The Phone Security Guide] If today helped, there's a whole Gmail section in The Phone Security Guide, with those three checks printed out, and a plan to cut down spam calls and junk texts.
 The link is on my channel page, under About. And let me know in the comments. Was that Smart features switch on in your phone?
+And if you ever change your mind, you can come right back here and turn it on again. Nothing is lost.
+Thirty seconds sounds short, but when your heart is racing, it's plenty of time to catch a mistake.
+From then on, if someone tries to sign in from a new place, Google asks you first. If it wasn't you, just say no.
+And if you're ever unsure, ask a family member to take a look before you do anything. There's no shame in a second opinion.
