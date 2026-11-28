@@ -1,5 +1,15 @@
-[w: GANCHO] Gancho do Walt para a câmera (clipe do HeyGen com gancho.txt).
-[w: A01] Hello there, and welcome in. I'm Walter Harper, but please, just call me Walt. Let's make your phone easier today.
+[w: A07a] Hi there. Walt here, from the workshop.
+[g: 01] [a: tap Gmail] [p: Gmail users: turn this OFF] If you read your email in the Gmail app, listen closely.
+[g: 02] [a: go dataprivacy] There's a switch in there that most people have never seen.
+[g: 03] [a: hl Smart features] For most of us, it's been on since the very first day.
+[g: 04] [a: back] While it's on, Google's computers go through what's inside your emails.
+[g: 05a] [a: hl First Hometown Bank] Your bank statements,
+[g: 05b] [cola] [a: hl Pharmacy Rx] your prescriptions,
+[g: 05c] [cola] [a: hl Tom (grandson)] the notes from your grandkids.
+[g: 06] [a: menu] It's buried four screens deep, so almost nobody finds it.
+[g: 07] [a: close] [p: 1 switch + 4 more settings] In the next few minutes, I'll walk you right to it, and four more settings worth changing.
+[g: 08] It's easier than you think.
+[w: A20c] [a: home] Let me show you.
 [a: tap Gmail] [p: 5 Gmail settings to change] Let's open Gmail together, on your iPhone.
 [a: hl search] Stay for number four. It lets you take back an email after you've sent it, and that beats one of the oldest tricks scammers use.
 [a: hl menu] [p: The three lines = Menu] One thing first. In the Gmail app, everything starts with these three short lines at the top left. That's the menu.

@@ -44,7 +44,7 @@ NOMES = {"5 Gmail settings to change": "What we'll change today", "Gmail on your
 caps, vistos = [(0, "The Gmail switch most people never see")], set()  # 0:00 = gancho do Walt
 for a in L["acoes"]:
     p = a.get("p")
-    if not p or p in vistos: continue
+    if not p or p in vistos or p in ("Gmail users: turn this OFF", "1 switch + 4 more settings"): continue  # painéis do gancho
     vistos.add(p)
     nome = NOMES.get(p) or p.replace("  ", " ").replace("→", "—").replace("#", "#")
     if p.startswith("+ 2-Step"): nome = "Turn on 2-Step Verification"

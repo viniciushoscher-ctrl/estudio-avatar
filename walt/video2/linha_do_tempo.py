@@ -50,7 +50,10 @@ for l in [l.strip() for l in Path(rot).read_text(encoding="utf-8").splitlines() 
         w = cw[int(a * SR): int(b * SR)] * GANHO_CLIPE
         itens.append(dict(tags=t, txt=txt, audio=w, dur=len(w) / SR, walt=dict(id=t["w"], src=round(a, 3))))
         continue
-    k = NARR.index(txt) + 1; arq = pasta / f"fala-{k:03d}.wav"
+    if "g" in t:  # gancho em frases: gancho-NN.wav (cortado da narração do gancho, mesma voz)
+        arq = pasta / f"gancho-{t['g']}.wav"
+    else:
+        k = NARR.index(txt) + 1; arq = pasta / f"fala-{k:03d}.wav"
     d0 = sf.info(arq).duration - 0.57
     ppm = len(txt.split()) / max(d0, 0.5) * 60
     if ppm > MAX_PPM:
@@ -65,6 +68,8 @@ for l in [l.strip() for l in Path(rot).read_text(encoding="utf-8").splitlines() 
     itens.append(dict(tags=t, txt=txt, audio=w, dur=len(w) / SR))
 
 def pausa(it, prox):
+    if prox and prox["tags"].get("cola"): return 0.0  # emenda sem pausa (a mesma frase cortada em partes)
+    if "g" in it["tags"]: return 0.22  # gancho: ritmo corrido
     p = 0.30
     a = it["tags"].get("a", "")
     if a and not a.startswith(("card", "home", "reveal")): p += 0.55
@@ -75,7 +80,7 @@ def pausa(it, prox):
 
 trilha = np.zeros(int(1200 * SR), np.float32)
 acoes, walt, legendas = [], [], []
-t = 0.0 if itens[0]["tags"].get("w") == "GANCHO" else 0.6
+t = 0.0 if "w" in itens[0]["tags"] else 0.6
 for n, it in enumerate(itens):
     prox = itens[n + 1] if n + 1 < len(itens) else None
     s = int(t * SR); trilha[s:s + len(it["audio"])] += it["audio"]
@@ -87,7 +92,9 @@ for n, it in enumerate(itens):
         walt.append(dict(ini=round(t, 3), fim=round(t + d, 3), src=it["walt"]["src"], id=it["walt"]["id"], qr=bool(tg.get("qr"))))
     a = tg.get("a", "")
     cmd = a.split(" ")[0] if a else ""
-    if cmd in ("go", "off", "on", "check", "tap", "back", "back2", "root", "menu", "close"):
+    if "g" in tg:
+        ta = t + 0.25  # gancho: a tela muda junto com a frase
+    elif cmd in ("go", "off", "on", "check", "tap", "back", "back2", "root", "menu", "close"):
         ta = t + max(0.35, min(d * 0.55, d - 1.0))
     else:
         ta = t + 0.15
