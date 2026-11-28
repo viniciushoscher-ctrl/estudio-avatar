@@ -1,3 +1,24 @@
+// ícones Material (Apache 2.0) como no app do Gmail
+const ICP = {
+ mail:'M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z',
+ video:'M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z',
+ star:'M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z',
+ clock:'M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z',
+ send:'M2.01 21L23 12 2.01 3 2 10l15 2-15 2z',
+ draft:'M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z',
+ spam:'M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3zM19 14.9L14.9 19H9.1L5 14.9V9.1L9.1 5h5.8L19 9.1v5.8zM11 7h2v6h-2zm0 8h2v2h-2z',
+ trash:'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z',
+ gear:'M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65A.49.49 0 0 0 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z',
+ help:'M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z',
+ inbox:'M19 3H4.99c-1.11 0-1.98.89-1.98 2L3 19c0 1.1.88 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10z',
+ tag:'M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM13 20.01L4 11V4h7v-.01l9 9-7 7.02zM6.5 5C5.67 5 5 5.67 5 6.5S5.67 8 6.5 8 8 7.33 8 6.5 7.33 5 6.5 5z',
+ people:'M16.5 13c-1.2 0-3.07.34-4.5 1-1.43-.67-3.3-1-4.5-1C5.33 13 1 14.08 1 16.25V19h22v-2.75c0-2.17-4.33-3.25-6.5-3.25zm-4 4.5h-10v-1.25c0-.54 2.56-1.75 5-1.75s5 1.21 5 1.75v1.25zm9 0H14v-1.25c0-.46-.2-.86-.52-1.22.88-.3 1.96-.53 3.02-.53 2.44 0 5 1.21 5 1.75v1.25zM7.5 12c1.93 0 3.5-1.57 3.5-3.5S9.43 5 7.5 5 4 6.57 4 8.5 5.57 12 7.5 12zm0-5.5c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 5.5c1.93 0 3.5-1.57 3.5-3.5S18.43 5 16.5 5 13 6.57 13 8.5s1.57 3.5 3.5 3.5zm0-5.5c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z',
+ info:'M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z',
+ back:'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z',
+ archive:'M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM6.24 5h11.52l.81.97H5.44l.8-.97zM5 19V8h14v11H5zm8.45-9h-2.9v3H8l4 4 4-4h-2.55z',
+ more:'M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z',
+ edit:'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'};
+const IC = (n, px=24, cor='currentColor') => `<svg class="ic" width="${px}" height="${px}" viewBox="0 0 24 24"><path d="${ICP[n]}" fill="${cor}"/></svg>`;
 // Telas do vídeo 2 (Gmail no iPhone + Safari na Conta Google). Caminhos e nomes conferidos na Ajuda do Gmail para
 // iPhone (27/11/2026): Menu > Settings > General > Data privacy > Smart features; Data privacy > Google Workspace smart
 // features > "Smart features in Google Workspace" / "Smart features in other Google products" > Done;
@@ -18,20 +39,20 @@ function inboxHTML(){
   let h = `<div class="gtop"><div class="gsearch" data-l="search"><span class="hamb" data-l="menu" data-to="drawer"><i></i><i></i><i></i></span><span class="gs-t">Search in mail</span>${AV('W','#3949AB').replace('gav','gav sm')}</div></div>
   <div class="content gcontent"><div class="glabel">Primary</div>`;
   for(const [n,t,s,p,c,l,id] of MAILS)
-    h += `<div class="mrow" data-l="${n}" data-to="${id?'mail'+id:''}">${AV(l,c)}<div class="mtx"><div class="m1"><b>${n}</b><span>${t}</span></div><div class="m2">${s}</div><div class="m3">${p}</div></div><span class="star">☆</span></div>`;
-  h += `</div><div class="compose">✎&nbsp; Compose</div><div class="gnav"><span class="on">✉<sup>3</sup></span><span>▶︎</span></div>
+    h += `<div class="mrow" data-l="${n}" data-to="${id?'mail'+id:''}">${AV(l,c)}<div class="mtx"><div class="m1"><b>${n}</b><span>${t}</span></div><div class="m2">${s}</div><div class="m3">${p}</div></div><span class="star">${IC('star',24)}</span></div>`;
+  h += `</div><div class="compose">${IC('edit',24)}&nbsp; Compose</div><div class="gnav"><span class="on">${IC('mail',28)}<sup>3</sup></span><span>${IC('video',28)}</span></div>
   <div class="snack" id="snack"><span>Sent</span><b data-l="Undo">Undo</b></div>`;
   return h;
 }
 function drawerHTML(){
   const it = (ic, l, extra='') => `<div class="ditem ${extra}" data-l="${l}" data-to="${l==='Settings'?'settings':''}"><span class="dic">${ic}</span>${l}</div>`;
   return `<div class="dshade"></div><div class="drawer"><div class="dlogo">Gmail</div>
-   ${it('▣','All inboxes')}${it('▭','Primary','sel')}${it('◈','Promotions')}${it('☺','Social')}${it('ⓘ','Updates')}
-   <div class="dhdr">All labels</div>${it('☆','Starred')}${it('◷','Snoozed')}${it('➤','Sent')}${it('▤','Drafts')}${it('✉','All mail')}${it('⚠','Spam')}${it('🗑','Trash')}
-   <div class="dsep"></div>${it('⚙','Settings')}${it('?','Help & feedback')}</div>`;
+   ${it(IC('inbox'),'All inboxes')}${it(IC('inbox'),'Primary','sel')}${it(IC('tag'),'Promotions')}${it(IC('people'),'Social')}${it(IC('info'),'Updates')}
+   <div class="dhdr">All labels</div>${it(IC('star'),'Starred')}${it(IC('clock'),'Snoozed')}${it(IC('send'),'Sent')}${it(IC('draft'),'Drafts')}${it(IC('mail'),'All mail')}${it(IC('spam'),'Spam')}${it(IC('trash'),'Trash')}
+   <div class="dsep"></div>${it(IC('gear'),'Settings')}${it(IC('help'),'Help & feedback')}</div>`;
 }
 function mailHTML(tipo){
-  const top = `<div class="mtop"><span class="mback">←</span><span class="micons">▤ &nbsp; 🗑 &nbsp; ✉ &nbsp; <b data-l="dots">⋯</b></span></div>`;
+  const top = `<div class="mtop"><span class="mback">${IC('back',26)}</span><span class="micons">${IC('archive',26)} &nbsp; ${IC('trash',26)} &nbsp; ${IC('mail',26)} &nbsp; <b data-l="dots">${IC('more',26)}</b></span></div>`;
   if(tipo === 'images') return top + `<div class="content mcont"><div class="msubj">This week only: 40% off seeds <span class="tag">Inbox</span></div>
     <div class="msend">${AV('G','#689F38')}<div><b>Garden Deals Weekly</b> <span class="mt">Yesterday</span><div class="to">to me ▾</div></div></div>
     <div class="imgbar"><span>Images are not displayed.</span><b data-l="Display images">Display images</b></div>
