@@ -12,7 +12,7 @@ on:
         default: walt/video1/roteiro.txt
   push:
     branches: [claude/project-thread-1gotel, claude/project-thread-cgj203]
-    paths: [walt/video1/roteiro.txt, walt/video2/narracao.txt]
+    paths: [walt/video1/roteiro.txt]  # vídeo 2 em diante: só workflow_dispatch (refazer falas sem regerar tudo)
 
 permissions:
   contents: read

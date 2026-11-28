@@ -18,7 +18,7 @@ CL = json.load(open(Path(__file__).with_name("clipe.json")))["falas"]
 cw, csr = sf.read(clipe_wav, dtype="float32")
 if cw.ndim > 1: cw = cw.mean(1)
 assert csr == SR
-GANHO_CLIPE = 10 ** (4.1 / 20)  # clipe -20,1 LUFS -> -16 LUFS como a narração
+GANHO_CLIPE = 10 ** (3.2 / 20)  # clipe com EQ (clip-eq) medido no mesmo LUFS da narração
 
 def tags(l):
     t = {}
