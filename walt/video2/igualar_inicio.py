@@ -17,7 +17,7 @@ for lg in L['legendas']:
     if lg['ini']>ate: break
     a=max(0,int((lg['ini']-0.2)*sr)); b=int((lg['fim']+0.2)*sr); s=y[a:b]
     d=Bc-bandas(ltas(s)); d-=np.median(d[(cent>=300)&(cent<=1200)])   # só a forma do espectro
-    d=np.clip(np.convolve(d,np.ones(3)/3,'same'),-6,6); d[cent<70]=np.minimum(d[cent<70],0)
+    LIM=float(__import__('os').environ.get('LIM',6)); d=np.clip(np.convolve(d,np.ones(3)/3,'same'),-LIM,LIM); d[cent<70]=np.minimum(d[cent<70],0)
     n=len(s); X=np.fft.rfft(s); fr=np.fft.rfftfreq(n,1/sr)
     g=10**(np.interp(np.log2(np.maximum(fr,20)),np.log2(cent),d)/20)
     s2=np.fft.irfft(X*g,n).astype(np.float32)

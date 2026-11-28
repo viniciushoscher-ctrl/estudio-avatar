@@ -26,23 +26,35 @@ for k, lg in enumerate(L["legendas"]):
         if ini[i] is None or not (lg["ini"] - 0.6 <= ini[i] <= lg["fim"] + 0.6):
             j = idx.index(i); ini[i] = lg["ini"] + (lg["fim"] - lg["ini"]) * j / len(idx); fim[i] = ini[i] + 0.25
 MAXC = 34
+def linhas_de(ids):
+    ls, cur = [], ""
+    for i in ids:
+        p = sw[i]
+        if cur and len(cur) + 1 + len(p) > MAXC: ls.append(cur); cur = ""
+        cur = (cur + " " + p).strip()
+    return ls + ([cur] if cur else [])
+def cabe(ids): return len(linhas_de(ids)) <= 2
 cues = []
 for k, lg in enumerate(L["legendas"]):
     idx = [i for i, d in enumerate(dono) if d == k]
-    bloco, linhas, cur = [], [], ""
-    def fecha():
-        global bloco, linhas, cur
-        if cur: linhas.append(cur)
-        if bloco: cues.append([ini[bloco[0]], fim[bloco[-1]] + 0.2, "\\N".join(linhas)])
-        bloco, linhas, cur = [], [], ""
+    grupos, g = [], []
     for i in idx:
-        p = sw[i]
-        if cur and len(cur) + 1 + len(p) > MAXC:
-            linhas.append(cur); cur = ""
-            if len(linhas) == 2: cur_save = p; linhas_tmp = linhas; cur = ""; fecha()
-        cur = (cur + " " + p).strip(); bloco.append(i)
-        if p[-1] in ".?!" and len(" ".join(linhas) + cur) > 18: fecha()
-    fecha()
+        if g and not cabe(g + [i]): grupos.append(g); g = []
+        g.append(i)
+        if sw[i][-1] in ".?!" and len(" ".join(sw[j] for j in g)) > 18: grupos.append(g); g = []
+    if g: grupos.append(g)
+    # rabo curto (1-2 palavras): divide de novo o par em duas metades equilibradas
+    for n in range(1, len(grupos)):
+        if len(grupos[n]) <= 2 and sw[grupos[n - 1][-1]][-1] not in ".?!":
+            t = grupos[n - 1] + grupos[n]; best = None
+            for c in range(1, len(t)):
+                A, B = t[:c], t[c:]
+                if cabe(A) and cabe(B):
+                    pun = 0 if sw[A[-1]][-1] in ",;:" else 1
+                    sc = (pun, abs(len(A) - len(B)))
+                    if best is None or sc < best[0]: best = (sc, c)
+            if best: grupos[n - 1], grupos[n] = t[:best[1]], t[best[1]:]
+    for g in grupos: cues.append([ini[g[0]], fim[g[-1]] + 0.2, "\\N".join(linhas_de(g))])
 for a, b in zip(cues, cues[1:]):
     a[1] = min(a[1], b[0] - 0.04)
 def t(x):
