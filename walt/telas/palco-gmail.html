@@ -360,6 +360,7 @@ function agendar(lista){
 function executar(it){
   const t = it.t, a = it.a || '';
   if(it.p) painel(t, it.p);
+  if(it.p && !a.startsWith('card') && cardAtual) esconderCartao(t);  // seção nova: o cartão (QR) sai junto
   if(!a) return;
   const [cmd, ...resto] = a.split(' '); const arg = resto.join(' ');
   if(cmd !== 'card' && cmd !== 'reveal' && cardAtual) esconderCartao(t);

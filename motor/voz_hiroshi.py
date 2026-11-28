@@ -81,6 +81,11 @@ if a.parte is None or __import__("os").environ.get("CLIPES"):
                 return e / np.linalg.norm(e)
             _R = _emb(librosa.load(str(AQUI / SIM_REF), sr=16000)[0])
 
+        try:
+            from speechmos import dnsmos as _dns
+        except Exception:
+            _dns = None
+
         def nota(w, sr, texto):
             """Quanto menor, melhor: palavras erradas, tom fora do alvo, buracos e ritmo estranho."""
             y = librosa.resample(w, orig_sr=sr, target_sr=16000)
@@ -105,7 +110,15 @@ if a.parte is None or __import__("os").environ.get("CLIPES"):
             smin = SIM_MIN if len(certo) >= 5 else SIM_MIN - 0.2
             pen_sim = max(0.0, smin - sim) * 30
             nota.ultima_sim = sim; nota.smin = smin
-            return erro * 20 + abs(st) + max(0.0, buraco - 0.7) * 4 + ritmo + pen_sim, st, erro, buraco, cps
+            # voz "robótica e grave": quedas de tom no fim das frases (vocal fry) e sinal ruim (DNSMOS)
+            fv = f0[voz]; creak = float(np.mean(fv < 0.72 * hz)) if len(fv) else 0.0
+            pen_creak = max(0.0, creak - 0.04) * 40
+            pen_sig = 0.0
+            if _dns is not None:
+                sig = float(_dns.run(y, sr=16000)["sig_mos"]); pen_sig = max(0.0, 3.55 - sig) * 8
+                nota.ultima_sig = sig
+            nota.ultima_creak = creak
+            return erro * 20 + abs(st) * 1.5 + max(0.0, buraco - 0.7) * 4 + ritmo + pen_sim + pen_creak + pen_sig, st, erro, buraco, cps
     for i in idx:
         fala = falas[i - 1]
         if TAKES > 1:
@@ -114,14 +127,14 @@ if a.parte is None or __import__("os").environ.get("CLIPES"):
                 torch.manual_seed(1000 * i + k)
                 w, sr = dizer(fala)
                 n, st, erro, buraco, cps = nota(w, sr, fala)
-                print(f"  fala {i} take {k}: nota {n:.2f} (tom {st:+.1f} st, erro {erro:.2f}, buraco {buraco:.1f}s, {cps:.0f} l/s, locutor {getattr(nota, 'ultima_sim', 1):.3f})", flush=True)
+                print(f"  fala {i} take {k}: nota {n:.2f} (tom {st:+.1f} st, erro {erro:.2f}, buraco {buraco:.1f}s, {cps:.0f} l/s, locutor {getattr(nota, 'ultima_sim', 1):.3f}, fry {getattr(nota, 'ultima_creak', 0):.2f}, sig {getattr(nota, 'ultima_sig', 0):.2f})", flush=True)
                 if melhor is None or n < melhor[0]:
                     melhor = (n, w, sr, st)
                 if n < 0.8 and getattr(nota, "ultima_sim", 1) >= getattr(nota, "smin", 0) + 0.04:  # take boa: não gasta mais tempo
                     break
             _, w, sr, st = melhor
             # corrige o resto do tom no pós-processo (rubberband), no máximo 2 semitons
-            (pasta / f"fala-{i:03d}.st").write_text(f"{-max(-2.0, min(2.0, st)):.2f}")
+            (pasta / f"fala-{i:03d}.st").write_text(f"{-max(-1.0, min(1.0, st)):.2f}")  # correção pequena: muito rubberband soa robótico
             print(f"fala-{i:03d}: escolhida nota {melhor[0]:.2f}", flush=True)
         else:
             w, sr = dizer(fala)
