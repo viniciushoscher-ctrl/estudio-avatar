@@ -69,13 +69,18 @@ WrapStyle: 2
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Walt,Inter,92,&H00FFFFFF,&H00FFFFFF,&H00000000,&H96000000,-1,0,0,0,100,100,0,0,3,18,0,2,1640,420,110,1
+Style: QR,Inter,76,&H00FFFFFF,&H00FFFFFF,&H00000000,&H96000000,-1,0,0,0,100,100,0,0,3,16,0,2,200,1640,40,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
 with open(out_ass, "w") as f:
     f.write(head)
-    for a, b, txt in cues: f.write(f"Dialogue: 0,{t(a)},{t(b)},Walt,,0,0,0,,{txt}\n")
+    # com o QR em tela cheia o Walt fica num quadro embaixo à direita: a legenda vai para baixo do QR, à esquerda
+    QRS = [(w["ini"], w["fim"]) for w in L.get("walt", []) if w.get("qr")]
+    for a, b, txt in cues:
+        st = "QR" if any(x - 0.1 <= (a + b) / 2 <= y + 0.1 for x, y in QRS) else "Walt"
+        f.write(f"Dialogue: 0,{t(a)},{t(b)},{st},,0,0,0,,{txt}\n")
 if out_srt:
     def ts(x):
         ms = int(round(max(0, x) * 1000)); h, ms = divmod(ms, 3600000); mi, ms = divmod(ms, 60000); s, ms = divmod(ms, 1000)
