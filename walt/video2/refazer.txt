@@ -1,0 +1,6 @@
+[a: go settings] Tap Settings.
+[a: hl Smart features in Google Workspace] You'll find two more switches. The first is Smart features in Google Workspace. That lets your email show up in places like your calendar and Google Drive.
+[a: off Smart features in Google Workspace] Turn it off.
+[a: go images] Then tap Images.
+[a: mail undo] Now, right after you send something from your phone, a little bar shows up at the bottom with the word Undo.
+Scammers count on hurry. Reply right now. Send your account number today.

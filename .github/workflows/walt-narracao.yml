@@ -41,7 +41,7 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y -qq sox ffmpeg > /dev/null
           pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
           pip install -q qwen-tts soundfile librosa faster-whisper speechbrain
-      - run: TAKES=8 SIM_REF=vozes/walt-aprovada.wav SIM_MIN=0.72 ALVO_HZ=145.4 CLIPES=1 VOZ=walt-c VOZ_MISTURA=walt-b:0.5 python motor/voz_hiroshi.py "$ROTEIRO" saida --parte ${{ matrix.parte }} --partes 12
+      - run: TAKES=${{ contains(inputs.roteiro, 'refazer') && 16 || 8 }} SIM_REF=vozes/walt-aprovada-longa.wav SIM_MIN=0.74 ALVO_HZ=145.4 CLIPES=1 VOZ=walt-c VOZ_MISTURA=walt-b:0.5 python motor/voz_hiroshi.py "$ROTEIRO" saida --parte ${{ matrix.parte }} --partes 12
       - name: Tom -0,7 e ritmo 0,88 (rubberband, formantes preservados)
         run: |
           shopt -s nullglob
