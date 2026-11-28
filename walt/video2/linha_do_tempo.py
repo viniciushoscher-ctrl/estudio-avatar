@@ -31,7 +31,7 @@ def tags(l):
         l = l[m.end():]
     return t, l
 
-TMP = Path(tempfile.mkdtemp()); MAX_PPM = 172
+TMP = Path(tempfile.mkdtemp()); MAX_PPM = 999  # sem esticar: rubberband em cima do ritmo 0,88 tira a voz do Walt do lugar (ECAPA 0,72 -> 0,55)
 # numeração dos wavs = posição da linha em narracao.txt (o que foi narrado); o roteiro pode omitir linhas
 NARR = [tags(l.strip())[1] for l in Path(rot).with_name("narracao.txt").read_text(encoding="utf-8").splitlines() if l.strip()]
 itens = []

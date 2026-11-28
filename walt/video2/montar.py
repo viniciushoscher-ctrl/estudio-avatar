@@ -44,8 +44,10 @@ for w in L["walt"]:
     ini, fim = q(w["ini"]), q(w["fim"])
     if ini > t: pecas.append(("palco", t, ini - t, None, False))
     if w["id"] == "GANCHO":
-        assert GANCHO, "falta o clipe do gancho do HeyGen (não usar foto parada)"
-        off = atraso_gancho(GANCHO, str(d / "gancho.wav")); print(f"gancho: áudio começa em {off:.3f}s do clipe")
+        SEM = "--sem-gancho" in sys.argv  # prepara todos os outros pedaços enquanto o clipe do HeyGen não chega
+        assert GANCHO or SEM, "falta o clipe do gancho do HeyGen (não usar foto parada)"
+        off = atraso_gancho(GANCHO, str(d / "gancho.wav")) if GANCHO else 0.0
+        if GANCHO: print(f"gancho: áudio começa em {off:.3f}s do clipe")
         pecas.append(("gancho", ini, fim - ini, off, False))
     else:
         pecas.append(("walt", ini, fim - ini, w["src"], w.get("qr", False)))
@@ -58,6 +60,8 @@ for k, (tipo, ini, dur, src, qr) in enumerate(pecas):
     if f.exists() and f.stat().st_size > 1000 and "--refazer" not in sys.argv:
         continue
     n = round(dur * FPS)
+    if tipo == "gancho" and not GANCHO:
+        print("gancho: pedaço pulado (sem o clipe do HeyGen)"); continue
     if tipo == "palco":
         cmd = ["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{ini:.4f}", "-i", str(d / "palco.mp4"), "-i", LOGO,
                "-filter_complex", f"[0:v]fps={FPS},setsar=1[v];{LOGO_F}", "-frames:v", str(n)] + ENC + [str(f)]
@@ -79,6 +83,8 @@ for k, (tipo, ini, dur, src, qr) in enumerate(pecas):
                "-frames:v", str(n)] + ENC + [str(f)]
     subprocess.run(cmd, check=True)
     print(f"{k:02d} {tipo}{' +QR' if qr else ''} {ini:7.2f} +{dur:5.2f}", flush=True)
+if not GANCHO and "--sem-gancho" in sys.argv:
+    sys.exit("pedaços prontos; falta só o gancho. Rode de novo com o clipe do HeyGen.")
 (tmp / "lista.txt").write_text("".join(f"file '{p.name}'\n" for p in lista))
 subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(tmp / "lista.txt"),
                 "-i", str(d / "narracao.wav"), "-map", "0:v", "-map", "1:a", "-c:v", "copy",

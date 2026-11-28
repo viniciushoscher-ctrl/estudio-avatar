@@ -38,10 +38,10 @@ with open(sys.argv[2], "w") as f:
         f.write(f"{i}\n{hms(desl(a))} --> {hms(desl(b) - 0.02)}\n{p}\n\n")
 
 # capítulos: começo do vídeo, cada painel novo de ajuste e os cartões principais
-NOMES = {"Gmail on your iPhone?": "The Gmail switch most people never see", "1 switch + 4 more settings": "What we will change today", "The three lines = Menu": "Where Gmail hides its settings",
+NOMES = {"5 Gmail settings to change": "What we'll change today", "Gmail on your iPhone?": "The Gmail switch most people never see", "1 switch + 4 more settings": "What we will change today", "The three lines = Menu": "Where Gmail hides its settings",
          "Printable guide": "Point your camera here (printable guide)", "The Phone Security Guide": "The Phone Security Guide",
          "Today's Gmail checkup": "Today's Gmail checkup"}
-caps, vistos = [], set()
+caps, vistos = [(0, "The Gmail switch most people never see")], set()  # 0:00 = gancho do Walt
 for a in L["acoes"]:
     p = a.get("p")
     if not p or p in vistos: continue
@@ -49,7 +49,7 @@ for a in L["acoes"]:
     nome = NOMES.get(p) or p.replace("  ", " ").replace("→", "—").replace("#", "#")
     if p.startswith("+ 2-Step"): nome = "Turn on 2-Step Verification"
     if p.startswith("Bonus"): nome = "Bonus: 3 checks for a fake email"
-    t = 0 if not caps else desl(a["t"])
+    t = desl(a["t"])
     caps.append((t, nome))
 with open(sys.argv[3], "w") as f:
     for t, n in caps: f.write(f"{int(t // 60)}:{int(t % 60):02d} {n}\n")
