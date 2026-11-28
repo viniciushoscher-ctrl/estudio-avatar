@@ -1,0 +1,86 @@
+[w: A07a] Hi there. Walt here, from the workshop.
+[g: 01] [a: tap Gmail] [p: Gmail users: turn this OFF] If you read your email in the Gmail app, listen closely.
+[g: 02] [a: go dataprivacy] There's a switch in there that most people have never seen.
+[g: 03] [a: hl Smart features] For most of us, it's been on since the very first day.
+[g: 04] [a: back] While it's on, Google's computers go through what's inside your emails.
+[g: 05a] [a: hl First Hometown Bank] Your bank statements,
+[g: 05b] [cola] [a: hl Pharmacy Rx] your prescriptions,
+[g: 05c] [cola] [a: hl Tom (grandson)] the notes from your grandkids.
+[g: 06] [a: menu] It's buried four screens deep, so almost nobody finds it.
+[g: 07] [a: close] [p: 1 switch + 4 more settings] In the next few minutes, I'll walk you right to it, and four more settings worth changing.
+[w: A20c] [a: home] Let me show you.
+[a: tap Gmail] [p: 5 Gmail settings to change] Let's open Gmail together, on your iPhone.
+[a: hl search] Stay for number four. It lets you take back an email after you've sent it, and that beats one of the oldest tricks scammers use.
+[a: hl menu] [p: The three lines = Menu] One thing first. In the Gmail app, everything starts with these three short lines at the top left. That's the menu.
+[a: menu] Tap them, and a list slides out from the left. Settings sits near the very bottom.
+[a: close] To close the list, tap anywhere on the right side, and you're back in your inbox. Nothing you tap in there deletes your email.
+[w: M10] This one only takes a moment, but it can make a real difference. Watch closely now.
+[a: menu] [p: #1  Smart features → OFF] Number one, the big one. Tap the three lines, and scroll down to Settings.
+[a: go settings] Then tap Settings, and a new page opens up.
+[a: go dataprivacy] Under General, tap Data privacy.
+[a: hl Smart features] See the switch called Smart features? That's the one I told you about.
+While it's on, Google's systems go through what's inside your messages. That's how Gmail sorts your mail into tabs, suggests replies, and pulls a flight or a package out of an email you barely looked at.
+[a: off Smart features] Tap the switch, so it's no longer blue. That's off.
+Your email still arrives. You can read it, write it and search it like always. You only lose a few conveniences, like the automatic tabs and the suggested replies.
+And if you ever change your mind, you can come right back here and turn it on again. Nothing is lost.
+[w: R02] There you go. Easy, right?
+[w: Q03] [qr] See that square code on your screen? Open your camera, aim it at the code, and my printable guide will come up.
+[a: card qr] [p: Printable guide] When you aim your camera at it, a little yellow button shows up near the code. Tap that button.
+[a: go workspace] [p: #2  Two more switches → OFF] Number two is on the very same screen, and hardly anyone notices it. Right under that switch, tap Google Workspace smart features.
+[a: hl Smart features in Google Workspace] You'll find two more switches. The first is Smart features in Google Workspace. That lets your email show up in places like your calendar and Google Drive.
+[a: off Smart features in Google Workspace] Tap that switch, and turn it off.
+[a: hl Smart features in other Google products] The second is Smart features in other Google products. That lets what's in your email travel over to Maps, to Wallet, and to Google's assistant.
+[a: off Smart features in other Google products] If you'd rather your inbox kept to itself, turn this one off too.
+[a: tap Done] Then tap Done, at the top right. Your email keeps working exactly the same.
+[w: M14] Now, here's where it gets interesting. Stay with me, because this part really matters.
+[a: root] [p: #3  Images → Ask first] Number three is about something sneaky. Who finds out that you opened an email. Head back to Settings.
+[a: go emailprefs] Under Inbox, tap Email preferences.
+[a: go images] Then tap Images.
+[a: check Ask before displaying external images] And choose Ask before displaying external images.
+Here's why it matters. Lots of advertising emails, and plenty of scam emails, carry a tiny picture you can't even see.
+The moment your phone loads that picture, the sender learns you opened the message, what time it was, and roughly where you were.
+And a scammer who knows you open his messages will keep on sending more.
+[a: mail images] Now the pictures wait for you. When a message comes from someone you know and trust, just tap Display images.
+[w: M03] You're doing just fine. Learning something new at any age is something to be proud of.
+[w: E01b] [sub] If this helped, hit subscribe, and I'll be here for the next lesson.
+[a: card guide] [p: The Phone Security Guide] Let me pause here for a moment. Some of you have asked me to put these lessons on paper. So I did.
+It's called The Phone Security Guide. You print it at home, and it covers forty-five fixes, in letters big enough to read without your glasses.
+You'll find the link on my channel page, under About. Or just use the square code from a minute ago.
+[w: Q13] [qr] Videos are great, but paper never needs a battery. Scan the code on screen for my printable guide.
+[a: card desk1] [p: #4  Undo Send → 30 seconds] Now, number four, the one I promised. It protects you from your own fingers, and from scammers who try to rush you.
+The Gmail app on your phone doesn't have this setting, so you'll do it once, on a computer.
+Go to gmail dot com and sign in. Click the little gear at the top right, then See all settings.
+[a: card desk2] On the General tab, find Undo Send. Next to Send cancellation period, pick thirty seconds. That's the longest it goes.
+Then scroll to the very bottom and click Save Changes. Don't skip that part.
+[a: mail undo] Now, right after you send something from your phone, a little bar shows up at the bottom with the word Undo.
+Scammers count on hurry. Reply right now. Send your account number today.
+If you ever hit send and get that sinking feeling in your stomach, tap Undo. The email never leaves.
+Thirty seconds sounds short, but when your heart is racing, it's plenty of time to catch a mistake.
+[w: M22] I know these menus can feel like a maze. Just follow along with me, and you'll be fine.
+[a: safari] [p: #5  Old connections → Remove] Number five. For this one, open Safari, the blue compass, because it's about your Google account itself.
+Type myaccount dot google dot com, and sign in with your Gmail address.
+[a: go security] Then find Security, and tap it.
+[a: scroll Your connections to third-party apps & services] Then scroll down to Your connections to third-party apps and services.
+[a: go connections] Here you'll see every app and website you ever let into your Google account. An old game, a coupon site you tried once, something the grandkids set up.
+[a: go coupon] If you don't recognize one, tap it.
+[a: tap Remove access] Then remove its access, and confirm.
+Each one you take off is one less door into your email. And if you ever use that app again, it'll simply ask your permission one more time.
+[w: R08] Perfect. That's the way to do it.
+[a: back2] [p: + 2-Step Verification → On] While you're on the Security page, look for 2-Step Verification.
+[a: hl 2-Step Verification] If it says off, tap it and follow the steps. Then a stolen password alone can't get anyone into your email. They'd need your phone too.
+From then on, if someone tries to sign in from a new place, Google asks you first. If it wasn't you, just say no.
+If it already says on, good. Leave it just the way it is.
+[a: mail phish] [p: Bonus  Spot a fake email] And here's a bonus, for staying with me. Three quick checks for any email that makes you uneasy.
+[a: sign 1] First, tap the sender's name. If it says your bank, but the address underneath ends in a jumble of numbers, or a website you've never heard of, it's fake.
+[a: sign 2] Second, the greeting. Your real bank knows your name. Dear valued customer is a red flag.
+[a: sign 3] Third, the hurry. Your account will be locked in twenty-four hours. Real companies don't talk like that.
+[a: dots] If you spot even one of those, don't tap any link. Tap the three dots at the top right, and choose Report spam.
+Then phone the company directly, using the number printed on the back of your card.
+And if you're ever unsure, ask a family member to take a look before you do anything. There's no shame in a second opinion.
+[a: card summary] [p: Today's Gmail checkup] So, here's today's checkup. One, Smart features, off. Two, the other smart features, off.
+[a: reveal 4] Three, images, ask first. Four, Undo Send, thirty seconds.
+[a: reveal 6] Five, old app connections removed, and 2-Step Verification on. And the bonus, three checks for a fake email.
+Your Gmail works just like it did this morning. It simply tells Google, and strangers, a whole lot less about you.
+[a: card guide] [p: The Phone Security Guide] If today helped, there's a whole Gmail section in The Phone Security Guide, with those three checks printed out, and a plan to cut down spam calls and junk texts.
+The link is on my channel page, under About. And let me know in the comments. Was that Smart features switch on in your phone?
+[w: E16] [end] Thank you kindly for watching. If you'd like more lessons like this one, subscribe to Walter Harper Tips.

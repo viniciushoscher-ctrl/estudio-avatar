@@ -1,0 +1,9 @@
+[
+ {
+  "nome": "C-mix-B50-grave-v2",
+  "base": "walt-c",
+  "mistura": "walt-b:0.5",
+  "tom": "-0.7",
+  "ritmo": "0.88"
+ }
+]

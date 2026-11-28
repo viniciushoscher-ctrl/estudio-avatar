@@ -1,0 +1,4 @@
+[a: go settings] Then tap Settings, and a new page opens up.
+[a: off Smart features in Google Workspace] Tap that switch, and turn it off.
+[a: mail undo] Now, right after you send something from your phone, a little bar shows up at the bottom with the word Undo.
+[a: go security] Then find Security, and tap it.

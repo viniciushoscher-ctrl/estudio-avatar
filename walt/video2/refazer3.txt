@@ -1,0 +1,30 @@
+[a: tap Gmail] [p: 5 Gmail settings to change] Let's open Gmail together, on your iPhone.
+[a: menu] [p: #1  Smart features → OFF] Number one, the big one. Tap the three lines, and scroll down to Settings.
+[a: go settings] Then tap Settings, and a new page opens up.
+[a: go dataprivacy] Under General, tap Data privacy.
+[a: hl Smart features] See the switch called Smart features? That's the one I told you about.
+[a: card qr] [p: Printable guide] When you aim your camera at it, a little yellow button shows up near the code. Tap that button.
+[pausa: 3] Everything from today's lesson is written out in that guide, step by step. No rush. The code stays up for a few more seconds.
+[a: off Smart features in Google Workspace] Tap that switch, and turn it off.
+[a: go images] Then tap Images.
+Here's why it matters. Lots of advertising emails, and plenty of scam emails, carry a tiny picture you can't even see.
+And a scammer who knows you open his messages will keep on sending more.
+Each fix has a box you tick when it's done, and room to jot down what you changed.
+You'll find the link on my channel page, under About. Or just use the square code from a minute ago.
+Scammers count on hurry. Reply right now. Send your account number today.
+If you ever hit send and get that sinking feeling in your stomach, tap Undo. The email never leaves.
+Type myaccount dot google dot com, and sign in with your Gmail address.
+[a: go security] Then find Security, and tap it.
+[a: go coupon] If you don't recognize one, tap it.
+Each one you take off is one less door into your email. And if you ever use that app again, it'll simply ask your permission one more time.
+[a: back2] [p: + 2-Step Verification → On] While you're on the Security page, look for 2-Step Verification.
+[a: card summary] [p: Today's Gmail checkup] So, here's today's checkup. One, Smart features, off. Two, the other smart features, off.
+[a: reveal 4] Three, images, ask first. Four, Undo Send, thirty seconds.
+If you read your email in the Gmail app, listen closely.
+There's a switch in there that most people have never seen.
+For most of us, it's been on since the very first day.
+While it's on, Google's computers go through what's inside your emails.
+Your bank statements, your prescriptions, the notes from your grandkids.
+It's buried four screens deep, so almost nobody finds it.
+In the next few minutes, I'll walk you right to it, and four more settings worth changing.
+It's easier than you think.

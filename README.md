@@ -1,4 +1,31 @@
-# Estúdio de Avatar (100% GitHub, sem pagar)
+# Estúdio de Avatar (100% open source, sem pagar)
+
+## Novo: avatar falando a partir de UMA imagem (clone do HeyGen Photo Avatar)
+
+Anima só a imagem gerada por IA (ex.: `avatares/rosto-japones.png`, o Hiroshi): do peito para cima,
+boca sincronizada, piscadas, cabeça, ombros e mãos se mexendo. Nenhum vídeo de pessoa real.
+
+| Etapa | Modelo | Licença | Onde roda |
+|---|---|---|---|
+| Voz em inglês | [Kokoro-82M](https://github.com/hexgrad/kokoro) | Apache-2.0 | CPU do GitHub |
+| Vídeo falando | [LongCat-Video-Avatar 1.5](https://github.com/meituan-longcat/LongCat-Video) | MIT (uso comercial ok) | GPU da [Modal](https://modal.com) (US$ 5/mês grátis, sem cartão) |
+
+**Ligar (uma vez, ~3 min):**
+1. Entre em [modal.com](https://modal.com) com a conta do GitHub (grátis, não pede cartão).
+2. Em *Settings > API Tokens > New Token*, copie o `token id` (começa com `ak-`) e o `token secret` (`as-`).
+3. Aqui no GitHub: *Settings > Secrets and variables > Actions > New repository secret*:
+   `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET`.
+
+**Gerar:** *Actions > Hiroshi falando > Run workflow*. Cada linha de `roteiros/kenji-falas.txt` vira um
+clipe (falas de até ~9 s ficam melhores). Os clipes saem em *Artifacts* da execução e na Release
+`kenji` do repositório privado. A 1ª execução baixa os pesos (~30 GB) para um volume da Modal e demora
+mais; as seguintes já começam prontas.
+
+Arquivos: `gpu/kenji_longcat.py` (GPU), `motor/voz_kokoro.py` (voz), `.github/workflows/kenji-falando.yml`.
+
+---
+
+## Versão anterior: o seu próprio rosto e voz (CPU do GitHub)
 
 Gera um vídeo seu falando um roteiro, com a sua voz e a boca sincronizada, rodando no
 **GitHub Actions** (gratuito). Sem ElevenLabs, HeyGen, Modal ou Google.

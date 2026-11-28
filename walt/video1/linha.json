@@ -1,0 +1,452 @@
+{
+ "duracao": 600.405,
+ "acoes": [
+  {
+   "t": 6.69,
+   "a": "home",
+   "p": "Grab your iPhone"
+  },
+  {
+   "t": 31.488,
+   "a": "home",
+   "p": "7 settings + 1 bonus"
+  },
+  {
+   "t": 43.68,
+   "a": "",
+   "p": "Your Back button"
+  },
+  {
+   "t": 45.743,
+   "a": "go settings",
+   "p": null
+  },
+  {
+   "t": 50.116,
+   "a": "go privacy",
+   "p": null
+  },
+  {
+   "t": 52.895,
+   "a": "hl back",
+   "p": "Top left corner = Back"
+  },
+  {
+   "t": 62.646,
+   "a": "back",
+   "p": null
+  },
+  {
+   "t": 78.907,
+   "a": "scroll Privacy & Security",
+   "p": "#1  Share iPhone Analytics → OFF"
+  },
+  {
+   "t": 85.398,
+   "a": "go privacy",
+   "p": null
+  },
+  {
+   "t": 89.989,
+   "a": "go analytics",
+   "p": null
+  },
+  {
+   "t": 93.236,
+   "a": "hl Share iPhone Analytics",
+   "p": null
+  },
+  {
+   "t": 112.936,
+   "a": "off Share iPhone Analytics",
+   "p": null
+  },
+  {
+   "t": 118.11,
+   "a": "off Share iCloud Analytics",
+   "p": null
+  },
+  {
+   "t": 124.986,
+   "a": "card qr",
+   "p": "Printable guide"
+  },
+  {
+   "t": 151.841,
+   "a": "",
+   "p": "#2  Significant Locations → OFF"
+  },
+  {
+   "t": 154.754,
+   "a": "back",
+   "p": null
+  },
+  {
+   "t": 159.223,
+   "a": "go location",
+   "p": null
+  },
+  {
+   "t": 163.373,
+   "a": "go sysservices",
+   "p": null
+  },
+  {
+   "t": 170.451,
+   "a": "go siglocs",
+   "p": null
+  },
+  {
+   "t": 174.926,
+   "a": "hl Significant Locations",
+   "p": null
+  },
+  {
+   "t": 188.733,
+   "a": "off Significant Locations",
+   "p": null
+  },
+  {
+   "t": 192.828,
+   "a": "tap Clear History",
+   "p": null
+  },
+  {
+   "t": 208.549,
+   "a": "",
+   "p": "#3  Personalized Ads → OFF"
+  },
+  {
+   "t": 210.544,
+   "a": "back3",
+   "p": null
+  },
+  {
+   "t": 214.863,
+   "a": "go ads",
+   "p": null
+  },
+  {
+   "t": 218.804,
+   "a": "off Personalized Ads",
+   "p": null
+  },
+  {
+   "t": 241.829,
+   "a": "",
+   "p": "#4  Tracking → OFF"
+  },
+  {
+   "t": 244.641,
+   "a": "back",
+   "p": null
+  },
+  {
+   "t": 251.729,
+   "a": "go tracking",
+   "p": null
+  },
+  {
+   "t": 257.588,
+   "a": "off Allow Apps to Request to Track",
+   "p": null
+  },
+  {
+   "t": 273.995,
+   "a": "card guide",
+   "p": "The Phone Security Guide"
+  },
+  {
+   "t": 331.941,
+   "a": "",
+   "p": "#5  Unknown Callers → Silence"
+  },
+  {
+   "t": 335.754,
+   "a": "root",
+   "p": null
+  },
+  {
+   "t": 340.909,
+   "a": "go apps",
+   "p": null
+  },
+  {
+   "t": 344.119,
+   "a": "go phone",
+   "p": null
+  },
+  {
+   "t": 350.861,
+   "a": "go screencallers",
+   "p": null
+  },
+  {
+   "t": 358.075,
+   "a": "check Silence",
+   "p": null
+  },
+  {
+   "t": 375.795,
+   "a": "hl Silence",
+   "p": "Save your doctor & family in Contacts"
+  },
+  {
+   "t": 392.248,
+   "a": "",
+   "p": "#6  Show Previews → When Unlocked"
+  },
+  {
+   "t": 394.011,
+   "a": "root",
+   "p": null
+  },
+  {
+   "t": 398.139,
+   "a": "go notifications",
+   "p": null
+  },
+  {
+   "t": 401.881,
+   "a": "go previews",
+   "p": null
+  },
+  {
+   "t": 408.059,
+   "a": "check When Unlocked",
+   "p": null
+  },
+  {
+   "t": 428.783,
+   "a": "",
+   "p": "#7  Background App Refresh → Wi-Fi"
+  },
+  {
+   "t": 431.596,
+   "a": "root",
+   "p": null
+  },
+  {
+   "t": 436.083,
+   "a": "go general",
+   "p": null
+  },
+  {
+   "t": 439.432,
+   "a": "go bgrefresh",
+   "p": null
+  },
+  {
+   "t": 443.186,
+   "a": "go bgopts",
+   "p": null
+  },
+  {
+   "t": 448.233,
+   "a": "check Wi-Fi",
+   "p": null
+  },
+  {
+   "t": 456.37,
+   "a": "back",
+   "p": null
+  },
+  {
+   "t": 466.803,
+   "a": "",
+   "p": "Bonus  Unknown Senders → Screen"
+  },
+  {
+   "t": 470.616,
+   "a": "root",
+   "p": null
+  },
+  {
+   "t": 476.021,
+   "a": "go apps",
+   "p": null
+  },
+  {
+   "t": 478.632,
+   "a": "go messages",
+   "p": null
+  },
+  {
+   "t": 480.415,
+   "a": "scroll Screen Unknown Senders",
+   "p": null
+  },
+  {
+   "t": 487.692,
+   "a": "on Screen Unknown Senders",
+   "p": null
+  },
+  {
+   "t": 512.827,
+   "a": "card rule",
+   "p": "Walt's rule"
+  },
+  {
+   "t": 529.678,
+   "a": "card summary",
+   "p": "What we changed"
+  },
+  {
+   "t": 537.437,
+   "a": "reveal 4"
+  },
+  {
+   "t": 543.669,
+   "a": "reveal 6"
+  },
+  {
+   "t": 551.537,
+   "a": "reveal 8"
+  },
+  {
+   "t": 565.701,
+   "a": "card guide",
+   "p": "The Phone Security Guide"
+  },
+  {
+   "t": 589.654,
+   "a": "card end",
+   "p": "See you next time"
+  }
+ ],
+ "walt": [
+  {
+   "ini": 0.6,
+   "fim": 5.74,
+   "off": 0.0,
+   "linha": 1,
+   "txt": "If you're over sixty and you own an iPhone, grab it right now."
+  },
+  {
+   "ini": 24.97,
+   "fim": 30.538,
+   "off": 5.34,
+   "linha": 5,
+   "txt": "Hi friends, I'm Walt. Today we'll fix seven of them, together."
+  },
+  {
+   "ini": 38.073,
+   "fim": 42.83,
+   "off": 11.108,
+   "linha": 7,
+   "txt": "First, let me show you the most important button on your phone."
+  },
+  {
+   "ini": 74.752,
+   "fim": 77.957,
+   "off": 16.065,
+   "linha": 13,
+   "txt": "Okay? Let's start with number one."
+  },
+  {
+   "ini": 121.195,
+   "fim": 124.036,
+   "off": 19.47,
+   "linha": 21,
+   "txt": "Done. See? Not so bad."
+  },
+  {
+   "ini": 146.968,
+   "fim": 150.991,
+   "off": 22.51,
+   "linha": 25,
+   "txt": "Okay. Number two surprises everybody."
+  },
+  {
+   "ini": 204.221,
+   "fim": 207.699,
+   "off": 26.733,
+   "linha": 35,
+   "txt": "Number three is quick. You'll like this one."
+  },
+  {
+   "ini": 236.683,
+   "fim": 240.979,
+   "off": 30.41,
+   "linha": 41,
+   "txt": "Number four stops those annoying pop-ups for good."
+  },
+  {
+   "ini": 270.204,
+   "fim": 273.045,
+   "off": 34.906,
+   "linha": 46,
+   "txt": "Quick pause before the big one."
+  },
+  {
+   "ini": 326.667,
+   "fim": 331.091,
+   "off": 37.947,
+   "linha": 53,
+   "txt": "Alright, back to your phone. Pay attention to this next one."
+  },
+  {
+   "ini": 370.459,
+   "fim": 374.845,
+   "off": 42.571,
+   "linha": 60,
+   "txt": "But first, save the people who matter in your contacts."
+  },
+  {
+   "ini": 387.921,
+   "fim": 391.398,
+   "off": 47.158,
+   "linha": 63,
+   "txt": "Number six protects your private messages."
+  },
+  {
+   "ini": 424.136,
+   "fim": 427.933,
+   "off": 50.835,
+   "linha": 70,
+   "txt": "That's the way it should have been from the start."
+  },
+  {
+   "ini": 461.385,
+   "fim": 465.953,
+   "off": 54.832,
+   "linha": 77,
+   "txt": "And because you stayed with me this long, here's a bonus."
+  },
+  {
+   "ini": 508.14,
+   "fim": 511.877,
+   "off": 59.6,
+   "linha": 85,
+   "txt": "Here's my simple rule for every text you get."
+  },
+  {
+   "ini": 525.648,
+   "fim": 528.728,
+   "off": 63.537,
+   "linha": 88,
+   "txt": "Let's go over what we did today."
+  },
+  {
+   "ini": 559.456,
+   "fim": 564.751,
+   "off": 66.817,
+   "linha": 93,
+   "txt": "Your phone is now safer, quieter, and easier on the battery."
+  },
+  {
+   "ini": 583.877,
+   "fim": 588.704,
+   "off": 72.312,
+   "linha": 97,
+   "txt": "Which of these was already on in your phone? Tell me below."
+  },
+  {
+   "ini": 595.668,
+   "fim": 599.055,
+   "off": 77.339,
+   "linha": 99,
+   "txt": "I'm Walt. See you in the next one."
+  }
+ ]
+}

@@ -1,0 +1,108 @@
+name: Walt narração
+run-name: Walt narração ${{ github.run_number }} (${{ inputs.roteiro || github.ref_name }})
+
+# Narração inteira de um vídeo do Walt: um wav por linha do roteiro, na voz 3 aprovada
+# (Qwen3-TTS clonando walt-c + 50% walt-b, tom -0,7, ritmo 0,88), em 8 máquinas de CPU grátis.
+# Depois: Resemble Enhance (HD), EQ leve, 48 kHz e -16 LUFS. Artefato: narracao-hd.
+on:
+  workflow_dispatch:
+    inputs:
+      roteiro:
+        description: roteiro (uma linha por fala)
+        default: walt/video1/roteiro.txt
+  push:
+    branches: [claude/project-thread-1gotel, claude/project-thread-cgj203]
+    paths: [walt/video1/roteiro.txt]  # vídeo 2 em diante: só workflow_dispatch (refazer falas sem regerar tudo)
+
+permissions:
+  contents: read
+
+env:
+  ROTEIRO: ${{ inputs.roteiro || (github.ref_name == 'claude/project-thread-cgj203' && 'walt/video2/narracao.txt') || 'walt/video1/roteiro.txt' }}
+
+jobs:
+  voz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        parte: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: qwen3-tts-base-v1-asr
+      - run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq sox ffmpeg > /dev/null
+          pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -q qwen-tts soundfile librosa faster-whisper speechbrain speechmos
+      - run: TAKES=${{ contains(inputs.roteiro, 'refazer') && 16 || 8 }} SIM_REF=vozes/walt-aprovada-longa.wav SIM_MIN=0.74 ALVO_HZ=145.4 CLIPES=1 VOZ=walt-c VOZ_MISTURA=walt-b:0.5 python motor/voz_hiroshi.py "$ROTEIRO" saida --parte ${{ matrix.parte }} --partes 12
+      - name: Tom -0,7 e ritmo 0,88 (rubberband, formantes preservados)
+        run: |
+          shopt -s nullglob
+          for f in saida/*.wav; do
+            C=0; [ -f "${f%.wav}.st" ] && C=$(cat "${f%.wav}.st")
+            P=$(python3 -c "print(2**((-0.7+$C)/12))")
+            ffmpeg -loglevel error -y -i "$f" -af "rubberband=pitch=$P:tempo=0.88:formant=preserved:pitchq=quality:window=standard" -ar 24000 "$f.tmp.wav"
+            mv "$f.tmp.wav" "$f"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bruto-${{ matrix.parte }}
+          path: saida/
+          if-no-files-found: ignore
+
+  hd:
+    needs: voz
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        parte: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    steps:
+      - uses: actions/download-artifact@v4
+        id: baixa
+        continue-on-error: true  # roteiro curto: parte sem falas não tem artefato
+        with:
+          name: bruto-${{ matrix.parte }}
+          path: bruto
+      - if: steps.baixa.outcome != 'success'
+        run: echo "parte sem falas" && exit 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - if: steps.baixa.outcome == 'success'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/torch
+            ~/.cache/huggingface
+          key: resemble-enhance-v1
+      - if: steps.baixa.outcome == 'success'
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          pip install -q torch==2.1.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cpu
+          DS_BUILD_OPS=0 pip install -q resemble-enhance
+      - if: steps.baixa.outcome == 'success'
+        name: Resemble Enhance (CPU)
+        run: resemble-enhance bruto realcado --device cpu
+      - if: steps.baixa.outcome == 'success'
+        name: EQ leve, 48 kHz, -16 LUFS
+        run: |
+          mkdir -p hd
+          for f in bruto/*.wav; do
+            n=$(basename "$f"); src="realcado/$n"; [ -f "$src" ] || src="$f"
+            ffmpeg -loglevel error -y -i "$src" -af "highpass=f=70,equalizer=f=3200:t=q:w=1.2:g=1.5,loudnorm=I=-16:TP=-1.5:LRA=11" -ar 48000 -ac 1 "hd/$n"
+          done
+          ls hd | wc -l
+      - if: steps.baixa.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: hd-${{ matrix.parte }}
+          path: hd/
